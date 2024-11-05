@@ -15,8 +15,4 @@ require(Components.GameComponent).new():Start()
 
 print('-- Setup Completed --')
 
-SignalComponent:GetSignal('Test'):Connect(function(scope, ...)
-	print(scope, ...)
-end)
-
 --SignalComponent:GetSignal('Test'):Wait('Test1')

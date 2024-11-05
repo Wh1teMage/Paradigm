@@ -15,6 +15,8 @@ function PackageComponent:AddToPackage(scope: string, data, player: Player?)
     if (firstAdded < 1) then
         firstAdded = os.clock()
         task.delay(DELAY_TIME, function()
+            --print(Package)
+
             self:Finish(Package)
             self:Clear()
         end)
@@ -26,9 +28,9 @@ function PackageComponent:AddToPackage(scope: string, data, player: Player?)
     end
 
     if (RunService:IsServer()) then
-        if (not Package[scope]) then Package[scope] = {} end
-        if (not Package[scope][player]) then Package[scope][player] = {} end
-        table.insert(Package[scope][player], data)
+        if (not Package[player]) then Package[player] = {} end
+        if (not Package[player][scope]) then Package[player][scope] = {} end
+        table.insert(Package[player][scope], data)
     end
 end
 

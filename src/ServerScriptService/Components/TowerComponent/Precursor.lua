@@ -14,7 +14,7 @@ return function(position: Vector3)
 		self.SelectedTarget:DealDamage(self.Damage)
 		--print(self.SelectedTarget)
 
-		SignalComponent:GetSignal('ManageEffects'):FireAllClients(PathConfig.Scope.UpgradeTower, PathConfig.Effects.PrecursorTestEffect, self.Hitbox.CFrame)
+		SignalComponent:GetSignal('ManageEffects'):FireAllClients(PathConfig.Scope.ReplicateEffect, PathConfig.Effects.PrecursorTestEffect, self.Hitbox.CFrame)
 	end
 	
 	return self
