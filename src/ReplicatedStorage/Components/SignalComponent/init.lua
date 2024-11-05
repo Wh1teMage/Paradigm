@@ -1,3 +1,4 @@
+local Players = game:GetService('Players')
 local RunService = game:GetService('RunService')
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 
@@ -65,7 +66,7 @@ end
 function Event:Fire(scope: string, ...)
 	
 	local args = {...}
-	
+
 	if (not self.IsBindable) then
 		
 		if (RunService:IsClient()) then
@@ -89,6 +90,14 @@ function Event:Fire(scope: string, ...)
 	
 end
 
+function Event:FireAllClients(scope: string, ...)
+	if (RunService:IsClient()) then return end
+
+	for _, player in pairs(Players:GetPlayers()) do
+		self:Fire(scope, player, ...)
+	end
+end
+
 local function eventConnection(name: string)
 	
 	local event: RemoteEvent = Events:FindFirstChild(name)
@@ -99,9 +108,11 @@ local function eventConnection(name: string)
 	local connection;
 	
 	if (RunService:IsClient()) then
-		connection = event.OnClientEvent:Connect(function(scope, buff, strLen)
+		connection = event.OnClientEvent:Connect(function(scope, buff: buffer, strLen)
+			--print(scope, buffer.len(buff), strLen)
 			local value = DataTransfer:Decode(buff, strLen)
-			
+			--print(value)
+
 			for _, connection in pairs(customEvent['_connections']) do
 				connection(scope, table.unpack(value))
 			end

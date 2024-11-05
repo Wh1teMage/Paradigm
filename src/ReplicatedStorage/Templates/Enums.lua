@@ -25,5 +25,5 @@ return {
 		Fastest = 4,
 		Weakest = 5,
 		Strongest = 6,
-	}
+	},
 }

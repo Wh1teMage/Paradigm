@@ -6,8 +6,12 @@ return function()
 	local component;
 	
 	function self.OnAttack()
-		print('Attack', component.Damage)
-		component.Damage += 1
+		--print('Attack', component.Damage)
+		--component.Damage += 1
+	end
+
+	function self.Start()
+		print('Placed')
 	end
 	
 	function self.TransferData(args: {any})

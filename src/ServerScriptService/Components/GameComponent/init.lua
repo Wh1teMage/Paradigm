@@ -19,7 +19,7 @@ end
 
 function GameComponent:Start()
 	self:CreatePath()
-	self:LoadWaves('TestLobby')
+	task.spawn(self.LoadWaves, self, 'TestLobby')
 	
 	SignalComponent:GetSignal('ManageGameBindable', true):Connect(
 		function(scope, ...)

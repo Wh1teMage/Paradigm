@@ -25,7 +25,7 @@ PlayerComponent.__index = setmetatable(PlayerComponent, {
 
 type IPlayerComponent = typeof(PlayerComponent)
 
-function PlayerComponent:ReplicatePlayerEffect(args)
+function PlayerComponent:ReplicatePlayerEffect(args) --!! rewrite later
 	local effectName = args[1]
 	
 	if (not PlayerEffects[effectName]) then return end

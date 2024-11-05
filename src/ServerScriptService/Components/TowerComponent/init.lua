@@ -84,6 +84,7 @@ function TowerComponent:Upgrade()
 	
 	local upgradeInfo = UpgradesCache[self.Name]
 	self.Level += 1
+	self:ReplicateField('Level', self.Level)
 	
 	if (not upgradeInfo[self.Level]) then return end
 	
@@ -94,6 +95,12 @@ end
 
 function TowerComponent:CheckRequirements(requirements) -- use later
 	return true
+end
+
+function TowerComponent:ReplicateField(fieldName: string, value: number)
+	if (not self.Hitbox) then return end
+	local hitbox: Part? = self.Hitbox
+	hitbox:SetAttribute(fieldName, value)
 end
 
 local TowerComponentFabric = {}
@@ -107,14 +114,21 @@ end
 function TowerComponentFabric.new(position: Vector3, name: string)
 	if (not TowersInfo[name]) then warn(name..' tower doesnt exist') return end
 
+	local part = ReplicatedStorage.Samples.TowerPart:Clone()
+	part.Name = name..tostring(math.round(math.fmod(os.clock(), 1)*100000))..tostring(math.random(-1000, 1000))
+	part.CFrame = CFrame.new(position)
+	part.Parent = workspace.Towers
+	
+	--[[
 	local part = Instance.new('Part')
-	part.Name = name..tostring(os.clock())..tostring(math.random(-1000, 1000))
+	part.Name = name..tostring(math.round(math.fmod(os.clock(), 1)*100000))..tostring(math.random(-1000, 1000))
 	part.Anchored = true
 	part.Transparency = .5
 	part.CanCollide = false
 	part.CastShadow = false
 	part.CFrame = CFrame.new(position)
 	part.Parent = workspace.Towers
+	]]
 
 	local data = TowersInfo[name]()
 	
@@ -128,6 +142,9 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 	for _, passive in pairs(data.Passives) do
 		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
 	end
+
+	self:ReplicateField('Level', self.Level)
+	self:ReplicateField('Name', name)
 
 	Towers[part] = self
 

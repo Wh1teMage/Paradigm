@@ -11,10 +11,10 @@ Enemies['Part'] = function(level: number)
 	
 	if (level) then enemy.Level = level end
 	
-	enemy.MaxHealth = enemy.MaxHealth + 10*(enemy.Level-1)
+	enemy.MaxHealth = enemy.MaxHealth * 10000 + 10*(enemy.Level-1) -- change later
 	enemy.Health = enemy.MaxHealth
 	
-	enemy.Speed = 10
+	enemy.Speed = 1
 	
 	enemy.Name = 'Part'
 	--enemy.Model = EnemySamples["Spike Fox"]

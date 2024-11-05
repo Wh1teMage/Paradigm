@@ -5,6 +5,7 @@ local Players = game:GetService('Players')
 local ReplicatedComponents = ReplicatedStorage.Components
 
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
+local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 
 local Templates = ReplicatedStorage.Templates
 
@@ -73,8 +74,7 @@ function TowersComponent:PlaceTower()
 	local raycast = createRaycast(raycastParams)
 	if (not raycast) then return end
 
-	SignalComponent:GetSignal('ManageTowers'):Fire(
-		'PlaceTower', raycast.Position, currentlySelected)
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.PlaceTower, raycast.Position, currentlySelected)
 
 	self:StopPlacing()
 	
@@ -95,15 +95,13 @@ end
 function TowersComponent:UpgradeTower()
 	if (not currentlySelected) then return end
 	
-	SignalComponent:GetSignal('ManageTowers'):Fire(
-		'UpgradeTower', currentlySelected)
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.UpgradeTower, currentlySelected)
 end
 
 function TowersComponent:SellTower()
 	if (not currentlySelected) then return end
 
-	SignalComponent:GetSignal('ManageTowers'):Fire(
-		'SellTower', currentlySelected)
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.SellTower, currentlySelected)
 end
 
 return TowersComponent

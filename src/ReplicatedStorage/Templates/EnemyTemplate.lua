@@ -10,8 +10,8 @@ local data = {
 	
 	Level = 1,
 	
-	MaxHealth = 100,
-	Health = 100,
+	MaxHealth = 10000,
+	Health = 10000,
 	Speed = 1,
 	
 	Distance = 0,

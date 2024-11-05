@@ -16,6 +16,7 @@ local data = {
 	
 	Limit = 8,
 	Hidden = true,
+	
 	PlacementType = Enums.PlacementType.Ground,
 	TargetType = Enums.TargetType.First,
 

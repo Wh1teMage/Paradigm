@@ -8,9 +8,12 @@ local ReplicatedComponents = ReplicatedStorage.Components
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 local DataTransfer = require(ReplicatedComponents.SignalComponent.DataTransfer)
 
+SignalComponent:GetSignal('ManageTowers')
+SignalComponent:GetSignal('ManageEffects')
+
 require(Components.GameComponent).new():Start()
 
-SignalComponent:GetSignal('ManageTowers')
+print('-- Setup Completed --')
 
 SignalComponent:GetSignal('Test'):Connect(function(scope, ...)
 	print(scope, ...)
