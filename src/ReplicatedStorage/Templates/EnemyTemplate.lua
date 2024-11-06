@@ -17,13 +17,17 @@ local data = {
 	Distance = 0,
 
 	Defense = {
-		[Enums.DamageType.Bullet] = 0,
-		[Enums.DamageType.Energy] = 0,
-		[Enums.DamageType.Splash] = 0,
+		[Enums.DamageType.Bullet] = 1,
+		[Enums.DamageType.Energy] = 1,
+		[Enums.DamageType.Splash] = 1,
 	},
 	
 	Attributes = {},
 	Passives = {},
+
+	Animations = {},
+	Sounds = {},
+	Descriptions = {},
 	
 	Session = {
 		Passives = {},
@@ -40,6 +44,10 @@ return function()
 	
 	temp.Session.Passives = {}
 	temp.Session.Buffs = {}
+
+	temp.Animations = {}
+	temp.Sounds = {}
+	temp.Descriptions = {}
 	
 	return temp
 end

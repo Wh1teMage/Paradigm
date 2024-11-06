@@ -18,6 +18,12 @@ return {
 		Energy = 'Energy',
 		Splash = 'Splash',
 	},
+	ShootType = {
+		Signle = 'Signle',
+		Burst = 'Bullet',
+		Energy = 'Energy',
+		Splash = 'Splash',
+	},
 	TargetType = {
 		First = 1,
 		Last = 2,

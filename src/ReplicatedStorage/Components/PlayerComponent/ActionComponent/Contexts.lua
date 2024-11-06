@@ -49,10 +49,8 @@ Contexts['Test1'] = function()
 
 	task.spawn(function()
 		while (flag and task.wait(1/20)) do
-			print(os.clock(), flag)
 			SignalComponent:GetSignal('ManageTowersBindable', true):Fire('StartPlacing', 1)
 			SignalComponent:GetSignal('ManageTowersBindable', true):Fire('SelectTower')
-			print(os.clock(), '123', flag)
 		end
 	end)
 

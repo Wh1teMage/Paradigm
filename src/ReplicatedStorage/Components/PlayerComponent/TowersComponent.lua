@@ -62,7 +62,7 @@ end
 function TowersComponent:StopPlacing()
 	if (not currentlyPlacing) then return end
 
-	print('Stopped Placing')
+	--print('Stopped Placing')
 	currentlyPlacing:Destroy()
 	currentlySelected = nil
 	currentlyPlacing = nil
@@ -78,7 +78,7 @@ function TowersComponent:PlaceTower()
 
 	self:StopPlacing()
 	
-	--SignalComponent:GetSignal('ManageTowers'):Wait('Selected')
+	--SignalComponent:GetSignal('ManageTowers'):Wait('Selected') --!! remove comments for auto selection after placement
 	--self:SelectTower()
 end
 
@@ -89,7 +89,7 @@ function TowersComponent:SelectTower()
 	if (not raycast) then currentlySelected = nil return end
 	
 	currentlySelected = raycast.Instance.Name
-	print('Selected')
+	--print('Selected')
 end
 
 function TowersComponent:UpgradeTower()

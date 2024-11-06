@@ -12,6 +12,19 @@ local Template = require(Templates.WaveTemplate)
 
 local Waves: {typeof(Template())} = {
 	[1] = {
+		{"Spawn", "Part", 150, .1},
+		{"Wait", 5},
+		{"Spawn", "Part", 150, .1},
+		{"Wait", 5},
+		{"Spawn", "Part", 15, .1},
+		{"Wait", 5},
+		{"Spawn", "Part", 15, .1},
+		{"Wait", 5},
+		{"Spawn", "Part", 15, .1},
+		{"Wait", 5}
+	}
+	--[[
+	[1] = {
 		{"Wait", 3},
 		{"Spawn", "Walker", 6, 1},
 		{"Wait", 10},
@@ -22,6 +35,7 @@ local Waves: {typeof(Template())} = {
 		{"Wait", 5},
 		{"AwardCash", 310},
 	},
+	]]
 }
 
 return Waves

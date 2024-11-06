@@ -11,7 +11,7 @@ return function()
 	end
 
 	function self.Start()
-		print('Placed')
+		--print('Placed')
 	end
 	
 	function self.TransferData(args: {any})

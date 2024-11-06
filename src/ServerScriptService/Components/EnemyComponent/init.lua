@@ -93,6 +93,12 @@ function EnemyComponent:CheckRequirements(requirements) -- use later
 	return true
 end
 
+function EnemyComponent:ReplicateField(fieldName: string, value: number)
+	if (not self.Hitbox) then return end
+	local hitbox: Part? = self.Hitbox
+	hitbox:SetAttribute(fieldName, value)
+end
+
 local EnemyComponentFabric = {}
 
 function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
@@ -102,7 +108,7 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	local postfix = string.rep('a', (4-string.len(clockId)))
 
 	local part = ReplicatedStorage.Samples.EnemyPart:Clone()
-	part.Name = name..clockId..postfix..tostring(math.random(1000, 9999))
+	part.Name = clockId..postfix..tostring(math.random(1000, 9999))
 	part.Parent = workspace.Enemies
 
 	local data = EnemiesInfo[name]()
@@ -114,6 +120,8 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
 	end
 	
+	self:ReplicateField('Name', name)
+
 	Enemies[part] = self
 	
 	return self

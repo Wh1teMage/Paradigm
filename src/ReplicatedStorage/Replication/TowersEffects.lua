@@ -36,11 +36,30 @@ local function GetTowerInfo(towerName: string, towerLevel: number)
     return selectedInfo
 end
 
+local function createModel(self, selectedInfo, part)
+    self.Model = selectedInfo.Model:Clone() :: Model
+    self.Model.Parent = part
+    self.Model:PivotTo(part.CFrame + Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0))
+
+    local idle = selectedInfo.Animations.Idle
+    if (not idle) then return end
+
+    local animation = Instance.new('Animation')
+    animation.AnimationId = idle
+
+    local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(animation)
+    loadedAnimation.Looped = true
+
+    animation:Destroy()
+    loadedAnimation:Play()
+end
+
 RunService.Stepped:Connect(function()
     
     for _, tower in pairs(ReplicatedTowers) do
         if (not tower.Model) then continue end
-        tower.Model:PivotTo(tower.Instance.CFrame)
+        local finalCFrame = tower.Instance.CFrame + Vector3.new(0, tower.Model:GetExtentsSize().Y/2, 0)
+        tower.Model:PivotTo(tower.Model:GetPivot():Lerp(finalCFrame, .2))
     end
 
 end)
@@ -57,27 +76,26 @@ return {
         local self = {
             Instance = part,
             LevelChange = nil,
-            Model = nil
+            Model = nil,
+            Info = nil
         }
 
         local towerLevel = FindAttribute(part, 'Level')
         local towerName = FindAttribute(part, 'Name')
 
         local selectedInfo = GetTowerInfo(towerName, towerLevel)
+        self.Info = selectedInfo
 
-        self.Model = selectedInfo.Model:Clone()
-        self.Model.Parent = part
-        self.Model:PivotTo(part.CFrame) -- add size
+        createModel(self, selectedInfo, part)
 
         self.LevelChange = part:GetAttributeChangedSignal('Level'):Connect(function()
             towerLevel = FindAttribute(part, 'Level')
             selectedInfo = GetTowerInfo(towerName, towerLevel)
+            self.Info = selectedInfo
 
             self.Model:Destroy()
 
-            self.Model = selectedInfo.Model:Clone() -- make into func
-            self.Model.Parent = part
-            self.Model:PivotTo(part.CFrame) -- add size    
+            createModel(self, selectedInfo, part)
         end)
 
         ReplicatedTowers[part] = self

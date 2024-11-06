@@ -19,9 +19,14 @@ local data = {
 	
 	PlacementType = Enums.PlacementType.Ground,
 	TargetType = Enums.TargetType.First,
+	ShootType = Enums.ShootType.Signle,
 
 	Attributes = {},
 	Passives = {},
+
+	Animations = {},
+	Sounds = {},
+	Descriptions = {},
 	
 	Session = {
 		Passives = {},
@@ -35,6 +40,10 @@ return function()
 	temp.Attributes = {}
 	temp.Passives = {}
 	temp.Session = table.clone(temp.Session)
+
+	temp.Animations = {}
+	temp.Sounds = {}
+	temp.Descriptions = {}
 
 	temp.Session.Passives = {}
 	temp.Session.Buffs = {}

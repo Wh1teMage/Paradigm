@@ -25,7 +25,8 @@ RunService.Stepped:Connect(function()
     
     for _, enemy in pairs(ReplicatedEnemies) do
         if (not enemy.Model) then continue end
-        enemy.Model:PivotTo(enemy.Instance.CFrame)
+        local finalCFrame = enemy.Instance.CFrame + Vector3.new(0, enemy.Model:GetExtentsSize().Y/2, 0)
+        enemy.Model:PivotTo(enemy.Model:GetPivot():Lerp(finalCFrame, .2))
     end
 
 end)
@@ -39,14 +40,28 @@ return {
         }
 
         local enemyName = FindAttribute(part, 'Name')
+        if (not EnemiesInfo[enemyName]) then return end
+
+        local selectedInfo = EnemiesInfo[enemyName]()
         --prob include speed, check stats in the original game
 
-        if (not EnemiesInfo[enemyName]) then return end
-        if (not EnemiesInfo[enemyName].Model) then return end
+        if (not selectedInfo.Model) then return end
 
-        self.Model = EnemiesInfo[enemyName].Model:Clone()
+        self.Model = selectedInfo.Model:Clone()
         self.Model.Parent = part
-        self.Model:PivotTo(part.CFrame)
+        self.Model:PivotTo(part.CFrame + Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0))
+
+        local idle = selectedInfo.Animations.Idle
+        if (not idle) then return end
+    
+        local animation = Instance.new('Animation')
+        animation.AnimationId = idle
+    
+        local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(animation)
+        loadedAnimation.Looped = true
+    
+        animation:Destroy()
+        loadedAnimation:Play()
 
         ReplicatedEnemies[part] = self
     end,

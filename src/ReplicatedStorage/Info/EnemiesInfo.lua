@@ -1,6 +1,6 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 
---local EnemySamples = ReplicatedStorage.Samples.Enemies
+local EnemySamples = ReplicatedStorage.Samples.EnemyModels
 
 local Template = require(script.Parent.Parent.Templates.EnemyTemplate)
 
@@ -11,10 +11,15 @@ Enemies['Part'] = function(level: number)
 	
 	if (level) then enemy.Level = level end
 	
-	enemy.MaxHealth = enemy.MaxHealth * 10000 + 10*(enemy.Level-1) -- change later
+	enemy.MaxHealth = 18  -- change later
 	enemy.Health = enemy.MaxHealth
+	enemy.Model = EnemySamples.Walker
 	
-	enemy.Speed = 1
+	enemy.Speed = 4
+
+	enemy.Animations = {
+		Idle = 'rbxassetid://15289102971',
+	}
 	
 	enemy.Name = 'Part'
 	--enemy.Model = EnemySamples["Spike Fox"]
@@ -26,13 +31,17 @@ Enemies['Walker'] = function(level: number)
 	
 	if (level) then enemy.Level = level end
 	
-	enemy.MaxHealth = 100
+	enemy.MaxHealth = 6 * 100
 	enemy.Health = enemy.MaxHealth
+	enemy.Model = EnemySamples.Walker
 	
-	enemy.Speed = 1
+	enemy.Speed = 3
+
+	enemy.Animations = {
+		Idle = 'rbxassetid://15289102971',
+	}
 	
-	enemy.Name = 'Part'
-	--enemy.Model = EnemySamples["Spike Fox"]
+	enemy.Name = 'Walker'
 	return enemy
 end
 
