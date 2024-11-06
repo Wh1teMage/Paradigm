@@ -98,8 +98,11 @@ local EnemyComponentFabric = {}
 function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	if (not EnemiesInfo[name]) then warn(name..' enemy doesnt exist') return end
 
+	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
+	local postfix = string.rep('a', (4-string.len(clockId)))
+
 	local part = ReplicatedStorage.Samples.EnemyPart:Clone()
-	part.Name = name..tostring(math.round(math.fmod(os.clock(), 1)*100000))..tostring(math.random(-1000, 1000))
+	part.Name = name..clockId..postfix..tostring(math.random(1000, 9999))
 	part.Parent = workspace.Enemies
 
 	local data = EnemiesInfo[name]()

@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
+local RunService = game:GetService('RunService')
 
 local Templates = ReplicatedStorage.Templates
 local Info = ReplicatedStorage.Info
@@ -15,7 +16,7 @@ local Cache = {}
 
 local function FindAttribute(part: Part, name: string)
     local value = part:GetAttribute(name)
-    if (not value) then warn(part..' Failed to find '..value); return end
+    if (not value) then warn(part.Name..' Failed to find '..name); return end
 
     return value
 end
@@ -35,7 +36,22 @@ local function GetTowerInfo(towerName: string, towerLevel: number)
     return selectedInfo
 end
 
+RunService.Stepped:Connect(function()
+    
+    for _, tower in pairs(ReplicatedTowers) do
+        if (not tower.Model) then continue end
+        tower.Model:PivotTo(tower.Instance.CFrame)
+    end
+
+end)
+
 return {
+
+    ['GetTowerByName'] = function(name: string)
+        for _, tower in pairs(ReplicatedTowers) do
+            if (tower.Instance.Name == name) then return tower end
+        end
+    end,
 
     ['Spawn'] = function(part: BasePart)
         local self = {
@@ -75,6 +91,8 @@ return {
         if (self.Model and self.Model.Parent) then self.Model:Destroy() end
         table.clear(self)
         self = nil
+
+        ReplicatedTowers[part] = nil
     end
 
 }

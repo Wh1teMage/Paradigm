@@ -114,8 +114,11 @@ end
 function TowerComponentFabric.new(position: Vector3, name: string)
 	if (not TowersInfo[name]) then warn(name..' tower doesnt exist') return end
 
+	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
+	local postfix = string.rep('0', (4-string.len(clockId)))
+
 	local part = ReplicatedStorage.Samples.TowerPart:Clone()
-	part.Name = name..tostring(math.round(math.fmod(os.clock(), 1)*100000))..tostring(math.random(-1000, 1000))
+	part.Name = clockId..postfix..tostring(math.random(1000, 9999))
 	part.CFrame = CFrame.new(position)
 	part.Parent = workspace.Towers
 	

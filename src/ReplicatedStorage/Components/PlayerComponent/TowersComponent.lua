@@ -78,8 +78,8 @@ function TowersComponent:PlaceTower()
 
 	self:StopPlacing()
 	
-	SignalComponent:GetSignal('ManageTowers'):Wait('Selected')
-	self:SelectTower()
+	--SignalComponent:GetSignal('ManageTowers'):Wait('Selected')
+	--self:SelectTower()
 end
 
 function TowersComponent:SelectTower()

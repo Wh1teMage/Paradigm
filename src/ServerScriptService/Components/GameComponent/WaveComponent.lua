@@ -7,14 +7,42 @@ local WavesInfo = ReplicatedStorage.Info.Waves
 local Components = ServerScriptService.Components
 
 local PlayerComponent = require(Components.PlayerComponent)
-local EnemyComponent = Components.EnemyComponent
+local EnemyComponent = require(Components.EnemyComponent)
+local EnemyComponentFolder = Components.EnemyComponent
 
 local EnemiesCache = {}
 
+--{"AwardCash", 1000},--awardcash type, amount of cash
+--{"Spawn", "Normal", 6, 1.2},--zombie, amount, timebetween
+--{"Dialogue", "Get ready for a new enemy!", 3},--dialogue type, text, duration
+--{"DialogueLink", "SirZeltron"} --name of required module
+--{"Wait", 3},
+--{"Music", 15914222986, 1, true}, --id, volume, loop
+--{"WaitForClear"}, --wait for every zombie killed
+--{"StopMusic"},
+
 local parseFunctions = {
+	['Music'] = function(id: number, volume: number, loop: boolean)
+
+	end,
+
+	['DialogueLink'] = function(name: string)
+
+	end,
+
+	['Wait'] = function(value: number)
+		task.wait(value)
+	end,
+
+	['WaitForClear'] = function()
+
+	end,
+
 	['AwardCash'] = function(value: number)
 		for _, player in pairs(Players:GetChildren()) do
-			PlayerComponent:GetPlayer(player) -- add money method
+			local component = PlayerComponent:GetPlayer(player)
+			if (not component) then continue end
+			component:AddAttribute('Cash', value)
 		end
 	end,
 	
@@ -25,10 +53,10 @@ local parseFunctions = {
 
 	['Spawn'] = function(name: string, amount: number, between: number)
 		for i = 1, amount do
-			if (not EnemyComponent:FindFirstChild(name)) then return end
+			if (not EnemyComponentFolder:FindFirstChild(name)) then return end
 
 			if (not EnemiesCache[name]) then 
-				EnemiesCache[name] = require(EnemyComponent:FindFirstChild(name))
+				EnemiesCache[name] = require(EnemyComponentFolder:FindFirstChild(name))
 			end
 
 			EnemiesCache[name]()

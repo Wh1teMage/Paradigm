@@ -13,8 +13,18 @@ return function(position: Vector3)
 
 		self.SelectedTarget:DealDamage(self.Damage)
 		--print(self.SelectedTarget)
+		local selectedCFrame = CFrame.new(self.Hitbox.Position, self.SelectedTarget.Hitbox.Position)
+		self.Hitbox.CFrame = selectedCFrame
 
-		SignalComponent:GetSignal('ManageEffects'):FireAllClients(PathConfig.Scope.ReplicateEffect, PathConfig.Effects.PrecursorTestEffect, self.Hitbox.CFrame)
+		--[[
+		SignalComponent:GetSignal('ManageEffects'):FireAllClients(
+			PathConfig.Scope.ReplicateEffect, 
+			PathConfig.Effects.PrecursorTestEffect, 
+			selectedCFrame,
+			self.Hitbox.Name
+		)
+		]]
+
 	end
 	
 	return self

@@ -58,7 +58,7 @@ function ReplicationComponent:Setup()
 end
 
 function ReplicationComponent:TriggerEffect(path: number, ...)
-    
+
     for _, module in pairs(LoadedModules) do
         if (module[path]) then module[path](...) end
     end

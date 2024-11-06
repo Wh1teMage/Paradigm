@@ -114,118 +114,41 @@ local function eventConnection(name: string)
 	if (RunService:IsClient()) then
 
 		PackageComponent.Finish = function(self, package)
-			local redactedPackage = {}
-
-			for scope, vals in pairs(package) do
-				local elementSize = (buffer.len(vals[1][1]) + 2)
-				local buff = buffer.create(#vals * elementSize)
-
-				local offset = 0
-
-				for i, val in pairs(vals) do
-					buffer.copy(buff, offset, val[1])
-					offset += elementSize-2
-					buffer.writeu8(buff, offset, val[2])
-					offset += 2
-				end
-
-				redactedPackage[scope] = { buff, elementSize }
-			end
-
-			event:FireServer(redactedPackage)
+			event:FireServer(PackageComponent:Encode(package))
 		end
 
 		connection = event.OnClientEvent:Connect(function(data) --scope, buff: buffer, strLen
-			--print(data)
 
-			for scope, vals in pairs(data) do
-
-				local buff = vals[1]
-				local elementSize = vals[2]
-
-				local strLen = buffer.readu8(buff, elementSize-2)
-
-				for i = 0, buffer.len(buff)-1, elementSize do
-					local newBuff = buffer.create(elementSize)
-					buffer.copy(newBuff, 0, buff, i, elementSize)
-
-					local value = DataTransfer:Decode(newBuff, strLen)
-
-					--print(value, i, buffer.len(buff))
-			
-					for _, connection in pairs(customEvent['_connections']) do
-						connection(scope, table.unpack(value))
-					end
-		
-					for _, info in pairs(customEvent['_waitConnections'][scope] or {}) do
-						info.isFinished = true
-					end
+			PackageComponent:Decode(data, function(scope, value)
+				for _, connection in pairs(customEvent['_connections']) do
+					connection(scope, table.unpack(value))
 				end
-
-			end
-
-			--print(scope, buffer.len(buff), strLen)
+	
+				for _, info in pairs(customEvent['_waitConnections'][scope] or {}) do
+					info.isFinished = true
+				end
+			end)
 
 		end)
 	else
 
 		PackageComponent.Finish = function(self, package)
-			--print(package, 'package')
-
 			for player, data in pairs(package) do
-
-				local redactedPackage = {}
-
-				for scope, vals in pairs(data) do
-					local elementSize = (buffer.len(vals[1][1]) + 2)
-					local buff = buffer.create(#vals * elementSize)
-	
-					local offset = 0
-	
-					for i, val in pairs(vals) do
-						buffer.copy(buff, offset, val[1])
-						offset += elementSize-2
-						buffer.writeu8(buff, offset, val[2])
-						offset += 2
-					end
-	
-					redactedPackage[scope] = { buff, elementSize }
-				end
-
-				event:FireClient(player, redactedPackage)
+				event:FireClient(player, PackageComponent:Encode(data))
 			end
 		end
 
 		connection = event.OnServerEvent:Connect(function(player, data) --scope, buff, strLen
 
-			for scope, vals in pairs(data) do
-
-				local buff = vals[1]
-				local elementSize = vals[2]
-
-				local strLen = buffer.readu8(buff, elementSize-2)
-
-				for i = 0, buffer.len(buff)-1, elementSize do
-					local newBuff = buffer.create(elementSize)
-					buffer.copy(newBuff, 0, buff, i, elementSize)
-
-					local value = DataTransfer:Decode(newBuff, strLen)
-
-					--print(value, i, buffer.len(buff))
-			
-					for _, connection in pairs(customEvent['_connections']) do
-						connection(scope, player, table.unpack(value))
-					end
-		
-					for _, info in pairs(customEvent['_waitConnections'][scope] or {}) do
-						info.isFinished = true
-					end
+			PackageComponent:Decode(data, function(scope, value)
+				for _, connection in pairs(customEvent['_connections']) do
+					connection(scope, player, table.unpack(value))
 				end
-
-			end
-
-			--print(player, scope, buff, strLen)
-
+	
+				for _, info in pairs(customEvent['_waitConnections'][scope] or {}) do
+					info.isFinished = true
+				end
+			end)
 
 		end)
 	end
