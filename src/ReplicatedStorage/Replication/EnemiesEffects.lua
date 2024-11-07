@@ -20,16 +20,17 @@ local function FindAttribute(part: Part, name: string)
     return value
 end
 
-
+--[[
 RunService.Stepped:Connect(function()
     
     for _, enemy in pairs(ReplicatedEnemies) do
         if (not enemy.Model) then continue end
-        local finalCFrame = enemy.Instance.CFrame + Vector3.new(0, enemy.Model:GetExtentsSize().Y/2, 0)
-        enemy.Model:PivotTo(enemy.Model:GetPivot():Lerp(finalCFrame, .2))
+        --local finalCFrame = enemy.Instance.CFrame + Vector3.new(0, enemy.Model:GetExtentsSize().Y/2, 0)
+        --enemy.Model:PivotTo(enemy.Model:GetPivot():Lerp(finalCFrame, .2))
     end
 
 end)
+]]
 
 return {
 
@@ -51,17 +52,24 @@ return {
         self.Model.Parent = part
         self.Model:PivotTo(part.CFrame + Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0))
 
+        if (not self.Model.PrimaryPart) then warn('PrimaryPart '..self.Model.Name..' doesnt exist'); return end
+
+        local weld = Instance.new('WeldConstraint')
+        weld.Part1 = part
+        weld.Part0 = self.Model.PrimaryPart
+        weld.Parent = part
+    
+        self.Model.PrimaryPart.Anchored = false    
+
         local idle = selectedInfo.Animations.Idle
         if (not idle) then return end
+
+        pcall(function() -- Cannot load the AnimationClipProvider Service. error on very fast enemy kill ( fix later )
+            local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
+            loadedAnimation.Looped = true
     
-        local animation = Instance.new('Animation')
-        animation.AnimationId = idle
-    
-        local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(animation)
-        loadedAnimation.Looped = true
-    
-        animation:Destroy()
-        loadedAnimation:Play()
+            loadedAnimation:Play()
+        end)
 
         ReplicatedEnemies[part] = self
     end,

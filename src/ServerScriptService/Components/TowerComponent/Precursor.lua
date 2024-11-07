@@ -11,7 +11,7 @@ return function(position: Vector3)
 	function self:OnAttack()
 		if (not getmetatable(self.SelectedTarget)) then return end -- extra check
 
-		for i = 1, self.BurstCount do
+		for i = 1, self.BurstCount do -- check whats dropping the microprofilerstats
 			self:GetTarget()
 
 			repeat task.wait(.1); self:GetTarget() until self.SelectedTarget
@@ -21,7 +21,13 @@ return function(position: Vector3)
 			if (not getmetatable(self.SelectedTarget)) then return end
 
 			local selectedCFrame = CFrame.new(self.Hitbox.Position, self.SelectedTarget.Hitbox.Position * Vector3.new(1, 0, 1) + self.Hitbox.Position * Vector3.new(0, 1, 0))
-			self.Hitbox.CFrame = selectedCFrame
+
+			task.spawn(function() -- not sure about this one tho
+				for i = 1, 2 do
+					self.Hitbox.CFrame = self.Hitbox.CFrame:Lerp(selectedCFrame, i/3)
+					task.wait(1/20)
+				end
+			end)
 
 			SignalComponent:GetSignal('ManageEffects'):FireAllClients(
 				PathConfig.Scope.ReplicateEffect, 
@@ -32,15 +38,6 @@ return function(position: Vector3)
 
 			task.wait(self.BurstCD)
 		end
-
-		--[[
-		self.SelectedTarget:DealDamage(self.Damage)
-		--print(self.SelectedTarget)
-		local selectedCFrame = CFrame.new(self.Hitbox.Position, self.SelectedTarget.Hitbox.Position * Vector3.new(1, 0, 1) + self.Hitbox.Position * Vector3.new(0, 1, 0))
-		self.Hitbox.CFrame = selectedCFrame
-		]]
-
-
 
 	end
 	

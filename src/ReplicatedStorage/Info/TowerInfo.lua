@@ -20,17 +20,24 @@ Towers['Precursor'] = function()
 	tower.BurstCount = 6
 	tower.BurstCD = .11
 
+	local idleAnim = Instance.new('Animation')
+	idleAnim.AnimationId = 'rbxassetid://14253606347'
+
+	local attackAnim = Instance.new('Animation')
+	attackAnim.AnimationId = 'rbxassetid://14535901409'
+
+	local attackSound = Instance.new('Sound')
+	attackSound.SoundId = 'rbxassetid://7131411690'
+	attackSound.PlaybackSpeed = 1.3
+	attackSound.Volume = 0.35
+
 	tower.Animations = {
-		Idle = 'rbxassetid://14253606347',
-		Attack = 'rbxassetid://14535901409'
+		Idle = idleAnim,
+		Attack = attackAnim
 	}
 
 	tower.Sounds = {
-		AttackSound = {
-			SoundId = 'rbxassetid://7131411690',
-			PlaybackSpeed = 1.3,
-			Volume = 0.35,
-		}
+		AttackSound = attackSound
 	}
 	
 	tower.Passives = {

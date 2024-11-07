@@ -17,8 +17,11 @@ Enemies['Part'] = function(level: number)
 	
 	enemy.Speed = 4
 
+	local idleAnim = Instance.new('Animation')
+	idleAnim.AnimationId = 'rbxassetid://15289102971'
+
 	enemy.Animations = {
-		Idle = 'rbxassetid://15289102971',
+		Idle = idleAnim,
 	}
 	
 	enemy.Name = 'Part'

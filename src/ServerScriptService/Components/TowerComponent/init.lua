@@ -122,17 +122,6 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 	part.CFrame = CFrame.new(position)
 	part.Parent = workspace.Towers
 	
-	--[[
-	local part = Instance.new('Part')
-	part.Name = name..tostring(math.round(math.fmod(os.clock(), 1)*100000))..tostring(math.random(-1000, 1000))
-	part.Anchored = true
-	part.Transparency = .5
-	part.CanCollide = false
-	part.CastShadow = false
-	part.CFrame = CFrame.new(position)
-	part.Parent = workspace.Towers
-	]]
-
 	local data = TowersInfo[name]()
 	
 	data.Hitbox = part

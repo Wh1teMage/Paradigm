@@ -41,28 +41,35 @@ local function createModel(self, selectedInfo, part)
     self.Model.Parent = part
     self.Model:PivotTo(part.CFrame + Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0))
 
+    if (not self.Model.PrimaryPart) then warn('PrimaryPart '..self.Model.Name..' doesnt exist'); return end
+
+    local weld = Instance.new('WeldConstraint')
+    weld.Part1 = part
+    weld.Part0 = self.Model.PrimaryPart
+    weld.Parent = part
+
+    self.Model.PrimaryPart.Anchored = false
+
     local idle = selectedInfo.Animations.Idle
     if (not idle) then return end
 
-    local animation = Instance.new('Animation')
-    animation.AnimationId = idle
-
-    local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(animation)
+    local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
     loadedAnimation.Looped = true
 
-    animation:Destroy()
     loadedAnimation:Play()
 end
 
+--[[
 RunService.Stepped:Connect(function()
     
     for _, tower in pairs(ReplicatedTowers) do
         if (not tower.Model) then continue end
-        local finalCFrame = tower.Instance.CFrame + Vector3.new(0, tower.Model:GetExtentsSize().Y/2, 0)
-        tower.Model:PivotTo(tower.Model:GetPivot():Lerp(finalCFrame, .2))
+        --local finalCFrame = tower.Instance.CFrame + Vector3.new(0, tower.Model:GetExtentsSize().Y/2, 0)
+        --tower.Model:PivotTo(tower.Model:GetPivot():Lerp(finalCFrame, .2))
     end
 
 end)
+]]
 
 return {
 
@@ -77,7 +84,8 @@ return {
             Instance = part,
             LevelChange = nil,
             Model = nil,
-            Info = nil
+            Info = nil,
+            Cache = nil
         }
 
         local towerLevel = FindAttribute(part, 'Level')
@@ -105,6 +113,7 @@ return {
         local self = ReplicatedTowers[part]
         if (not self) then return end
 
+        --if (self.Cache) then self.Cache:Destroy() end
         if (self.LevelChange) then self.LevelChange:Disconnect() end
         if (self.Model and self.Model.Parent) then self.Model:Destroy() end
         table.clear(self)
