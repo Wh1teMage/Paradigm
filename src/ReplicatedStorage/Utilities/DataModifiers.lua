@@ -64,10 +64,15 @@ function Functions:CompareTables(t1, t2, useIgnore)
 	return checks
 end
 
+function Functions:UpdateTable(origin, template) -- rewrite later
+	for i, value in pairs(template) do
+		origin[i] = value
+	end
+end
+
 function Functions:ConstuctData(target, template)
 	return self:TableClone(self:TransferTable(target, {}), template)
 end
-
 
 function Functions:RandomWeight(chances: {{weight: number}}, luck: number)
 

@@ -2,8 +2,8 @@ local Enums = require(script.Parent.Enums)
 
 local data = {
 	Name = 'Precursor',
-	Model = nil,
 	Hitbox = nil,
+	ModelsFolder = nil,
 
 	Level = 1,
 

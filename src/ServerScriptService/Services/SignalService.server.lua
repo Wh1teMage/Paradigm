@@ -13,7 +13,9 @@ SignalComponent:GetSignal('ManageTowers'):Connect(
 	function(scope, ...)
 		local args = {...}
 		local component = PlayerComponent:GetPlayer(args[1])
-		
+
+		scope = tonumber(scope)
+
 		if (not component) then return end
 		
 		if (scope == PathConfig.Scope.PlaceTower) then component:PlaceTower(args[2], args[3]) return end

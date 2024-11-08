@@ -24,6 +24,7 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	end
 	
 	local tower = Cache[name](position)
+	tower:ReplicateField('Skin', 'Default')
 	-- set owner
 	local blockingParts = workspace:GetPartBoundsInBox(CFrame.new(position), tower.Hitbox.Size) 
 	
@@ -52,8 +53,6 @@ function TowerComponent:UpgradeTower(partName: string)
 	if (not tower) then return end
 
 	tower:Upgrade()
-	
-	print(tower)
 end
 
 return TowerComponent

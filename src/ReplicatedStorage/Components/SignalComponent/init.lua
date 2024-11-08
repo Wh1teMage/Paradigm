@@ -193,6 +193,25 @@ end
 
 local SignalComponentFabric = {}
 
+function SignalComponentFabric:Test()
+	
+	PackageComponent:AddToPackage('test', {DataTransfer:Encode({'test'})}, game.Players:GetChildren()[1])
+	PackageComponent:AddToPackage('test', {DataTransfer:Encode({'test12312321321'})}, game.Players:GetChildren()[1])
+
+	PackageComponent.Finish = function(self, package)
+
+		for player, info in pairs(package) do
+			local data = PackageComponent:Encode(info)
+
+			PackageComponent:Decode(data, function(scope, value)
+				print(value)
+			end)
+		end
+
+	end
+
+end
+
 function SignalComponentFabric:GetSignal(name: string, isBindable: boolean?): typeof(Event)
 	if (not CustomEvents[name]) then return constructor(name, isBindable) end
 	return CustomEvents[name]

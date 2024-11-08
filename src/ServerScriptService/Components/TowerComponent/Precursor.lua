@@ -12,18 +12,17 @@ return function(position: Vector3)
 		if (not getmetatable(self.SelectedTarget)) then return end -- extra check
 
 		for i = 1, self.BurstCount do -- check whats dropping the microprofilerstats
+			task.wait(self.BurstCD)
+
 			self:GetTarget()
 
-			repeat task.wait(.1); self:GetTarget() until self.SelectedTarget
-			if (not getmetatable(self.SelectedTarget)) then return end
-			
-			self.SelectedTarget:DealDamage(self.Damage)
-			if (not getmetatable(self.SelectedTarget)) then return end
+			repeat task.wait(.1); self:GetTarget() until self.SelectedTarget or (not getmetatable(self))
+			if (not getmetatable(self.SelectedTarget)) then continue end
 
 			local selectedCFrame = CFrame.new(self.Hitbox.Position, self.SelectedTarget.Hitbox.Position * Vector3.new(1, 0, 1) + self.Hitbox.Position * Vector3.new(0, 1, 0))
 
 			task.spawn(function() -- not sure about this one tho
-				for i = 1, 2 do
+				for i = 1, 3 do
 					self.Hitbox.CFrame = self.Hitbox.CFrame:Lerp(selectedCFrame, i/3)
 					task.wait(1/20)
 				end
@@ -36,7 +35,8 @@ return function(position: Vector3)
 				self.Hitbox.Name
 			)
 
-			task.wait(self.BurstCD)
+			self.SelectedTarget:DealDamage(self.Damage)
+			if (not getmetatable(self.SelectedTarget)) then continue end
 		end
 
 	end

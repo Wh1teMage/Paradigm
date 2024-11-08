@@ -1,15 +1,12 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local RunService = game:GetService('RunService')
 
-local UpgradesInfo = ReplicatedStorage.Info.Upgrades
-
 local TargetComponent = require(script.TargetComponent)
 local PassiveComponent = require(script.PassiveComponent)
 
-local TowersInfo = require(ReplicatedStorage.Info.TowerInfo)
+local TowersInfo = ReplicatedStorage.Info.Towers
 local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
 
-local UpgradesCache = {}
 local TowersCache = {}
 
 local Towers = {}
@@ -75,22 +72,14 @@ end
 
 function TowerComponent:Upgrade()
 
-	if (not UpgradesCache[self.Name]) then
-		local info = UpgradesInfo:FindFirstChild(self.Name)
-		if (not info) then return end
-		
-		UpgradesCache[self.Name] = require(info)
-	end
-	
-	local upgradeInfo = UpgradesCache[self.Name]
+	local upgradeInfo = TowersCache[self.Name]
+
 	self.Level += 1
-	self:ReplicateField('Level', self.Level)
 	
 	if (not upgradeInfo[self.Level]) then return end
-	
-	self = DataModifiers:ConstuctData(upgradeInfo[self.Level](), self)
-	
-	print('Upgraded', self)
+
+	self:ReplicateField('Level', self.Level)
+	DataModifiers:UpdateTable(self.Info, upgradeInfo[self.Level]())
 end
 
 function TowerComponent:CheckRequirements(requirements) -- use later
@@ -112,24 +101,36 @@ function TowerComponentFabric:GetTower(partName: string): typeof(TowerComponent)
 end
 
 function TowerComponentFabric.new(position: Vector3, name: string)
-	if (not TowersInfo[name]) then warn(name..' tower doesnt exist') return end
+	if (not TowersInfo:FindFirstChild(name)) then warn(name..' tower doesnt exist') return end
 
 	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
 	local postfix = string.rep('0', (4-string.len(clockId)))
 
 	local part = ReplicatedStorage.Samples.TowerPart:Clone()
-	part.Name = clockId..postfix..tostring(math.random(1000, 9999))
+	part.Name = clockId..postfix..tostring(math.random(-9999, 9999))
 	part.CFrame = CFrame.new(position)
 	part.Parent = workspace.Towers
+
+	if (not TowersCache[name]) then
+		local info = TowersInfo:FindFirstChild(name)
+		if (not info) then return end
+		
+		TowersCache[name] = require(info)
+	end
 	
-	local data = TowersInfo[name]()
+	local data = {}
 	
+	data.Info = TowersCache[name][1]()
 	data.Hitbox = part
 	data.SelectedTarget = nil
 	data.LastShoot = 0
 	data.Shooting = false
 
-	local self = setmetatable(data, {__index = TowerComponent})
+	local self = setmetatable(data, {
+		__index = function(t, i)
+			return TowerComponent[i] or data.Info[i]
+		end 
+	})
 
 	for _, passive in pairs(data.Passives) do
 		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })

@@ -15,4 +15,8 @@ require(Components.GameComponent).new():Start()
 
 print('-- Setup Completed --')
 
+task.wait(3)
+
+--SignalComponent:Test()
+
 --SignalComponent:GetSignal('Test'):Wait('Test1')

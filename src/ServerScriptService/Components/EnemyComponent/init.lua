@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
-
-local BezierPath = require(ReplicatedStorage.Utilities.BezierPath)
+local RunService = game:GetService('RunService')
 
 local EnemiesInfo = require(ReplicatedStorage.Info.EnemiesInfo)
 local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
@@ -40,7 +39,7 @@ function EnemyComponent:StartMoving(startingCFrame: CFrame?, currentStep: number
 			self.CurrentStep = i
 			
 			if ((not self.Health) or (self.Health <= 0)) then break end
-
+			
 			self.Hitbox.AlignPosition.Position = uniformCframe.Position
 			self.Hitbox.AlignOrientation.CFrame = uniformCframe.Rotation
 
@@ -55,6 +54,7 @@ function EnemyComponent:StartMoving(startingCFrame: CFrame?, currentStep: number
 				if ((not self.Health) or (self.Health <= 0)) then break end
 				
 			until ((self.Hitbox.Position - self.Hitbox.AlignPosition.Position).Magnitude < .1)
+			
 		end
 		
 		if ((not self.Health) or (self.Health <= 0)) then return end

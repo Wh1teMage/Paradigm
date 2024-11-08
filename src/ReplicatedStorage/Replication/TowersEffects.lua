@@ -2,17 +2,13 @@ local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local RunService = game:GetService('RunService')
 
 local Templates = ReplicatedStorage.Templates
-local Info = ReplicatedStorage.Info
-
-local Upgrades = Info.Upgrades
-
-local TowerInfo = require(Info.TowerInfo)
+local TowersInfo = ReplicatedStorage.Info.Towers
 
 type ITowerInfo = typeof(require(Templates.TowerTemplate)())
 
 local ReplicatedTowers = {}
 
-local Cache = {}
+local TowersCache = {}
 
 local function FindAttribute(part: Part, name: string)
     local value = part:GetAttribute(name)
@@ -22,22 +18,27 @@ local function FindAttribute(part: Part, name: string)
 end
 
 local function GetTowerInfo(towerName: string, towerLevel: number)
-    if (not Cache[towerName]) then
-        if (not Upgrades:FindFirstChild(towerName)) then warn(towerName..' Upgrades dont exist') ;return end
-        Cache[towerName] = require(Upgrades:FindFirstChild(towerName))
+    if (not TowersCache[towerName]) then
+        if (not TowersInfo:FindFirstChild(towerName)) then warn(towerName..' Upgrades dont exist') ;return end
+        TowersCache[towerName] = require(TowersInfo:FindFirstChild(towerName))
     end
 
-    local selectedInfo: ITowerInfo? = TowerInfo[towerName]()
-    if (towerLevel > 1) then selectedInfo = Cache[towerName][towerLevel]() end
+    if (not TowersCache[towerName][towerLevel]) then warn(towerLevel..' for '..towerName..' doesnt exist') return end
+
+    local selectedInfo: ITowerInfo? = TowersCache[towerName][towerLevel]()
 
     if (not selectedInfo) then warn(towerName..' Info doesnt exist'); return end
-    if (not selectedInfo.Model) then warn(towerName..' Model doesnt exist'); return end
+    if (not selectedInfo.ModelsFolder) then warn(towerName..' Model doesnt exist'); return end
 
     return selectedInfo
 end
 
 local function createModel(self, selectedInfo, part)
-    self.Model = selectedInfo.Model:Clone() :: Model
+    local skin = FindAttribute(part, 'Skin')
+
+    if ((not skin) or (not selectedInfo.ModelsFolder:FindFirstChild(skin))) then warn(skin..' skin doesnt exist') end
+
+    self.Model = selectedInfo.ModelsFolder[skin]:Clone() :: Model
     self.Model.Parent = part
     self.Model:PivotTo(part.CFrame + Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0))
 
@@ -113,7 +114,7 @@ return {
         local self = ReplicatedTowers[part]
         if (not self) then return end
 
-        --if (self.Cache) then self.Cache:Destroy() end
+        if (self.Cache) then self.Cache:Destroy() end
         if (self.LevelChange) then self.LevelChange:Disconnect() end
         if (self.Model and self.Model.Parent) then self.Model:Destroy() end
         table.clear(self)

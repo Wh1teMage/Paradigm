@@ -1,15 +1,68 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
+local TweenService = game:GetService('TweenService')
 local RunService = game:GetService('RunService')
 local Players = game:GetService('Players')
 
 local ReplicatedComponents = ReplicatedStorage.Components
 
+local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 
 local Templates = ReplicatedStorage.Templates
+local TowerSamples = ReplicatedStorage.Samples.TowerModels
+local TowersInfo = ReplicatedStorage.Info.Towers
+
+local TowersCache = {}
 
 type IProfileStore = typeof(require(Templates.ProfileStoreTemplate))
+
+local function GetTowerInfo(towerName: string, towerLevel: number)
+    if (not TowersCache[towerName]) then
+        if (not TowersInfo:FindFirstChild(towerName)) then warn(towerName..' Upgrades dont exist') ;return end
+        TowersCache[towerName] = require(TowersInfo:FindFirstChild(towerName))
+    end
+
+    if (not TowersCache[towerName][towerLevel]) then warn(towerLevel..' for '..towerName..' doesnt exist') return end
+
+    local selectedInfo = TowersCache[towerName][towerLevel]()
+
+    if (not selectedInfo) then warn(towerName..' Info doesnt exist'); return end
+    if (not selectedInfo.ModelsFolder) then warn(towerName..' Model doesnt exist'); return end
+
+    return selectedInfo
+end
+
+local function FindAttribute(part: Part, name: string)
+    local value = part:GetAttribute(name)
+    if (not value) then warn(part.Name..' Failed to find '..name); return end
+
+    return value
+end
+
+local function CreateRange(part: Part, radius: number)
+	local range = ReplicatedStorage.Samples.Range:Clone() :: Part
+	range.Position = part.Position
+	range.Transparency = .2
+	range.Name = 'Range'
+	range.Parent = part
+
+	TweenService:Create(range, TweenInfo.new(.3), { Size = Vector3.new(.1, radius*2, radius*2), Transparency = .6 }):Play()
+
+	return range
+end
+
+local function DestroyRange(part: Part)
+	local range = part.Range
+	range.Parent = workspace['_ignore']
+	range.Anchored = true
+	TweenService:Create(range, TweenInfo.new(.3), { Size = Vector3.new(.1, .1, .1), Transparency = 1 }):Play()
+
+	task.delay(.3, function()
+		if (not range.Parent) then return end
+		range:Destroy()
+	end)
+end
 
 local TowersComponent = {}
 
@@ -36,6 +89,7 @@ end
 local currentlyPlacing: Part;
 local currentlySelected: string;
 local currentlySelectedPart: Part;
+local modelOffset: Vector3
 
 RunService:BindToRenderStep('TowerPlacement', 10, function()
 	if (not currentlyPlacing) then return end
@@ -43,7 +97,11 @@ RunService:BindToRenderStep('TowerPlacement', 10, function()
 	local raycast = createRaycast(raycastParams)
 	if (not raycast) then return end
 	
-	currentlyPlacing.Position = currentlyPlacing.Position:Lerp(raycast.Position, .3)
+	local unit = (currentlyPlacing.Position - raycast.Position).Unit * math.min( (currentlyPlacing.Position - raycast.Position).Magnitude, 1/5 )
+	local model = currentlyPlacing.Model
+
+	currentlyPlacing.CFrame = currentlyPlacing.CFrame:Lerp(CFrame.new( raycast.Position ), .3)
+	model.PrimaryPart.CFrame = (currentlyPlacing.CFrame + modelOffset) * CFrame.Angles(unit.Z, 0, -unit.X)
 end)
 
 function TowersComponent:StartPlacing(slot: number)
@@ -53,15 +111,48 @@ function TowersComponent:StartPlacing(slot: number)
 	local selectedTower = profileData.EquippedTowers['TowerSlot'..tostring(slot)]
 
 	if (not selectedTower) then return end
+
+	local selectedSkin = ''
+
+	for _, info in pairs(profileData.OwnedTowers) do
+		if (info.Name == selectedTower) then selectedSkin = info.Skin; break end
+	end
+
+	if (selectedSkin == '') then selectedSkin = 'Default' end
+	if (not TowerSamples:FindFirstChild(selectedTower)) then return end
+	if (not TowerSamples:FindFirstChild(selectedTower):FindFirstChild(selectedSkin)) then return end
 	
+	currentlyPlacing = ReplicatedStorage.Samples.TowerPart:Clone()
+
+	local model = TowerSamples[selectedTower][selectedSkin]:Clone() :: Model
+	model.Name = 'Model'
+	model.Parent = currentlyPlacing
+
+	modelOffset = Vector3.new(0, model:GetExtentsSize().Y/2, 0)
+
+    model:PivotTo(currentlyPlacing.CFrame + modelOffset)
+
+    if (not model.PrimaryPart) then warn('PrimaryPart '..model.Name..' doesnt exist'); return end
+
+    model.PrimaryPart.Anchored = true
+
+	local selectedInfo = GetTowerInfo(selectedTower, 1)
+
+	local range = CreateRange(currentlyPlacing, selectedInfo.Range)
+
+	InstanceUtilities:Weld(currentlyPlacing, range)
+	range.Anchored = false
+
 	currentlySelected = selectedTower
-	currentlyPlacing = workspace.Part:Clone()
 	currentlyPlacing.Parent = workspace['_ignore']
+
+	selectedInfo = nil
 end
 
 function TowersComponent:StopPlacing()
 	if (not currentlyPlacing) then return end
 
+	DestroyRange(currentlyPlacing)
 	--print('Stopped Placing')
 	currentlyPlacing:Destroy()
 	currentlySelected = nil
@@ -78,18 +169,31 @@ function TowersComponent:PlaceTower()
 
 	self:StopPlacing()
 	
-	--SignalComponent:GetSignal('ManageTowers'):Wait('Selected') --!! remove comments for auto selection after placement
-	--self:SelectTower()
+	SignalComponent:GetSignal('ManageTowers'):Wait('Selected') --!! remove comments for auto selection after placement
+	self:SelectTower()
 end
 
 function TowersComponent:SelectTower()
 	if (currentlyPlacing) then self:PlaceTower() return end
 	
 	local raycast = createRaycast(selectParams)
-	if (not raycast) then currentlySelected = nil return end
 	
-	currentlySelected = raycast.Instance.Name
-	--print('Selected')
+	if (currentlySelectedPart) then
+		DestroyRange(currentlySelectedPart)
+		currentlySelectedPart = nil
+	end
+	
+	if (not raycast) then 
+		currentlySelected = nil 
+		return 
+	end
+
+	currentlySelectedPart = raycast.Instance:FindFirstAncestorWhichIsA('Part')
+	currentlySelected = currentlySelectedPart.Name
+
+	local selectedInfo = GetTowerInfo(FindAttribute(currentlySelectedPart, 'Name'), 1)
+	CreateRange(currentlySelectedPart, selectedInfo.Range)
+	selectedInfo = nil
 end
 
 function TowersComponent:UpgradeTower()
@@ -102,6 +206,9 @@ function TowersComponent:SellTower()
 	if (not currentlySelected) then return end
 
 	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.SellTower, currentlySelected)
+
+	currentlySelected = nil 
+	currentlySelectedPart = nil
 end
 
 return TowersComponent

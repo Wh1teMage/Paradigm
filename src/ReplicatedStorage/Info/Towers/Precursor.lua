@@ -1,18 +1,18 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 
-local TowerSamples: Folder = ReplicatedStorage.Samples.TowerModels
+local TowerSamples = ReplicatedStorage.Samples.TowerModels
 
-local Enums = require(ReplicatedStorage.Templates.Enums)
 local Template = require(ReplicatedStorage.Templates.TowerTemplate)
+local Enums = require(ReplicatedStorage.Templates.Enums)
 
-local Towers: {[string]: () -> typeof(Template())} = {}
+local Towers: {[number]: () -> typeof(Template())} = {}
 
-Towers['Precursor'] = function()
+Towers[1] = function()
 	local tower = Template()
-	
-	tower.Model = TowerSamples:FindFirstChild('TestModel') :: Model
+
+	tower.ModelsFolder = TowerSamples.Precursor
 	tower.Price = 460
-	tower.Range = 18 * 100
+	tower.Range = 18
 	tower.Damage = 1
 	tower.Firerate = 2.05
 
@@ -39,11 +39,19 @@ Towers['Precursor'] = function()
 	tower.Sounds = {
 		AttackSound = attackSound
 	}
-	
+
 	tower.Passives = {
 		{Name = 'TestPassive', Level = 1, Requirements = {}}
 	}
-	
+
+	return tower
+end
+
+Towers[2] = function()
+	local tower = Towers[1]()
+
+	tower.Damage = 100
+
 	return tower
 end
 
