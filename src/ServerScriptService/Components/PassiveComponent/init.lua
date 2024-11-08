@@ -17,6 +17,10 @@ function PassiveComponent.OnTick()
 
 end
 
+function PassiveComponent.OnUpgrade()
+
+end
+
 function PassiveComponent.OnDeath()
 
 end

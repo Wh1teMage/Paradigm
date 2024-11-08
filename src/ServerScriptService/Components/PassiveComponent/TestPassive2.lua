@@ -10,26 +10,38 @@ return function()
 	local self = passive.new()
 	
 	local component;
-	
-	function self.OnAttack()
-		--print('Attack', component.Damage)
-		--component.Damage += 1
+
+	local buffedTowers = {}
+
+	local function ClearBuffs()
+		for _, tower in pairs(buffedTowers) do
+			tower.Amplifiers.Range -= .5
+		end
+
+		table.clear(buffedTowers)
 	end
 
-	function self.Start()
+	local function ApplyBuffs()
+		ClearBuffs()
 
 		for _, tower in pairs(TowersComponent:GetTowers()) do
 			if (tower.Hitbox == component.Hitbox) then continue end
-			if (tower.Name == component.Name) then
-				component.Damage += 10
-				component.Firerate /= 1.5
-				component.BurstCD /= 1.5
-				component.BurstCount *= 1.5
-				tower:Destroy()
-			end
+			if (tower.Name ~= component.Name) then continue end
+			tower.Amplifiers.Range += .5
+			table.insert(buffedTowers, tower)
 		end
-		
-		--print('Placed')
+	end
+
+	function self.OnTick()
+		ApplyBuffs()
+	end
+
+	function self.Start()
+		ApplyBuffs()
+	end
+
+	function self.Stop()
+		ClearBuffs()
 	end
 	
 	function self.TransferData(args: {any})

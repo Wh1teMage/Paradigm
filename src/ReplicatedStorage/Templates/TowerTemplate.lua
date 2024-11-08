@@ -19,7 +19,7 @@ local data = {
 	
 	PlacementType = Enums.PlacementType.Ground,
 	TargetType = Enums.TargetType.First,
-	ShootType = Enums.ShootType.Signle,
+	ShootType = Enums.ShootType.Single,
 
 	Attributes = {},
 	Passives = {},
@@ -28,6 +28,13 @@ local data = {
 	Sounds = {},
 	Descriptions = {},
 	
+	Amplifiers = {
+		[Enums.TowerAmplifiers.Cash] = 1,
+		[Enums.TowerAmplifiers.Speed] = 1,
+		[Enums.TowerAmplifiers.Range] = 1,
+		[Enums.TowerAmplifiers.Damage] = 1,
+	},
+
 	Session = {
 		Passives = {},
 		Buffs = {},
@@ -40,6 +47,7 @@ return function()
 	temp.Attributes = {}
 	temp.Passives = {}
 	temp.Session = table.clone(temp.Session)
+	temp.Amplifiers = table.clone(temp.Amplifiers)
 
 	temp.Animations = {}
 	temp.Sounds = {}

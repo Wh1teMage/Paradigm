@@ -38,7 +38,7 @@ local function createModel(self, selectedInfo, part)
 
     if ((not skin) or (not selectedInfo.ModelsFolder:FindFirstChild(skin))) then warn(skin..' skin doesnt exist') end
 
-    self.Model = selectedInfo.ModelsFolder[skin]:Clone() :: Model
+    self.Model = selectedInfo.ModelsFolder[skin][selectedInfo.Level]:Clone() :: Model
     self.Model.Parent = part
     self.Model:PivotTo(part.CFrame + Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0))
 

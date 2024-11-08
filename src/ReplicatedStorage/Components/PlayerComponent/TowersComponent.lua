@@ -124,12 +124,11 @@ function TowersComponent:StartPlacing(slot: number)
 	
 	currentlyPlacing = ReplicatedStorage.Samples.TowerPart:Clone()
 
-	local model = TowerSamples[selectedTower][selectedSkin]:Clone() :: Model
+	local model = TowerSamples[selectedTower][selectedSkin][1]:Clone() :: Model
 	model.Name = 'Model'
 	model.Parent = currentlyPlacing
 
 	modelOffset = Vector3.new(0, model:GetExtentsSize().Y/2, 0)
-
     model:PivotTo(currentlyPlacing.CFrame + modelOffset)
 
     if (not model.PrimaryPart) then warn('PrimaryPart '..model.Name..' doesnt exist'); return end
@@ -137,7 +136,6 @@ function TowersComponent:StartPlacing(slot: number)
     model.PrimaryPart.Anchored = true
 
 	local selectedInfo = GetTowerInfo(selectedTower, 1)
-
 	local range = CreateRange(currentlyPlacing, selectedInfo.Range)
 
 	InstanceUtilities:Weld(currentlyPlacing, range)
@@ -146,7 +144,21 @@ function TowersComponent:StartPlacing(slot: number)
 	currentlySelected = selectedTower
 	currentlyPlacing.Parent = workspace['_ignore']
 
+	local idle = selectedInfo.Animations.Idle
+    if (not idle) then return end
+
+    local loadedAnimation: AnimationTrack = model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
+    loadedAnimation.Looped = true
+
+    loadedAnimation:Play()
+
 	selectedInfo = nil
+
+	local raycast = createRaycast(raycastParams)
+	if (not raycast) then return end
+	
+	currentlyPlacing.CFrame = CFrame.new(raycast.Position)
+	model.PrimaryPart.CFrame = currentlyPlacing.CFrame
 end
 
 function TowersComponent:StopPlacing()
@@ -169,8 +181,8 @@ function TowersComponent:PlaceTower()
 
 	self:StopPlacing()
 	
-	SignalComponent:GetSignal('ManageTowers'):Wait('Selected') --!! remove comments for auto selection after placement
-	self:SelectTower()
+	--SignalComponent:GetSignal('ManageTowers'):Wait('Selected') --!! remove comments for auto selection after placement
+	--self:SelectTower()
 end
 
 function TowersComponent:SelectTower()
@@ -191,9 +203,7 @@ function TowersComponent:SelectTower()
 	currentlySelectedPart = raycast.Instance:FindFirstAncestorWhichIsA('Part')
 	currentlySelected = currentlySelectedPart.Name
 
-	local selectedInfo = GetTowerInfo(FindAttribute(currentlySelectedPart, 'Name'), 1)
-	CreateRange(currentlySelectedPart, selectedInfo.Range)
-	selectedInfo = nil
+	CreateRange(currentlySelectedPart, FindAttribute(currentlySelectedPart, 'Range'))
 end
 
 function TowersComponent:UpgradeTower()

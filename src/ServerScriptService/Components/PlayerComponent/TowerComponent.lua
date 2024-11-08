@@ -17,7 +17,7 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	if (result) then position = result.Position end
 	
 	if (not Cache[name]) then
-		local info = Components.TowerComponent:FindFirstChild(name)
+		local info = ServerScriptService.Towers:FindFirstChild(name)
 		if (not info) then return end
 
 		Cache[name] = require(info)

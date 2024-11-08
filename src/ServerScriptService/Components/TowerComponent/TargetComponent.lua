@@ -5,8 +5,8 @@ local Enums = require(ReplicatedStorage.Templates.Enums)
 local EnemyComponent = require(ServerScriptService.Components.EnemyComponent)
 
 local TargetModes = {
-	[Enums.TargetType.First] = function(self)
-		local enemies = self:GetTargetsInRange()
+	[Enums.TargetType.First] = function(self, position: Vector3?, range: number?)
+		local enemies = self:GetTargetsInRange(position, range)
 		
 		local selectedEnemy;
 		local selectedValue = 0
@@ -26,8 +26,11 @@ local TargetModes = {
 
 local TargetComponent = {}
 
-function TargetComponent:GetTargetsInRange()
-	return EnemyComponent:GetEnemiesInRadius(self.Hitbox.Position, self.Range)
+function TargetComponent:GetTargetsInRange(position: Vector3?, range: number?)
+	if (not position) then position = self.Hitbox.Position end
+	if (not range) then range = self.Range*self.Amplifiers.Range end
+
+	return EnemyComponent:GetEnemiesInRadius(position, range)
 	--[[
 	for _, enemy in pairs(EnemyComponent:GetAll()) do
 		local hitbox = enemy.Hitbox
@@ -43,11 +46,11 @@ function TargetComponent:GetTargetsInRange()
 	]]
 end
 
-function TargetComponent:GetTarget()
-	local mode = self.TargetType
+function TargetComponent:GetTarget(mode: typeof(Enums.TargetType)?, ...)
+	if (not mode) then mode = self.TargetType end
 	if (not TargetModes[mode]) then return end
 	
-	TargetModes[mode](self)
+	TargetModes[mode](self, ...)
 end
 
 return TargetComponent

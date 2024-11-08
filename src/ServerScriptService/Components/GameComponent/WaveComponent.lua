@@ -8,7 +8,7 @@ local Components = ServerScriptService.Components
 
 local PlayerComponent = require(Components.PlayerComponent)
 local EnemyComponent = require(Components.EnemyComponent)
-local EnemyComponentFolder = Components.EnemyComponent
+local EnemyComponentFolder = ServerScriptService.Enemies
 
 local EnemiesCache = {}
 

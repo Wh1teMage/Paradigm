@@ -20,6 +20,8 @@ Towers[1] = function()
 	tower.BurstCount = 6
 	tower.BurstCD = .11
 
+	tower.Level = 1
+
 	local idleAnim = Instance.new('Animation')
 	idleAnim.AnimationId = 'rbxassetid://14253606347'
 
@@ -41,7 +43,7 @@ Towers[1] = function()
 	}
 
 	tower.Passives = {
-		{Name = 'TestPassive', Level = 1, Requirements = {}}
+		{Name = 'TestPassive2', Level = 1, Requirements = {}}
 	}
 
 	return tower
@@ -50,7 +52,21 @@ end
 Towers[2] = function()
 	local tower = Towers[1]()
 
-	tower.Damage = 100
+	tower.Damage = 13
+	tower.Level = 2
+
+	return tower
+end
+
+Towers[3] = function()
+	local tower = Towers[2]()
+
+	tower.Damage = 26
+	tower.Level = 3
+
+	tower.Passives = {
+		{Name = 'TestPassive', Level = 1, Requirements = {}}
+	}
 
 	return tower
 end

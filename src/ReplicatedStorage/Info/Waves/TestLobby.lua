@@ -12,7 +12,7 @@ local Template = require(Templates.WaveTemplate)
 
 local Waves: {typeof(Template())} = {
 	[1] = {
-		{"Spawn", "Part", 15, 1},
+		{"Spawn", "Part", 150, .1},
 		{"Wait", 5},
 		{"Spawn", "Part", 150, .1},
 		{"Wait", 5},

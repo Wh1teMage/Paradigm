@@ -50,6 +50,7 @@ return {
 
                 task.delay(.1, function()
                     clonnedEffect.Enabled = false
+                    if (not getmetatable(cache)) then return end
                     cache:Add({ attachment, clonnedEffect })
                 end)
             end

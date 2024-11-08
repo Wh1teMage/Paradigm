@@ -19,8 +19,8 @@ return {
 		Splash = 'Splash',
 	},
 	ShootType = {
-		Signle = 'Signle',
-		Burst = 'Bullet',
+		Single = 'Single',
+		Burst = 'Burst',
 		Energy = 'Energy',
 		Splash = 'Splash',
 	},
@@ -31,5 +31,11 @@ return {
 		Fastest = 4,
 		Weakest = 5,
 		Strongest = 6,
+	},
+	TowerAmplifiers = {
+		Cash = 'Cash',
+		Speed = 'Speed',
+		Damage = 'Damage',
+		Range = 'Range',
 	},
 }

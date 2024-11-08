@@ -17,18 +17,28 @@ local TowerComponent = setmetatable({}, {
 	end,
 })
 
-local TICK = 1/20
+local DEFAULT_TOWER_PASSIVES = { 'TowerReplication' }
+
+local ATTACK_TICK = 1/20
+local PASSIVE_TICK = 1
 
 task.spawn(function() -- seems nested, refactor later
-	while task.wait(TICK) do
+	while task.wait(ATTACK_TICK) do
 		for part, tower in pairs(Towers) do
 			task.spawn(function()
-				
+				tower:Attack()
+			end)
+		end
+	end
+end)
+
+task.spawn(function()
+	while task.wait(PASSIVE_TICK) do
+		for part, tower in pairs(Towers) do
+			task.spawn(function()
 				for _, passive in pairs(tower.Session.Passives) do
 					passive.OnTick()
 				end
-				
-				tower:Attack()
 			end)
 		end
 	end
@@ -36,7 +46,7 @@ end)
 
 function TowerComponent:CheckCD()
 	if (self.Shooting) then return end
-	if (os.clock() - self.LastShoot) < self.Firerate then return end
+	if (os.clock() - self.LastShoot) < self.Firerate/self.Amplifiers.Speed then return end
 	return true
 end
 
@@ -64,6 +74,11 @@ function TowerComponent:Attack()
 end
 
 function TowerComponent:Destroy()
+	while (#self.Session.Passives > 0) do
+		local passive = table.remove(self.Session.Passives)
+		self:RemovePassive(passive.Name, passive.Level)
+	end
+
 	Towers[self.Hitbox] = nil
 	self.Hitbox:Destroy()
 	table.clear(self)
@@ -79,7 +94,17 @@ function TowerComponent:Upgrade()
 	if (not upgradeInfo[self.Level]) then return end
 
 	self:ReplicateField('Level', self.Level)
-	DataModifiers:UpdateTable(self.Info, upgradeInfo[self.Level]())
+	DataModifiers:UpdateTable(self, upgradeInfo[self.Level]())
+
+	for _, passive in pairs(self.Passives) do
+		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
+	end
+
+	self.Passives = nil
+
+	for _, passive in pairs(self.Session.Passives) do
+		passive.OnUpgrade()
+	end
 end
 
 function TowerComponent:CheckRequirements(requirements) -- use later
@@ -100,6 +125,10 @@ function TowerComponentFabric:GetTower(partName: string): typeof(TowerComponent)
 	end
 end
 
+function TowerComponentFabric:GetTowers(): typeof({TowerComponent})
+	return Towers
+end
+
 function TowerComponentFabric.new(position: Vector3, name: string)
 	if (not TowersInfo:FindFirstChild(name)) then warn(name..' tower doesnt exist') return end
 
@@ -109,7 +138,6 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 	local part = ReplicatedStorage.Samples.TowerPart:Clone()
 	part.Name = clockId..postfix..tostring(math.random(-9999, 9999))
 	part.CFrame = CFrame.new(position)
-	part.Parent = workspace.Towers
 
 	if (not TowersCache[name]) then
 		local info = TowersInfo:FindFirstChild(name)
@@ -118,9 +146,8 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 		TowersCache[name] = require(info)
 	end
 	
-	local data = {}
+	local data = TowersCache[name][1]()
 	
-	data.Info = TowersCache[name][1]()
 	data.Hitbox = part
 	data.SelectedTarget = nil
 	data.LastShoot = 0
@@ -128,16 +155,25 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 
 	local self = setmetatable(data, {
 		__index = function(t, i)
-			return TowerComponent[i] or data.Info[i]
+			return TowerComponent[i]
 		end 
 	})
+
+	for _, passiveName in pairs(DEFAULT_TOWER_PASSIVES) do
+		self:AppendPassive(passiveName, 1, {}, { self })
+	end
 
 	for _, passive in pairs(data.Passives) do
 		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
 	end
 
+	data.Passives = nil
+
+	self:ReplicateField('Range', self.Range)
 	self:ReplicateField('Level', self.Level)
 	self:ReplicateField('Name', name)
+
+	part.Parent = workspace.Towers
 
 	Towers[part] = self
 
