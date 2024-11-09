@@ -35,7 +35,7 @@ end
 
 local function FindAttribute(part: Part, name: string)
     local value = part:GetAttribute(name)
-    if (not value) then warn(part.Name..' Failed to find '..name); return end
+    if (not value) then return end
 
     return value
 end

@@ -1,12 +1,14 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local RunService = game:GetService('RunService')
 
-local TargetComponent = require(script.TargetComponent)
-local PassiveComponent = require(script.PassiveComponent)
-local ValuesComponent = require(script.ValuesComponent)
-
 local TowersInfo = ReplicatedStorage.Info.Towers
 local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
+
+local LoadedComponents = {}
+
+for _, component in ipairs(script:GetChildren()) do
+	LoadedComponents[component.Name] = require(component)
+end
 
 local TowersCache = {}
 
@@ -14,7 +16,9 @@ local Towers = {}
 
 local TowerComponent = setmetatable({}, {
 	__index = function(t, i)
-		return TargetComponent[i] or PassiveComponent[i] or ValuesComponent[i]
+		for _, module in pairs(LoadedComponents) do
+			if (module[i]) then return module[i] end
+		end
 	end,
 })
 
@@ -43,7 +47,7 @@ end)
 
 function TowerComponent:CheckCD()
 	if (self.Shooting) then return end
-	if (self:GetAttribute('Stunned')) then return end
+	if (self:GetAttribute('Stunned') > 0) then return end
 	if (os.clock() - self.LastShoot) < self:GetValue('Firerate') then return end
 	return true
 end
@@ -74,6 +78,7 @@ end
 function TowerComponent:Destroy()
 	while (#self.Session.Passives > 0) do
 		local passive = table.remove(self.Session.Passives)
+		passive.Stop()
 		self:RemovePassive(passive.Name, passive.Level)
 	end
 

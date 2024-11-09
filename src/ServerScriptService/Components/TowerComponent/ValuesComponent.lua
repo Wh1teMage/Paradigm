@@ -19,18 +19,22 @@ function ValuesComponent:GetAmplifier(scope: string)
     return self.Amplifiers[scope] * ( GlobalInfo.TowerAmplifiers[scope] )
 end
 
+function ValuesComponent:AddAmplifier(scope: string, value: number)
+    if (not table.find(avaliableScopes, scope)) then return end  
+    self.Amplifiers[scope] += value
+end
+
 function ValuesComponent:GetAttribute(key)
-	local sessionData = self.Session
-	if (not sessionData.Attributes[key]) then sessionData.Attributes[key] = 0 end
-	return sessionData.Attributes[key]
+	if (not self.Attributes[key]) then self.Attributes[key] = 0 end
+	return self.Attributes[key]
 end
 
 function ValuesComponent:AddAttribute(key, value: any)
-	self.Session.Attributes[key] = self:GetAttribute(key) + value
+	self.Attributes[key] = self:GetAttribute(key) + value
 end
 
 function ValuesComponent:SetAttribute(key, value: any)
-	self.Session.Attributes[key] = value
+	self.Attributes[key] = value
 end
 
 return ValuesComponent

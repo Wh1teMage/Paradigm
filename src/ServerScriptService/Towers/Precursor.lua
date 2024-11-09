@@ -13,8 +13,8 @@ return function(position: Vector3)
 		
 		for i = 1, self.BurstCount do -- check whats dropping the microprofilerstats
 			task.wait(self.BurstCD/self:GetAmplifier('Firerate'))
+			if (not getmetatable(self)) then break end
 
-			if (not getmetatable(self)) then continue end
 			self:GetTarget()
 
 			if (not self.SelectedTarget) then
@@ -40,7 +40,8 @@ return function(position: Vector3)
 				self.Hitbox.Name
 			)
 
-			self.SelectedTarget:DealDamage(self.Damage*self:GetAmplifier('Damage'))
+			self.SelectedTarget:DealDamage(self:GetValue('Damage'))
+			if (not getmetatable(self)) then break end
 		end
 	end
 
@@ -60,6 +61,7 @@ return function(position: Vector3)
 	end
 
 	function self:OnAttack()
+		print('Attacking')
 		if (not getmetatable(self.SelectedTarget)) then return end -- extra check
 
 		if (self.Level ~= 3) then preUltimatumPattern()

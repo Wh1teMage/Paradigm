@@ -37,6 +37,7 @@ local data = {
 
 	Attributes = {},
 	Passives = {},
+	Abilities = {},
 
 	Animations = {},
 	Sounds = {},

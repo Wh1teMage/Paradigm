@@ -7,12 +7,13 @@ local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
 local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 
 local PassiveComponent = require(script.PassiveComponent)
+local ValuesComponent = require(script.ValuesComponent)
 
 local Enemies = {}
 
 local EnemyComponent = setmetatable({}, {
 	__index = function(t, i)
-		return PassiveComponent[i]
+		return PassiveComponent[i] or ValuesComponent[i]
 	end,
 })
 

@@ -28,7 +28,7 @@ local TargetComponent = {}
 
 function TargetComponent:GetTargetsInRange(position: Vector3?, range: number?)
 	if (not position) then position = self.Hitbox.Position end
-	if (not range) then range = self.Range*self:GetAmpplifier('Range') end
+	if (not range) then range = self:GetValue('Range') end
 
 	return EnemyComponent:GetEnemiesInRadius(position, range)
 	--[[

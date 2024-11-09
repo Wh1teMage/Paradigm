@@ -7,6 +7,11 @@ local compareIgnoreList = {
 	'id',
 }
 
+local mergeIgnoreList = {
+	'Amplifiers',
+	'Session',
+}
+
 local Functions = {}
 
 function Functions:TableClone(transfer, template)
@@ -66,6 +71,7 @@ end
 
 function Functions:UpdateTable(origin, template) -- rewrite later
 	for i, value in pairs(template) do
+		if (table.find(mergeIgnoreList, i)) then continue end
 		origin[i] = value
 	end
 end

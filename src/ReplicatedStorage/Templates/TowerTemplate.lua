@@ -23,6 +23,7 @@ local data = {
 
 	Attributes = {},
 	Passives = {},
+	Abilities = {},
 
 	Animations = {},
 	Sounds = {},
@@ -30,14 +31,15 @@ local data = {
 	
 	Amplifiers = {
 		[Enums.TowerAmplifiers.Cash] = 1,
-		[Enums.TowerAmplifiers.Speed] = 1,
 		[Enums.TowerAmplifiers.Range] = 1,
 		[Enums.TowerAmplifiers.Damage] = 1,
+		[Enums.TowerAmplifiers.Firerate] = 1,
 	},
 
 	Session = {
 		Passives = {},
 		Buffs = {},
+		Abilities = {},
 	},
 }
 
