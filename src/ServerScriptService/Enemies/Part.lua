@@ -8,7 +8,25 @@ return function()
 	local self = enemy.new('Part')
 	
 	self:StartMoving()
+
+	local patterns = {
+		[1] = function()
+			print(1)
+		end,
+
+		[2] = function()
+			print(2)
+		end,
+
+		[3] = function()
+			print(3)
+		end,
+	}
 	
+	function self:OnAttack()
+		patterns[math.random(1, #patterns)]()
+	end
+
 	--[[
 	task.delay(4, function() 
 		print('Triggered 1')

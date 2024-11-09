@@ -34,8 +34,15 @@ return {
 	},
 	TowerAmplifiers = {
 		Cash = 'Cash',
-		Speed = 'Speed',
 		Damage = 'Damage',
 		Range = 'Range',
+		Firerate = 'Firerate',
+	},
+	EnemyAmplifiers = {
+		Speed = 'Speed',
+		Range = 'Range',
+		Damage = 'Damage',
+		Health = 'Health',
+		Firerate = 'Firerate',
 	},
 }

@@ -38,6 +38,8 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	
 	-- money check
 	
+	tower:SetOwner(self)
+
 	SignalComponent:GetSignal('ManageTowers'):Fire('Selected', self.Instance)
 end
 

@@ -3,6 +3,7 @@ local RunService = game:GetService('RunService')
 
 local TargetComponent = require(script.TargetComponent)
 local PassiveComponent = require(script.PassiveComponent)
+local ValuesComponent = require(script.ValuesComponent)
 
 local TowersInfo = ReplicatedStorage.Info.Towers
 local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
@@ -13,7 +14,7 @@ local Towers = {}
 
 local TowerComponent = setmetatable({}, {
 	__index = function(t, i)
-		return TargetComponent[i] or PassiveComponent[i]
+		return TargetComponent[i] or PassiveComponent[i] or ValuesComponent[i]
 	end,
 })
 
@@ -25,9 +26,7 @@ local PASSIVE_TICK = 1
 task.spawn(function() -- seems nested, refactor later
 	while task.wait(ATTACK_TICK) do
 		for part, tower in pairs(Towers) do
-			task.spawn(function()
-				tower:Attack()
-			end)
+			task.spawn(tower.Attack, tower)
 		end
 	end
 end)
@@ -35,18 +34,17 @@ end)
 task.spawn(function()
 	while task.wait(PASSIVE_TICK) do
 		for part, tower in pairs(Towers) do
-			task.spawn(function()
-				for _, passive in pairs(tower.Session.Passives) do
-					passive.OnTick()
-				end
-			end)
+			for _, passive in pairs(tower.Session.Passives) do
+				passive.OnTick()
+			end
 		end
 	end
 end)
 
 function TowerComponent:CheckCD()
 	if (self.Shooting) then return end
-	if (os.clock() - self.LastShoot) < self.Firerate/self.Amplifiers.Speed then return end
+	if (self:GetAttribute('Stunned')) then return end
+	if (os.clock() - self.LastShoot) < self:GetValue('Firerate') then return end
 	return true
 end
 
@@ -117,6 +115,14 @@ function TowerComponent:ReplicateField(fieldName: string, value: number)
 	hitbox:SetAttribute(fieldName, value)
 end
 
+function TowerComponent:SetOwner(owner)
+	for _, passive in pairs(owner.Session.Passives) do
+		passive.OnTowerAdded(self)
+	end
+	
+	self.OwnerInstance = owner.Instance
+end
+
 local TowerComponentFabric = {}
 
 function TowerComponentFabric:GetTower(partName: string): typeof(TowerComponent)
@@ -148,10 +154,12 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 	
 	local data = TowersCache[name][1]()
 	
+	data.Id = part.Name
 	data.Hitbox = part
 	data.SelectedTarget = nil
 	data.LastShoot = 0
 	data.Shooting = false
+	data.OwnerInstance = nil
 
 	local self = setmetatable(data, {
 		__index = function(t, i)
@@ -165,6 +173,17 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 
 	for _, passive in pairs(data.Passives) do
 		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
+	end
+
+	for _, ability in pairs(data.Abilities) do
+		self:AppendAbility(ability.Name, { self.Id, self })
+	end
+
+	for _, tower in pairs(TowerComponentFabric:GetTowers()) do
+		if (tower.Hitbox == part) then continue end
+		for _, passive in pairs(tower.Session.Passives) do
+			passive.OnTowerAdded(self)
+		end
 	end
 
 	data.Passives = nil

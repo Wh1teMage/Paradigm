@@ -30,6 +30,14 @@ local data = {
 		Other = table.clone(multipliers),
 	},
 
+	EquippedTowers = {
+		TowerSlot1 = nil,
+		TowerSlot2 = nil,
+		TowerSlot3 = nil,
+		TowerSlot4 = nil,
+		TowerSlot5 = nil,
+	},
+
 	Character = nil,
 	SessionTime = 0,
 	

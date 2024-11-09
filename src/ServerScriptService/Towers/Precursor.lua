@@ -12,7 +12,7 @@ return function(position: Vector3)
 	local preUltimatumPattern = function()
 		
 		for i = 1, self.BurstCount do -- check whats dropping the microprofilerstats
-			task.wait(self.BurstCD/self.Amplifiers.Speed)
+			task.wait(self.BurstCD/self:GetAmplifier('Firerate'))
 
 			if (not getmetatable(self)) then continue end
 			self:GetTarget()
@@ -40,7 +40,7 @@ return function(position: Vector3)
 				self.Hitbox.Name
 			)
 
-			self.SelectedTarget:DealDamage(self.Damage*self.Amplifiers.Damage)
+			self.SelectedTarget:DealDamage(self.Damage*self:GetAmplifier('Damage'))
 		end
 	end
 

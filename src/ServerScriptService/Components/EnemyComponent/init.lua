@@ -45,10 +45,12 @@ function EnemyComponent:StartMoving(startingCFrame: CFrame?, currentStep: number
 
 			repeat 
 				
-				self.Hitbox.AlignPosition.MaxVelocity = self.Speed
+				self.Hitbox.AlignPosition.MaxVelocity = self:GetValue('Speed')
 				self.Distance += (self.Hitbox.Position - changablePosition).Magnitude
 				changablePosition = self.Hitbox.Position
-				
+
+				task.spawn(self.Attack, self)
+
 				task.wait(1/(10*self.Speed))
 				
 				if ((not self.Health) or (self.Health <= 0)) then break end
@@ -99,6 +101,32 @@ function EnemyComponent:ReplicateField(fieldName: string, value: number)
 	hitbox:SetAttribute(fieldName, value)
 end
 
+function EnemyComponent:CheckCD()
+	if (self.Shooting) then return end
+	if (self:GetAttribute('Stunned')) then return end
+	if (os.clock() - self.LastShoot) < self:GetValue('Firerate') then return end
+	return true
+end
+
+function EnemyComponent:OnAttack()
+	
+end
+
+function EnemyComponent:Attack()
+	if (not self.CanAttack) then return end
+	if (not self:CheckCD()) then return end
+	self.Shooting = true
+
+	for _, passive in pairs(self.Session.Passives) do
+		passive.OnAttack()
+	end
+	
+	self:OnAttack()
+		
+	self.LastShoot = os.clock()
+	self.Shooting = false
+end
+
 local EnemyComponentFabric = {}
 
 function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
@@ -112,7 +140,11 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	part.Parent = workspace.Enemies
 
 	local data = EnemiesInfo[name]()
+
+	data.Id = part.Name
 	data.Hitbox = part
+	data.Shooting = false
+	data.LastShoot = 0
 	
 	local self = setmetatable(data, {__index = EnemyComponent})
 	

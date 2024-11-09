@@ -1,7 +1,7 @@
 local AbilitiesComponent = {}
 AbilitiesComponent.__index = AbilitiesComponent
 
-local GlobalCD = {}
+local GlobalCD = {} -- not sure about global cd
 
 function AbilitiesComponent:CheckCD()
 	if (os.clock() - GlobalCD[self.OwnerId].LastUsed) < self.CD then return end

@@ -32,8 +32,18 @@ return function()
 		end
 	end
 
-	function self.OnTick()
+	local function ApplyForTower(tower)
+		if (tower.Name ~= component.Name) then return end
+		tower.Amplifiers.Range += .5
+		table.insert(buffedTowers, tower)
+	end
+
+	function self.OnUpgrade()
 		ApplyBuffs()
+	end
+
+	function self.OnTowerAdded(tower)
+		ApplyForTower(tower)
 	end
 
 	function self.Start()

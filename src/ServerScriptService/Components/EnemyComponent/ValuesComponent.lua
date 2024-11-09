@@ -3,7 +3,7 @@ local ServerScriptService = game:GetService('ServerScriptService')
 
 local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
 
-local avaliableScopes = { 'Range', 'Damage', 'Firerate' }
+local avaliableScopes = { 'Range', 'Damage', 'Firerate', 'Health', 'Speed' }
 
 local ValuesComponent = {}
 
@@ -16,7 +16,7 @@ end
 
 function ValuesComponent:GetAmplifier(scope: string)
     if (not table.find(avaliableScopes, scope)) then return end  
-    return self.Amplifiers[scope] * ( GlobalInfo.TowerAmplifiers[scope] )
+    return self.Amplifiers[scope] * ( GlobalInfo.EnemyAmplifiers[scope] )
 end
 
 function ValuesComponent:GetAttribute(key)

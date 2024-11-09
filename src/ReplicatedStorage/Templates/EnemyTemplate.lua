@@ -10,10 +10,15 @@ local data = {
 	
 	Level = 1,
 	
-	MaxHealth = 10000,
-	Health = 10000,
+	MaxHealth = 100,
+	Health = 100,
 	Speed = 1,
 	
+	Firerate = 5,
+	Damage = 1,
+	Range = 5,
+
+	CanAttack = false,
 	Distance = 0,
 
 	Defense = {
@@ -22,6 +27,14 @@ local data = {
 		[Enums.DamageType.Splash] = 1,
 	},
 	
+	Amplifiers = {
+		[Enums.EnemyAmplifiers.Speed] = 1,
+		[Enums.EnemyAmplifiers.Range] = 1,
+		[Enums.EnemyAmplifiers.Damage] = 1,
+		[Enums.EnemyAmplifiers.Health] = 1,
+		[Enums.EnemyAmplifiers.Firerate] = 1,
+	},
+
 	Attributes = {},
 	Passives = {},
 
@@ -30,6 +43,7 @@ local data = {
 	Descriptions = {},
 	
 	Session = {
+		Abilities = {},
 		Passives = {},
 		Buffs = {},
 	},
@@ -41,7 +55,11 @@ return function()
 	temp.Attributes = {}
 	temp.Passives = {}
 	temp.Session = table.clone(temp.Session)
+
+	temp.Defense = table.clone(temp.Defense)
+	temp.Amplifiers = table.clone(temp.Amplifiers)
 	
+	temp.Session.Abilities = {}
 	temp.Session.Passives = {}
 	temp.Session.Buffs = {}
 
@@ -51,3 +69,10 @@ return function()
 	
 	return temp
 end
+
+--[[ --!!
+Make all global server cycles into actors, this includes
+OnTick for enemies, towers
+Movement for enemies
+Attack for tower, enemies
+]]
