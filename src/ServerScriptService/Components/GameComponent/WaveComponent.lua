@@ -70,21 +70,38 @@ local WaveComponent = {}
 
 function WaveComponent:ParseWave(waveData)
 	
-	for i, v in pairs(waveData) do
-		if (GlobalInfo.Health < 0) then return end
-		
-		local func = parseFunctions[v[1]]
-		if (not func) then return end
-		
-		func(table.unpack(v, 2))
-	end
-	
+	local finished = false
+
+	task.spawn(function()
+		for i, v in pairs(waveData) do
+			if (GlobalInfo.Health < 0) then continue end
+			
+			local func = parseFunctions[v[1]]
+			if (not func) then continue end
+			
+			func(table.unpack(v, 2))
+		end
+
+		finished = true
+	end)
+
+	while (not finished) and (not self.Skipped) do task.wait(.1) end
+
+	self.Skipped = false
+end
+
+function WaveComponent:Skip()
+	self.Skipped = true
 end
 
 function WaveComponent:LoadWaves(name: string)
 	if (not LobbiesInfo:FindFirstChild(name)) then return end
 	local selectedWave = require(LobbiesInfo:FindFirstChild(name)).Waves
 	
+	self.Skipped = false
+
+	-- add for i = startwave, endwave
+
 	for index, wave in pairs(selectedWave) do
 		self:ChangeWave(index)
 		if (GlobalInfo.Health < 0) then return end

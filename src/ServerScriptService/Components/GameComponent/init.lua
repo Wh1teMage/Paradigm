@@ -20,12 +20,13 @@ end
 
 function GameComponent:ChangeWave(value: number)
 	GlobalInfo.CurrentWave = value
+	print(GlobalInfo.CurrentWave..' Current Wave')
 end
 
 function GameComponent:Start()
 	self:CreatePath()
 	task.spawn(self.LoadWaves, self, self.SelectedLobby)
-	
+
 	SignalComponent:GetSignal('ManageGameBindable', true):Connect(
 		function(scope, ...)
 			
@@ -40,19 +41,14 @@ end
 
 function GameComponent:CreatePath()
 	if (#GlobalInfo.PathPoints > 0) then return end
-	
-	local points = {}
-	local newPoints = {}
 
-	for _, part in pairs(workspace.Path:GetChildren()) do
-		table.insert(points, part.Position)
-		table.insert(newPoints, part.CFrame)
+	for _, pathFolder: Instance in pairs(workspace.Path:GetChildren()) do
+		if (not pathFolder:IsA('Folder')) then continue end
+		local path = QuadPath.new(pathFolder:GetChildren())
+		path:SetupPoints()
+
+		table.insert(GlobalInfo.PathPoints, path.Points)
 	end
-	
-	local path = QuadPath.new(workspace.Path:GetChildren())
-	path:SetupPoints()
-	
-	GlobalInfo.PathPoints = path.Points
 end
 
 function GameComponent.new(name: string)

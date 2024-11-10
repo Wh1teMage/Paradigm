@@ -22,10 +22,13 @@ local EnemyComponent = setmetatable({}, {
 	end,
 })
 
-function EnemyComponent:StartMoving(startingCFrame: CFrame?, currentStep: number?, direction: number?)
+function EnemyComponent:StartMoving(selectedTrack: number?, startingCFrame: CFrame?, currentStep: number?, direction: number?)
+	if (not selectedTrack) then selectedTrack = 1 end
+
 	if (#GlobalInfo.PathPoints < 1) then return end
+	if (not GlobalInfo.PathPoints[selectedTrack]) then return end
 	
-	if (not startingCFrame) then startingCFrame = GlobalInfo.PathPoints[1] end
+	if (not startingCFrame) then startingCFrame = GlobalInfo.PathPoints[selectedTrack][1] end
 	if (not currentStep) then currentStep = 0 end
 	if (not direction) then direction = 1 end
 	
@@ -36,12 +39,12 @@ function EnemyComponent:StartMoving(startingCFrame: CFrame?, currentStep: number
 		local changablePosition = startingCFrame.Position
 		
 		local start = 1
-		local stop = #GlobalInfo.PathPoints
+		local stop = #GlobalInfo.PathPoints[selectedTrack]
 		
-		if (direction < 0) then start = #GlobalInfo.PathPoints; stop = 1 end
+		if (direction < 0) then start = #GlobalInfo.PathPoints[selectedTrack]; stop = 1 end
 		
 		for i = start, stop, direction do
-			local uniformCframe = GlobalInfo.PathPoints[i]
+			local uniformCframe = GlobalInfo.PathPoints[selectedTrack][i]
 			self.CurrentStep = i
 			
 			if ((not self.Health) or (self.Health <= 0)) then break end
@@ -91,6 +94,12 @@ function EnemyComponent:DealDamage(damage: number)
 end
 
 function EnemyComponent:Destroy()
+	while (#self.Session.Passives > 0) do
+		local passive = table.remove(self.Session.Passives)
+		passive.Stop()
+		self:RemovePassive(passive.Name, passive.Level)
+	end
+
 	Enemies[self.Hitbox] = nil
 	self.Hitbox:Destroy()
 	table.clear(self)

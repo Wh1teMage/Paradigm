@@ -17,16 +17,20 @@ Lobby.Settings.MaxHealth = 1000
 
 Lobby.Waves = {
 	[1] = {
-		{"Spawn", "Part", 1, .1},
-		{"Wait", 500},
-		{"Spawn", "Part", 150, .1},
-		{"Wait", 5},
 		{"Spawn", "Part", 15, .1},
 		{"Wait", 5},
+	},
+	[2] = {
 		{"Spawn", "Part", 15, .1},
 		{"Wait", 5},
+	},
+	[3] = {
 		{"Spawn", "Part", 15, .1},
-		{"Wait", 5}
+		{"Wait", 5},
+	},
+	[4] = {
+		{"Spawn", "Part", 15, .1},
+		{"Wait", 5},
 	}
 }
 

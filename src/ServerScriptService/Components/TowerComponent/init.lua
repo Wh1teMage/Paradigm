@@ -76,6 +76,12 @@ function TowerComponent:Attack()
 	self.Shooting = false
 end
 
+function TowerComponent:DealDamage(damage: number)
+	self.Health -= damage
+	if (self.Health > 0) then return end
+	self:Destroy()
+end
+
 function TowerComponent:Destroy()
 	while (#self.Session.Passives > 0) do
 		local passive = table.remove(self.Session.Passives)
