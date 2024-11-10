@@ -55,8 +55,9 @@ return function()
 	
 	temp.Attributes = {}
 	temp.Passives = {}
-	temp.Session = table.clone(temp.Session)
+	temp.Abilities = {}
 
+	temp.Session = table.clone(temp.Session)
 	temp.Defense = table.clone(temp.Defense)
 	temp.Amplifiers = table.clone(temp.Amplifiers)
 	

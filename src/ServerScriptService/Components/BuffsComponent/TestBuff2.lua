@@ -5,18 +5,19 @@ return function()
 
 	local component;
 
+	local testVal = 0
+
 	function self.Start()
-		print('Started Buffing')
-		component:AddAmplifier('Range', .5*self.Level)
+		component:AddAmplifier('Range', testVal)
 	end
 	
 	function self.Stop()
-		print('Stopped Buffing', component.Level)
-		component:AddAmplifier('Range', -.5*self.Level)
+		component:AddAmplifier('Range', -testVal)
 	end
 
 	function self.TransferData(args: {any})
 		component = args[1]
+		testVal = args[2]
 	end
 
 	return self

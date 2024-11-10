@@ -10,14 +10,15 @@ return function()
 	local self = passive.new()
 	
 	local component;
-	local currentLevel = 0
 
 	local buffedTowers = {}
+
+	local testVal = 0
 
 	local function ClearBuffs()
 		for _, tower in pairs(buffedTowers) do
 			if (not getmetatable(tower)) then continue end
-			tower:RemoveBuff('TestBuff2', currentLevel, { tower })
+			tower:RemoveBuff('TestBuff2')
 		end
 
 		table.clear(buffedTowers)
@@ -25,24 +26,23 @@ return function()
 
 	local function ApplyBuffs()
 		ClearBuffs()
-
-		currentLevel = component.Level
 		
 		for _, tower in pairs(TowersComponent:GetTowers()) do
 			if (tower.Hitbox == component.Hitbox) then continue end
 			if (tower.Name ~= component.Name) then continue end
-			tower:AppendBuff('TestBuff2', component.Level, { tower })
+			tower:AppendBuff('TestBuff2', component.Level, { tower, testVal })
 			table.insert(buffedTowers, tower)
 		end
 	end
 
 	local function ApplyForTower(tower)
 		if (tower.Name ~= component.Name) then return end
-		tower:AppendBuff('TestBuff2', component.Level, { tower })
+		tower:AppendBuff('TestBuff2', component.Level, { tower, testVal })
 		table.insert(buffedTowers, tower)
 	end
 
 	function self.OnUpgrade()
+		testVal = .5*component.Level
 		ApplyBuffs()
 	end
 
@@ -50,8 +50,14 @@ return function()
 		ApplyForTower(tower)
 	end
 
+	function self.OnTowerRemoved(tower)
+		if (#tower.Session.Passives < 1) then return end 
+		-- add check if the tower has the same passive (to update less towers)
+		ApplyBuffs()
+	end
+
 	function self.Start()
-		currentLevel = component.Level
+		component:UseAbility('Fireball')
 		ApplyBuffs()
 	end
 
@@ -61,6 +67,7 @@ return function()
 	
 	function self.TransferData(args: {any})
 		component = args[1]
+		testVal = .5
 	end
 	
 	return self

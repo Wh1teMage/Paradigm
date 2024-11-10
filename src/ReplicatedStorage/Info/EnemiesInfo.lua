@@ -11,11 +11,14 @@ Enemies['Part'] = function(level: number)
 	
 	if (level) then enemy.Level = level end
 	
+	enemy.Name = 'Part'
+
 	enemy.MaxHealth = 18  -- change later
 	enemy.Health = enemy.MaxHealth
 	enemy.Model = EnemySamples.Walker
 	
 	enemy.Speed = 4
+	enemy.Firerate = .1
 
 	local idleAnim = Instance.new('Animation')
 	idleAnim.AnimationId = 'rbxassetid://15289102971'
@@ -23,8 +26,12 @@ Enemies['Part'] = function(level: number)
 	enemy.Animations = {
 		Idle = idleAnim,
 	}
+
+	enemy.Abilities = {
+		{Name = 'Fireball'}
+	}
 	
-	enemy.Name = 'Part'
+	enemy.CanAttack = true
 	--enemy.Model = EnemySamples["Spike Fox"]
 	return enemy
 end

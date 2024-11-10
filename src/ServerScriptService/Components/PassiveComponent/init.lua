@@ -25,6 +25,10 @@ function PassiveComponent.OnTowerAdded(tower: any) -- prefer tower type
 
 end
 
+function PassiveComponent.OnTowerRemoved(tower: any) -- prefer tower type
+
+end
+
 function PassiveComponent.OnDeath()
 
 end

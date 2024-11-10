@@ -3,11 +3,10 @@ local ability = require(script.Parent)
 return function()
 	local self = ability.new()
 
-	local playerComponent;
+	local component;
 
 	function self.OnStart()
 		print('Started Ability')
-		print(playerComponent.Session)
 		task.wait(1)
 	end
 
@@ -16,7 +15,7 @@ return function()
 	end
 	
 	function self.TransferData(args: {any})
-		playerComponent = args[2]
+		component = args[2]
 	end
 
 	return self

@@ -13,6 +13,7 @@ end
 local TowersCache = {}
 
 local Towers = {}
+local TowerComponentFabric = {}
 
 local TowerComponent = setmetatable({}, {
 	__index = function(t, i)
@@ -82,6 +83,13 @@ function TowerComponent:Destroy()
 		self:RemovePassive(passive.Name, passive.Level)
 	end
 
+	for _, tower in pairs(TowerComponentFabric:GetTowers()) do
+		if (tower.Hitbox == self.Hitbox) then continue end
+		for _, passive in pairs(tower.Session.Passives) do
+			passive.OnTowerRemoved(self)
+		end
+	end
+
 	Towers[self.Hitbox] = nil
 	self.Hitbox:Destroy()
 	table.clear(self)
@@ -127,8 +135,6 @@ function TowerComponent:SetOwner(owner)
 	
 	self.OwnerInstance = owner.Instance
 end
-
-local TowerComponentFabric = {}
 
 function TowerComponentFabric:GetTower(partName: string): typeof(TowerComponent)
 	for part, tower in pairs(Towers) do
@@ -176,12 +182,12 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 		self:AppendPassive(passiveName, 1, {}, { self })
 	end
 
-	for _, passive in pairs(data.Passives) do
-		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
-	end
-
 	for _, ability in pairs(data.Abilities) do
 		self:AppendAbility(ability.Name, { self.Id, self })
+	end
+
+	for _, passive in pairs(data.Passives) do
+		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
 	end
 
 	for _, tower in pairs(TowerComponentFabric:GetTowers()) do
@@ -192,6 +198,7 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 	end
 
 	data.Passives = nil
+	data.Abilities = nil
 
 	self:ReplicateField('Range', self.Range)
 	self:ReplicateField('Level', self.Level)

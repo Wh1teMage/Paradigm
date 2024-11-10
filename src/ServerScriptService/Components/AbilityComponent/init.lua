@@ -1,13 +1,9 @@
 local AbilitiesComponent = {}
 AbilitiesComponent.__index = AbilitiesComponent
 
-local GlobalCD = {} -- not sure about global cd
 
 function AbilitiesComponent:CheckCD()
-	if (os.clock() - GlobalCD[self.OwnerId].LastUsed) < self.CD then return end
 	if (os.clock() - self.LastUsed) < self.CD then return end
-	
-	if (GlobalCD[self.OwnerId].Using) then return end
 	if (self.Using) then return end
 	
 	return true
@@ -17,7 +13,6 @@ function AbilitiesComponent:Start()
 	if (not self:CheckCD()) then return end
 	
 	self.Using = true
-	GlobalCD[self.OwnerId].Using = true
 
 	task.spawn(function()
 		self.OnStart()
@@ -30,9 +25,6 @@ function AbilitiesComponent:Stop()
 	
 	self.LastUsed = os.clock()
 	self.Using = false
-	
-	GlobalCD[self.OwnerId].LastUsed = self.LastUsed
-	GlobalCD[self.OwnerId].Using = false
 end
 
 function AbilitiesComponent.OnStart()
@@ -46,8 +38,6 @@ end
 function AbilitiesComponent:Setup(args: {any})
 	local id = args[1]
 	self.OwnerId = id
-	
-	GlobalCD[id] = {LastUsed = 0, Using = false}
 	
 	self.TransferData(args)
 end

@@ -6,14 +6,19 @@ local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
 
 local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 
-local PassiveComponent = require(script.PassiveComponent)
-local ValuesComponent = require(script.ValuesComponent)
+local LoadedComponents = {}
+
+for _, component in ipairs(script:GetChildren()) do
+	LoadedComponents[component.Name] = require(component)
+end
 
 local Enemies = {}
 
 local EnemyComponent = setmetatable({}, {
 	__index = function(t, i)
-		return PassiveComponent[i] or ValuesComponent[i]
+		for _, module in pairs(LoadedComponents) do
+			if (module[i]) then return module[i] end
+		end
 	end,
 })
 
@@ -103,8 +108,9 @@ function EnemyComponent:ReplicateField(fieldName: string, value: number)
 end
 
 function EnemyComponent:CheckCD()
+	if (not self.CanAttack) then return end
 	if (self.Shooting) then return end
-	if (self:GetAttribute('Stunned')) then return end
+	if (self:GetAttribute('Stunned') > 0) then return end
 	if (os.clock() - self.LastShoot) < self:GetValue('Firerate') then return end
 	return true
 end
@@ -114,7 +120,6 @@ function EnemyComponent:OnAttack()
 end
 
 function EnemyComponent:Attack()
-	if (not self.CanAttack) then return end
 	if (not self:CheckCD()) then return end
 	self.Shooting = true
 
@@ -148,12 +153,19 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	data.LastShoot = 0
 	
 	local self = setmetatable(data, {__index = EnemyComponent})
-	
+
+	for _, passive in pairs(data.Abilities) do
+		self:AppendAbility(passive.Name, { self.Id, self })
+	end
+
 	for _, passive in pairs(data.Passives) do
 		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
 	end
 	
 	self:ReplicateField('Name', name)
+
+	data.Passives = nil
+	data.Abilities = nil
 
 	Enemies[part] = self
 	

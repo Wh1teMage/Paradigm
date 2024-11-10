@@ -48,6 +48,8 @@ return function()
 
 	temp.Attributes = {}
 	temp.Passives = {}
+	temp.Abilities = {}
+
 	temp.Session = table.clone(temp.Session)
 	temp.Amplifiers = table.clone(temp.Amplifiers)
 
@@ -55,6 +57,7 @@ return function()
 	temp.Sounds = {}
 	temp.Descriptions = {}
 
+	temp.Session.Abilities = {}
 	temp.Session.Passives = {}
 	temp.Session.Buffs = {}
 

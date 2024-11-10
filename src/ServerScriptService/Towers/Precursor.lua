@@ -61,7 +61,6 @@ return function(position: Vector3)
 	end
 
 	function self:OnAttack()
-		print('Attacking')
 		if (not getmetatable(self.SelectedTarget)) then return end -- extra check
 
 		if (self.Level ~= 3) then preUltimatumPattern()
