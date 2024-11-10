@@ -8,6 +8,17 @@ return {
 
 	CurrentWave = 0,
 	PathPoints = {},
+
+	Loaded = false,
+
+	UseCustomLoadout = false,
+	EquippedTowers = {
+		TowerSlot1 = nil,
+		TowerSlot2 = nil,
+		TowerSlot3 = nil,
+		TowerSlot4 = nil,
+		TowerSlot5 = nil,
+	},
 	
 	TowerAmplifiers = {
 		[Enums.TowerAmplifiers.Cash] = 1,

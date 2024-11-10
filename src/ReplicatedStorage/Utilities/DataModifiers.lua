@@ -80,6 +80,19 @@ function Functions:ConstuctData(target, template)
 	return self:TableClone(self:TransferTable(target, {}), template)
 end
 
+function Functions:DeepTableClone(original)
+	local copy = {}
+
+	for i, v in pairs(original) do
+		if type(v) == "table" then
+			v = Functions:DeepTableClone(v)
+		end
+		copy[i] = v
+	end
+	
+	return copy
+end
+
 function Functions:RandomWeight(chances: {{weight: number}}, luck: number)
 
 	local maxweight = 0

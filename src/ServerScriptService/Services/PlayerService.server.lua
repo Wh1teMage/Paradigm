@@ -8,8 +8,12 @@ local ReplicatedComponents = ReplicatedStorage.Components
 local PlayerComponent = require(Components.PlayerComponent)
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 
+local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
+
 Players.PlayerAdded:Connect(function(player)
 	print(player, 123)
+
+	repeat task.wait(.1); print('Player loading') until GlobalInfo.Loaded
 
 	local component = PlayerComponent:CreatePlayer(player)
 	

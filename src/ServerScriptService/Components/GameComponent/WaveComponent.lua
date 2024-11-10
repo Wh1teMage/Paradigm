@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local Players = game:GetService('Players')
 
 local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
-local WavesInfo = ReplicatedStorage.Info.Waves
+local LobbiesInfo = ReplicatedStorage.Info.Lobbies
 local Components = ServerScriptService.Components
 
 local PlayerComponent = require(Components.PlayerComponent)
@@ -82,8 +82,8 @@ function WaveComponent:ParseWave(waveData)
 end
 
 function WaveComponent:LoadWaves(name: string)
-	if (not WavesInfo:FindFirstChild(name)) then return end
-	local selectedWave = require(WavesInfo:FindFirstChild(name))
+	if (not LobbiesInfo:FindFirstChild(name)) then return end
+	local selectedWave = require(LobbiesInfo:FindFirstChild(name)).Waves
 	
 	for index, wave in pairs(selectedWave) do
 		self:ChangeWave(index)
@@ -92,8 +92,6 @@ function WaveComponent:LoadWaves(name: string)
 	end
 	
 	if (GlobalInfo.Health < 0) then return end
-	
-	
 end
 
 return WaveComponent

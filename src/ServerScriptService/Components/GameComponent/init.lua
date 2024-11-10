@@ -2,10 +2,15 @@ local ServerScriptService = game:GetService('ServerScriptService')
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 
 local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
+local LobbiesInfo = ReplicatedStorage.Info.Lobbies
+
 local QuadPath = require(ReplicatedStorage.Utilities.QuadPath)
+local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
 
 local WaveComponent = require(script.WaveComponent)
 local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
+
+local Loaded = false
 
 local GameComponent = setmetatable({}, {__index = WaveComponent})
 
@@ -19,7 +24,7 @@ end
 
 function GameComponent:Start()
 	self:CreatePath()
-	task.spawn(self.LoadWaves, self, 'TestLobby')
+	task.spawn(self.LoadWaves, self, self.SelectedLobby)
 	
 	SignalComponent:GetSignal('ManageGameBindable', true):Connect(
 		function(scope, ...)
@@ -50,9 +55,18 @@ function GameComponent:CreatePath()
 	GlobalInfo.PathPoints = path.Points
 end
 
-function GameComponent.new()
+function GameComponent.new(name: string)
+	if (Loaded) then warn('Game was already loaded') return end
+	if (not LobbiesInfo:FindFirstChild(name)) then warn(name..' Lobby doesnt exist') end
+
+	Loaded = true
+
 	local self = setmetatable({}, {__index = GameComponent})
-	
+	self.SelectedLobby = name
+
+	DataModifiers:UpdateTable(GlobalInfo, require(LobbiesInfo:FindFirstChild(name)).Settings)
+	GlobalInfo.Loaded = true
+
 	return self
 end
 

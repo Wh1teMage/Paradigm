@@ -111,7 +111,7 @@ function TowersComponent:StartPlacing(slot: number)
 	local sessionData: IProfileStore = self.Replica.Data.Session 
 	-- !! make equipped towers replication into the session data (so that we can create events/challenges)
 
-	local selectedTower = profileData.EquippedTowers['TowerSlot'..tostring(slot)]
+	local selectedTower = sessionData.EquippedTowers['TowerSlot'..tostring(slot)]
 
 	if (not selectedTower) then return end
 

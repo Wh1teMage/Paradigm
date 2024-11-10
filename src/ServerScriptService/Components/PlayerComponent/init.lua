@@ -1,4 +1,7 @@
+local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local Players = game:GetService('Players')
+
+local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
 
 local LoadedComponents = {}
 
@@ -38,6 +41,11 @@ function PlayerComponentMethods:OnStart()
 		self:AppendPassive(v.Name, 1, {}, {self})
 	end
 	
+	self.Session.EquippedTowers = table.clone(self.Profile.Data.EquippedTowers)
+	if (GlobalInfo.UseCustomLoadout) then self.Session.EquippedTowers = table.clone(GlobalInfo.EquippedTowers) end
+
+	self.Replica:SetValue('Session.EquippedTowers', self.Session.EquippedTowers)
+
 	--! Party System Testing
 	
 	for _, comp in pairs(Components) do

@@ -11,7 +11,7 @@ local DataTransfer = require(ReplicatedComponents.SignalComponent.DataTransfer)
 SignalComponent:GetSignal('ManageTowers')
 SignalComponent:GetSignal('ManageEffects')
 
-require(Components.GameComponent).new():Start()
+require(Components.GameComponent).new('TestLobby'):Start()
 
 print('-- Setup Completed --')
 
