@@ -1,4 +1,7 @@
 # Paradigm
+
+## [Structure](https://miro.com/app/board/uXjVLKPyetg=/?share_link_id=227356778849)
+
 ## Paths
 ReplicatedStorage -> Info (All configs)
 
