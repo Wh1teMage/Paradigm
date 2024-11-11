@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService('ReplicatedStorage')
 
 local Templates = ReplicatedStorage.Templates
 
-local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo) 
 local Template = require(Templates.ProfileStoreTemplate) 
 
 type IProfileTemplate = typeof(require(Templates.ProfileStoreTemplate))

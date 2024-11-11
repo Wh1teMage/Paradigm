@@ -6,8 +6,6 @@ local enemy = require(Components.EnemyComponent)
 
 return function()
 	local self = enemy.new('Part')
-	
-	self:StartMoving(math.random(1, 2))
 
 	local patterns = {
 		[1] = function()

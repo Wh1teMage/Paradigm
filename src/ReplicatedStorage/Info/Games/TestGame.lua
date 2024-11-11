@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 
 local Templates = ReplicatedStorage.Templates
-local Template = require(Templates.LobbyTemplate)
+local Template = require(Templates.GameTemplate)
 
 --[[
 	{"Wait", 3},
@@ -10,12 +10,12 @@ local Template = require(Templates.LobbyTemplate)
 	{"AwardCash", 255},
 ]]
 
-local Lobby = Template()
+local Game = Template()
 
-Lobby.Settings.Health = 1000
-Lobby.Settings.MaxHealth = 1000
+Game.Settings.Health = 1000
+Game.Settings.MaxHealth = 1000
 
-Lobby.Waves = {
+Game.Waves = {
 	[1] = {
 		{"Spawn", "Part", 15, .1},
 		{"Wait", 5},
@@ -49,4 +49,4 @@ Lobby.Waves = {
 	},
 	]]
 
-return Lobby
+return Game

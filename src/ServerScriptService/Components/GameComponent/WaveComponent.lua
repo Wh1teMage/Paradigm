@@ -2,8 +2,6 @@ local ServerScriptService = game:GetService('ServerScriptService')
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local Players = game:GetService('Players')
 
-local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
-local LobbiesInfo = ReplicatedStorage.Info.Lobbies
 local Components = ServerScriptService.Components
 
 local PlayerComponent = require(Components.PlayerComponent)
@@ -22,15 +20,15 @@ local EnemiesCache = {}
 --{"StopMusic"},
 
 local parseFunctions = {
-	['Music'] = function(id: number, volume: number, loop: boolean)
+	['Music'] = function(component, id: number, volume: number, loop: boolean)
 
 	end,
 
-	['DialogueLink'] = function(name: string)
+	['DialogueLink'] = function(component, name: string)
 
 	end,
 
-	['Wait'] = function(value: number)
+	['Wait'] = function(component, value: number)
 		task.wait(value)
 	end,
 
@@ -38,7 +36,7 @@ local parseFunctions = {
 
 	end,
 
-	['AwardCash'] = function(value: number)
+	['AwardCash'] = function(component, value: number)
 		for _, player in pairs(Players:GetChildren()) do
 			local component = PlayerComponent:GetPlayer(player)
 			if (not component) then continue end
@@ -46,12 +44,15 @@ local parseFunctions = {
 		end
 	end,
 	
-	['Dialogue'] = function(text: string, duration: number)
+	['Dialogue'] = function(component, text: string, duration: number)
 		print(text)
 		task.wait(duration)
 	end,
 
-	['Spawn'] = function(name: string, amount: number, between: number)
+	['Spawn'] = function(component, name: string, amount: number, between: number)
+
+		print(name, amount, between, component)
+
 		for i = 1, amount do
 			if (not EnemyComponentFolder:FindFirstChild(name)) then return end
 
@@ -59,7 +60,9 @@ local parseFunctions = {
 				EnemiesCache[name] = require(EnemyComponentFolder:FindFirstChild(name))
 			end
 
-			EnemiesCache[name]()
+			local enemy = EnemiesCache[name]()
+			enemy:SetCurrentGame(component)
+			enemy:StartMoving(math.random(1, #component.Map.Path:GetChildren()))
 			
 			task.wait(between)
 		end
@@ -74,12 +77,12 @@ function WaveComponent:ParseWave(waveData)
 
 	task.spawn(function()
 		for i, v in pairs(waveData) do
-			if (GlobalInfo.Health < 0) then continue end
+			if (self.Info.Health < 0) then continue end
 			
 			local func = parseFunctions[v[1]]
 			if (not func) then continue end
 			
-			func(table.unpack(v, 2))
+			func(self, table.unpack(v, 2))
 		end
 
 		finished = true
@@ -95,8 +98,7 @@ function WaveComponent:Skip()
 end
 
 function WaveComponent:LoadWaves(name: string)
-	if (not LobbiesInfo:FindFirstChild(name)) then return end
-	local selectedWave = require(LobbiesInfo:FindFirstChild(name)).Waves
+	local selectedWave = self.Waves
 	
 	self.Skipped = false
 
@@ -104,11 +106,11 @@ function WaveComponent:LoadWaves(name: string)
 
 	for index, wave in pairs(selectedWave) do
 		self:ChangeWave(index)
-		if (GlobalInfo.Health < 0) then return end
+		if (self.Info.Health < 0) then return end
 		self:ParseWave(wave)
 	end
 	
-	if (GlobalInfo.Health < 0) then return end
+	if (self.Info.Health < 0) then return end
 end
 
 return WaveComponent

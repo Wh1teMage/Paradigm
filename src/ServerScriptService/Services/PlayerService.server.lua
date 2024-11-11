@@ -5,17 +5,20 @@ local Players = game:GetService('Players')
 local Components = ServerScriptService.Components
 local ReplicatedComponents = ReplicatedStorage.Components
 
+local LobbyComponent = require(Components.LobbyComponent)
 local PlayerComponent = require(Components.PlayerComponent)
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 
-local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
+local testGame = LobbyComponent:Survival('TestGame', 'TestModel')
 
 Players.PlayerAdded:Connect(function(player)
 	print(player, 123)
 
-	repeat task.wait(.1); print('Player loading') until GlobalInfo.Loaded
+	--repeat task.wait(.1); print('Player loading') until GlobalInfo.Loaded
 
 	local component = PlayerComponent:CreatePlayer(player)
+	component:SetCurrentGame(testGame)
+	-- connect player to the session
 	
 	--component:AddAttribute('CritChance', 30)
 	

@@ -1,8 +1,6 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local Players = game:GetService('Players')
 
-local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
-
 local LoadedComponents = {}
 
 for _, component in ipairs(script:GetChildren()) do
@@ -12,6 +10,13 @@ end
 local Components: {IPlayerComponent} = {}
 
 local PlayerComponentMethods = {}
+
+function PlayerComponentMethods:SetCurrentGame(match)
+	self.Game = match
+
+	if (self.Game.Info.UseCustomLoadout) then self.Session.EquippedTowers = table.clone(self.Game.Info.EquippedTowers) end
+	self.Replica:SetValue('Session.EquippedTowers', self.Session.EquippedTowers)
+end
 
 function PlayerComponentMethods:OnLeft()
 	local player = self.Instance :: Player
@@ -42,8 +47,6 @@ function PlayerComponentMethods:OnStart()
 	end
 	
 	self.Session.EquippedTowers = table.clone(self.Profile.Data.EquippedTowers)
-	if (GlobalInfo.UseCustomLoadout) then self.Session.EquippedTowers = table.clone(GlobalInfo.EquippedTowers) end
-
 	self.Replica:SetValue('Session.EquippedTowers', self.Session.EquippedTowers)
 
 	--! Party System Testing
@@ -63,9 +66,7 @@ PlayerComponent.__index = setmetatable(PlayerComponentMethods, {
 	end
 })
 
-type IPlayerComponent = 
-	typeof(LoadedComponents['CharacterComponent']) &
-	typeof(LoadedComponents['ValuesComponent'])
+type IPlayerComponent = typeof(PlayerComponentMethods)
 
 function PlayerComponent.constructor(player: Player): IPlayerComponent
 	local self = setmetatable({

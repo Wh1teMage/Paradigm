@@ -139,6 +139,7 @@ function TowerComponent:SetOwner(owner)
 		passive.OnTowerAdded(self)
 	end
 	
+	self.Game = owner.Game
 	self.OwnerInstance = owner.Instance
 end
 

@@ -1,8 +1,10 @@
 local ServerScriptService = game:GetService('ServerScriptService')
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
+local ServerStorage = game:GetService('ServerStorage')
+
 
 local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
-local LobbiesInfo = ReplicatedStorage.Info.Lobbies
+local GamesInfo = ReplicatedStorage.Info.Games
 
 local QuadPath = require(ReplicatedStorage.Utilities.QuadPath)
 local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
@@ -10,17 +12,15 @@ local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
 local WaveComponent = require(script.WaveComponent)
 local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 
-local Loaded = false
-
 local GameComponent = setmetatable({}, {__index = WaveComponent})
 
 function GameComponent:ChangeHealth(value: number)
-	GlobalInfo.Health = value
+	self.Info.Health = value
 end
 
 function GameComponent:ChangeWave(value: number)
-	GlobalInfo.CurrentWave = value
-	print(GlobalInfo.CurrentWave..' Current Wave')
+	self.Info.CurrentWave = value
+	print(self.Info.CurrentWave..' Current Wave')
 end
 
 function GameComponent:Start()
@@ -34,34 +34,48 @@ function GameComponent:Start()
 				self:ChangeHealth(...)
 			end
 			
-			print(GlobalInfo.Health)
+			print(self.Info.Health)
 		end
 	)
 end
 
-function GameComponent:CreatePath()
-	if (#GlobalInfo.PathPoints > 0) then return end
+function GameComponent:SetupMap(name: string, cframe: CFrame)
+	local map = ServerStorage.Maps:FindFirstChild(name)
+	if (not map) then return end
 
-	for _, pathFolder: Instance in pairs(workspace.Path:GetChildren()) do
+	local clonnedMap = map:Clone()
+	clonnedMap.Parent = game.Workspace
+	clonnedMap:PivotTo(cframe)
+
+	self.Map = clonnedMap
+end
+
+function GameComponent:CreatePath()
+	if (#self.Info.PathPoints > 0) then return end
+
+	for _, pathFolder: Instance in pairs(self.Map.Path:GetChildren()) do
 		if (not pathFolder:IsA('Folder')) then continue end
 		local path = QuadPath.new(pathFolder:GetChildren())
 		path:SetupPoints()
 
-		table.insert(GlobalInfo.PathPoints, path.Points)
+		table.insert(self.Info.PathPoints, path.Points)
 	end
 end
 
 function GameComponent.new(name: string)
-	if (Loaded) then warn('Game was already loaded') return end
-	if (not LobbiesInfo:FindFirstChild(name)) then warn(name..' Lobby doesnt exist') end
+	if (not GamesInfo:FindFirstChild(name)) then warn(name..' Lobby doesnt exist') end
 
-	Loaded = true
+	print(GamesInfo:FindFirstChild(name), name)
+
+	local gameInfo = require(GamesInfo:FindFirstChild(name))
 
 	local self = setmetatable({}, {__index = GameComponent})
 	self.SelectedLobby = name
+	self.Info = DataModifiers:DeepTableClone(GlobalInfo)
+	self.Waves = DataModifiers:DeepTableClone(gameInfo.Waves)
 
-	DataModifiers:UpdateTable(GlobalInfo, require(LobbiesInfo:FindFirstChild(name)).Settings)
-	GlobalInfo.Loaded = true
+	DataModifiers:UpdateTable(self.Info, gameInfo.Settings)
+	self.Info.Loaded = true
 
 	return self
 end

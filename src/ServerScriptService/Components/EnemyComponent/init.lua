@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local RunService = game:GetService('RunService')
 
 local EnemiesInfo = require(ReplicatedStorage.Info.EnemiesInfo)
-local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
 
 local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 
@@ -25,10 +24,10 @@ local EnemyComponent = setmetatable({}, {
 function EnemyComponent:StartMoving(selectedTrack: number?, startingCFrame: CFrame?, currentStep: number?, direction: number?)
 	if (not selectedTrack) then selectedTrack = 1 end
 
-	if (#GlobalInfo.PathPoints < 1) then return end
-	if (not GlobalInfo.PathPoints[selectedTrack]) then return end
+	if (#self.Game.Info.PathPoints < 1) then return end
+	if (not self.Game.Info.PathPoints[selectedTrack]) then return end
 	
-	if (not startingCFrame) then startingCFrame = GlobalInfo.PathPoints[selectedTrack][1] end
+	if (not startingCFrame) then startingCFrame = self.Game.Info.PathPoints[selectedTrack][1] end
 	if (not currentStep) then currentStep = 0 end
 	if (not direction) then direction = 1 end
 	
@@ -39,16 +38,16 @@ function EnemyComponent:StartMoving(selectedTrack: number?, startingCFrame: CFra
 		local changablePosition = startingCFrame.Position
 		
 		local start = 1
-		local stop = #GlobalInfo.PathPoints[selectedTrack]
+		local stop = #self.Game.Info.PathPoints[selectedTrack]
 		
-		if (direction < 0) then start = #GlobalInfo.PathPoints[selectedTrack]; stop = 1 end
+		if (direction < 0) then start = #self.Game.Info.PathPoints[selectedTrack]; stop = 1 end
 		
 		for i = start, stop, direction do
-			local uniformCframe = GlobalInfo.PathPoints[selectedTrack][i]
-			self.CurrentStep = i
-			
 			if ((not self.Health) or (self.Health <= 0)) then break end
-			
+
+			local uniformCframe = self.Game.Info.PathPoints[selectedTrack][i]
+			self.CurrentStep = i
+
 			self.Hitbox.AlignPosition.Position = uniformCframe.Position
 			self.Hitbox.AlignOrientation.CFrame = uniformCframe.Rotation
 
@@ -70,7 +69,7 @@ function EnemyComponent:StartMoving(selectedTrack: number?, startingCFrame: CFra
 		
 		if ((not self.Health) or (self.Health <= 0)) then return end
 		
-		local healthDelta = GlobalInfo.Health - self.Health
+		local healthDelta = self.Game.Info.Health - self.Health
 		
 		self:Destroy()
 		
@@ -140,6 +139,10 @@ function EnemyComponent:Attack()
 		
 	self.LastShoot = os.clock()
 	self.Shooting = false
+end
+
+function EnemyComponent:SetCurrentGame(match)
+	self.Game = match
 end
 
 local EnemyComponentFabric = {}
