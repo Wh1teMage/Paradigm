@@ -3,137 +3,164 @@
 ## [Structure](https://miro.com/app/board/uXjVLKPyetg=/?share_link_id=227356778849)
 
 ## Paths
-ReplicatedStorage -> Info (All configs)
+```diff
+Configs
++ ReplicatedStorage -> Info 
 
-ReplicatedStorage -> Templates (All templates)
+Templates
++ ReplicatedStorage -> Templates 
 
-ReplicatedStorage -> Components (All client components)
+Client components
++ ReplicatedStorage -> Components 
 
-ServerScriptService -> Components (All server components)
+Server components
++ ServerScriptService -> Components 
 
-ReplicatedStorage -> Replication (All client replication callbacks)
+Client replication callbacks
++ ReplicatedStorage -> Replication
 
+Client contexts / binds
++ ReplicatedStorage -> Components -> PlayerComponent
++ ReplicatedStorage -> Components -> PlayerComponent -> Contexts
+```
 
 ## How to create a new tower
 ### Setting up info
-To create tower info  go to $${\color{orange}ReplicatedStorage -> Info -> Towers -> /newfile/}$$
 
-To check all possible fields go to $${\color{orange}ReplicatedStorage -> Templates -> TowerTemplate}$$ 
+```diff
+To create tower info go to
++ ReplicatedStorage -> Info -> Towers -> /newfile/
 
-To create add skin/model go to $${\color{orange} ReplicatedStorage -> Samples -> TowerModels -> /towername/ -> /skinname/ -> /levelname/}$$ 
+To check all possible fields go to
++ ReplicatedStorage -> Templates -> TowerTemplate
 
-To see an example go to $${\color{orange}ReplicatedStorage -> Info -> Towers -> Precursor}$$  
+To create add skin/model go to
++ ReplicatedStorage -> Samples -> TowerModels -> /towername/ -> /skinname/ -> /levelname/
 
-```lua
-
-
-local Towers: {[number]: () -> typeof(Template())} = {}
-
-Towers[1] = function() -- index corresponds to level
-	local tower = Template() -- created by default template
-
-	tower.ModelsFolder = TowerSamples.Precursor -- all skins/models should be located here
-	tower.Price = 460
-	tower.Range = 18
-	tower.Damage = 1
-	tower.Firerate = 2.05
-
-	tower.ShootType = Enums.ShootType.Burst
-	tower.BurstCount = 6
-	tower.BurstCD = .11
-
-	tower.Level = 1
-
-	local idleAnim = Instance.new('Animation')
-	idleAnim.AnimationId = 'rbxassetid://14253606347'
-
-	local attackAnim = Instance.new('Animation')
-	attackAnim.AnimationId = 'rbxassetid://14535901409'
-
-	local attackSound = Instance.new('Sound')
-	attackSound.SoundId = 'rbxassetid://7131411690'
-	attackSound.PlaybackSpeed = 1.3
-	attackSound.Volume = 0.35
-
-	tower.Animations = {
-		Idle = idleAnim,
-		Attack = attackAnim
-	}
-
-	tower.Sounds = {
-		AttackSound = attackSound
-	}
-
-	tower.Passives = {
-		{Name = 'TestPassive2', Level = 1, Requirements = {}}
-	}
-
-	return tower
-end
-
-
+To see an example go to
++ ReplicatedStorage -> Info -> Towers -> Precursor
 ```
+> [!NOTE]
+> Tower indexes should ALWAYS be numbers
+> 
+> Tower Models should be able to be called via `tonumber(model.Name)`
+
+> [!TIP]
+> It's better to inherit previous tower level in the info
 
 
 ### Creating attack pattern
-ReplicatedStorage -> Towers -> /newfile/
 
-To check all possible methods go to ServerScriptService -> ServerScriptService -> TowerComponent
+```diff
+To create attack pattern go to
++ ServerScriptService -> Towers -> /newfile/
 
-To check all default attack patterns go to ServerScriptService -> ServerScriptService -> Static -> TowerAttackPatterns
+To check all possible methods go to
++ ServerScriptService -> ServerScriptService -> TowerComponent
 
-To see an example go to ServerScriptService -> Towers -> Precursor
+To check all default attack patterns go to
++ ServerScriptService -> ServerScriptService -> Static -> TowerAttackPatterns
 
+To see an example go to
++ ServerScriptService -> Towers -> Precursor
+```
+> [!NOTE]
+> Remember to create tower with correct name `local self = tower.new(position, 'towername')`
+> 
+> Damage method should be activated in callbacks for attack patterns
 
 ## How to create a new enemy
 ### Setting up info
-ReplicatedStorage -> Info -> EnemiesInfo
+```diff
+To create enemy info go to
++ ReplicatedStorage -> Info -> EnemiesInfo
 
-To check all possible fields go to ReplicatedStorage -> Templates -> EnemyTemplate
+To check all possible fields go to
++ ReplicatedStorage -> Templates -> EnemyTemplate
 
-To see an example go to ReplicatedStorage -> Info -> EnemiesInfo
+To create add skin/model go to
++ ReplicatedStorage -> Samples -> EnemyModels -> /enemyname/
+
+To see an example go to
++ ReplicatedStorage -> Info -> EnemiesInfo
+```
 
 ### Creating attack pattern
-ReplicatedStorage -> Enemies -> /newfile/
+```diff
+To create attack pattern go to
++ ReplicatedStorage -> Enemies -> /enemyname/
 
-To check all possible methods go to ServerScriptService -> Components -> EnemyComponent
+To check all possible methods go to
++ ServerScriptService -> Components -> EnemyComponent
 
-To see an example go to ServerScriptService -> Enemies -> Part
+To see an example go to
++ ServerScriptService -> Enemies -> Part
+```
+> [!NOTE]
+> Remember to create enemies with correct name `local self = enemy.new('enemyname')`
 
+## How to create a new game pattern
+```diff
+To create game pattern go to
++ ReplicatedStorage -> Info -> Games -> /newfile/
 
-## How to create a new lobby
-ReplicatedStorage -> Info -> Lobbies -> /newfile/
+To check all possible fields go to
++ ReplicatedStorage -> Templates -> GameTemplate
 
-To check all possible fields go to ReplicatedStorage -> Templates -> LobbyTemplate
-
-To see an example go to ReplicatedStorage -> Info -> Lobbies -> TestLobby
-
+To see an example go to
++ ReplicatedStorage -> Info -> Games -> TestGame
+```
 
 ## How to create a new passive
-ServerScriptService -> Components -> PassiveComponent -> /newfile/
+```diff
+To create passive go to
++ ServerScriptService -> Components -> PassiveComponent -> /newfile/
 
-To check all possible methods go to ServerScriptService -> Components -> PassiveComponent
+To check all possible methods go to
++ ServerScriptService -> Components -> PassiveComponent
 
-To see an example go to ServerScriptService -> Components -> PassiveComponent -> TestPassive2
-
+To see an example go to
++ ServerScriptService -> Components -> PassiveComponent -> TestPassive2
+```
+> [!TIP]
+> If you cant find specific trigger, you can always create one
 
 ## How to create a new ability
-ServerScriptService -> Components -> AbilityComponent -> /newfile/
+```diff
+To create ability go to
++ ServerScriptService -> Components -> AbilityComponent -> /newfile/
 
-To check all possible methods go to ServerScriptService -> Components -> AbilityComponent
+To check all possible methods go to
++ ServerScriptService -> Components -> AbilityComponent
 
-To see an example go to ServerScriptService -> Components -> AbilityComponent -> Fireball
-
+To see an example go to
++ ServerScriptService -> Components -> AbilityComponent -> Fireball
+```
+> [!TIP]
+> Abilities can be used by enemy, tower and player
 
 ## How to create a new buff
-ServerScriptService -> Components -> BuffsComponent -> /newfile/
+```diff
+To create buff go to
++ ServerScriptService -> Components -> BuffsComponent -> /newfile/
 
-To check all possible methods go to ServerScriptService -> Components -> BuffsComponent
+To check all possible methods go to
++ ServerScriptService -> Components -> BuffsComponent
 
-To see an example go to ServerScriptService -> Components -> BuffsComponent -> TestBuff
+To see an example go to
++ ServerScriptService -> Components -> BuffsComponent -> TestBuff
+```
+> [!TIP]
+> You can create buff with duration by simply using `task.delay(buffTime, function())`
 
 
 ## How to create a new signal
+```diff
+To check all possible methods go to
++ ReplicatedStorage -> Components -> SignalComponent
+```
+
+**Example**
 ```lua
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 
@@ -150,8 +177,10 @@ SignalComponent:GetSignal('ManageTowers'):Connect(
 --Firing
 SignalComponent:GetSignal('ManageTowers'):FireAllClients('TestScope', 'someparams')
 ```
-Signal **MUST** be created on server before client connects to it
+> [!NOTE]
+> Signal **MUST** be created on server before client connects to it
+>
+> Make sure to create any new scopes within the PathConfig `ReplicatedStorage -> Templates -> PathConfig`
 
-To check all possible methods go to ReplicatedStorage -> Components -> SignalComponent
 
 ...indev...
