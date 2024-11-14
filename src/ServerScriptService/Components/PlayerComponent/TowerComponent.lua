@@ -25,20 +25,23 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	
 	local tower = Cache[name](position)
 	tower:ReplicateField('Skin', 'Default')
+	tower:SetOwner(self)
+
 	-- set owner
 	local blockingParts = workspace:GetPartBoundsInBox(CFrame.new(position), tower.Hitbox.Size) 
-	
 	local canBePlaced = true
 	
 	for _, part in ipairs(blockingParts) do
 		if (part:IsAncestorOf(workspace.Towers)) then canBePlaced = false; break end
 	end
 	
-	if (not canBePlaced) then tower:Destroy() return end
+	--if (not canBePlaced) then tower:Destroy() return end
 	
 	-- money check
+
+	print(self.Game)
 	
-	tower:SetOwner(self)
+
 
 	SignalComponent:GetSignal('ManageTowers'):Fire('Selected', self.Instance)
 end

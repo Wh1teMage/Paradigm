@@ -47,6 +47,7 @@ task.spawn(function()
 end)
 
 function TowerComponent:CheckCD()
+	if (not self.Game) then return end
 	if (self.Shooting) then return end
 	if (self:GetAttribute('Stunned') > 0) then return end
 	if (os.clock() - self.LastShoot) < self:GetValue('Firerate') then return end
@@ -138,7 +139,7 @@ function TowerComponent:SetOwner(owner)
 	for _, passive in pairs(owner.Session.Passives) do
 		passive.OnTowerAdded(self)
 	end
-	
+
 	self.Game = owner.Game
 	self.OwnerInstance = owner.Instance
 end

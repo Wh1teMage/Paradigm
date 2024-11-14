@@ -16,17 +16,71 @@ ReplicatedStorage -> Replication (All client replication callbacks)
 
 ## How to create a new tower
 ### Setting up info
-ReplicatedStorage -> Info -> Towers -> /newfile/
+To create tower info  go to $${\color{orange}ReplicatedStorage -> Info -> Towers -> /newfile/}$$
 
-To check all possible fields go to ReplicatedStorage -> Templates -> TowerTemplate
+To check all possible fields go to $${\color{orange}ReplicatedStorage -> Templates -> TowerTemplate}$$ 
 
-To see an example go to ReplicatedStorage -> Info -> Towers -> Precursor
+To create add skin/model go to $${\color{orange} ReplicatedStorage -> Samples -> TowerModels -> /towername/ -> /skinname/ -> /levelname/}$$ 
+
+To see an example go to $${\color{orange}ReplicatedStorage -> Info -> Towers -> Precursor}$$  
+
+```lua
+
+
+local Towers: {[number]: () -> typeof(Template())} = {}
+
+Towers[1] = function() -- index corresponds to level
+	local tower = Template() -- created by default template
+
+	tower.ModelsFolder = TowerSamples.Precursor -- all skins/models should be located here
+	tower.Price = 460
+	tower.Range = 18
+	tower.Damage = 1
+	tower.Firerate = 2.05
+
+	tower.ShootType = Enums.ShootType.Burst
+	tower.BurstCount = 6
+	tower.BurstCD = .11
+
+	tower.Level = 1
+
+	local idleAnim = Instance.new('Animation')
+	idleAnim.AnimationId = 'rbxassetid://14253606347'
+
+	local attackAnim = Instance.new('Animation')
+	attackAnim.AnimationId = 'rbxassetid://14535901409'
+
+	local attackSound = Instance.new('Sound')
+	attackSound.SoundId = 'rbxassetid://7131411690'
+	attackSound.PlaybackSpeed = 1.3
+	attackSound.Volume = 0.35
+
+	tower.Animations = {
+		Idle = idleAnim,
+		Attack = attackAnim
+	}
+
+	tower.Sounds = {
+		AttackSound = attackSound
+	}
+
+	tower.Passives = {
+		{Name = 'TestPassive2', Level = 1, Requirements = {}}
+	}
+
+	return tower
+end
+
+
+```
 
 
 ### Creating attack pattern
 ReplicatedStorage -> Towers -> /newfile/
 
-To check all possible methods go to ServerScriptService -> Components -> TowerComponent
+To check all possible methods go to ServerScriptService -> ServerScriptService -> TowerComponent
+
+To check all default attack patterns go to ServerScriptService -> ServerScriptService -> Static -> TowerAttackPatterns
 
 To see an example go to ServerScriptService -> Towers -> Precursor
 

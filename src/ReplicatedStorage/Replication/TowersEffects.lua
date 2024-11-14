@@ -12,7 +12,7 @@ local TowersCache = {}
 
 local function FindAttribute(part: Part, name: string)
     local value = part:GetAttribute(name)
-    if (not value) then warn(part.Name..' Failed to find '..name); return end
+    if (not value) then return end --warn(part.Name..' Failed to find '..name);
 
     return value
 end
@@ -35,8 +35,9 @@ end
 
 local function createModel(self, selectedInfo, part)
     local skin = FindAttribute(part, 'Skin')
+    if (not skin) then skin = 'Default' end
 
-    if ((not skin) or (not selectedInfo.ModelsFolder:FindFirstChild(skin))) then warn(skin..' skin doesnt exist') end
+    if ((not selectedInfo.ModelsFolder:FindFirstChild(skin))) then warn(skin..' skin doesnt exist') end
 
     self.Model = selectedInfo.ModelsFolder[skin][selectedInfo.Level]:Clone() :: Model
     self.Model.Parent = part

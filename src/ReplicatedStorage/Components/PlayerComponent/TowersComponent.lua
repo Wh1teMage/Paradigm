@@ -13,6 +13,8 @@ local Templates = ReplicatedStorage.Templates
 local TowerSamples = ReplicatedStorage.Samples.TowerModels
 local TowersInfo = ReplicatedStorage.Info.Towers
 
+--!! make this module into effects folder (the effects part)
+
 local TowersCache = {}
 
 type IProfileStore = typeof(require(Templates.ProfileStoreTemplate))
@@ -109,7 +111,6 @@ function TowersComponent:StartPlacing(slot: number)
 	
 	local profileData: IProfileStore = self.Replica.Data.Profile
 	local sessionData: IProfileStore = self.Replica.Data.Session 
-	-- !! make equipped towers replication into the session data (so that we can create events/challenges)
 
 	local selectedTower = sessionData.EquippedTowers['TowerSlot'..tostring(slot)]
 

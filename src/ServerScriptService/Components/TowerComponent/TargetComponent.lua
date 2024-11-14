@@ -53,4 +53,29 @@ function TargetComponent:GetTarget(mode: typeof(Enums.TargetType)?, ...)
 	TargetModes[mode](self, ...)
 end
 
+function TargetComponent:WaitForTarget(delay: number?)
+	if (not delay) then delay = 5 end
+
+	local start = os.clock()
+
+	if (self.SelectedTarget and getmetatable(self.SelectedTarget)) then return end
+	repeat task.wait(.1); self:GetTarget() until self.SelectedTarget or (not getmetatable(self)) or (os.clock() - start > delay)
+end
+
+function TargetComponent:FaceEnemy()
+	if not getmetatable(self.SelectedTarget) then return end
+	local selectedCFrame = CFrame.new(self.Hitbox.Position, 
+		self.SelectedTarget.Hitbox.Position * Vector3.new(1, 0, 1) + 
+		self.Hitbox.Position * Vector3.new(0, 1, 0))
+
+	task.spawn(function() -- not sure about this one tho
+		for i = 1, 3 do
+			if ((not getmetatable(self.SelectedTarget)) or (not getmetatable(self))) then continue end
+			self.Hitbox.CFrame = self.Hitbox.CFrame:Lerp(selectedCFrame, i/3)
+			task.wait(1/20)
+		end
+	end)
+end
+
+
 return TargetComponent
