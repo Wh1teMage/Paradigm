@@ -39,7 +39,7 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	
 	-- money check
 
-	print(self.Game)
+	--print(self.Game)
 	
 
 

@@ -2,59 +2,62 @@ local RunService = game:GetService('RunService')
 
 local DataTransfer = require(script.Parent.DataTransfer)
 
-local DELAY_TIME = 1/20
-local DELTA_TIME = 1/3
+local DELAY_TIME = 1/10
+local DELTA_TIME = 1/30
 
-local Package = {}
+local Packages = {}
 local Deltas = {}
 
-local firstAdded = 0
-local disabled = false
+local FirstAdded = {}
+local disabled = {}
 
 local PackageComponent = {}
 
-function PackageComponent:AddToPackage(scope: string, data, player: Player?)
-    if (disabled) then return end
+PackageComponent.FinishConnections = {}
+
+function PackageComponent:AddToPackage(eventName: string, scope: string, data, player: Player?)
+    if (disabled[eventName]) then return end
     if (not Deltas[scope]) then Deltas[scope] = 0 end
+    if (not Packages[eventName]) then Packages[eventName] = {}; FirstAdded[eventName] = 0 end
 
     local delta = os.clock() - Deltas[scope]
     if (Deltas[scope] < 1) then Deltas[scope] = os.clock() end
 
-    if (delta > DELTA_TIME) then
+    if (delta < DELTA_TIME) then
         local newPackage = {}
 
-        if (RunService:IsClient()) then newPackage[scope] = { data }
-        else newPackage[player] = { [scope] = { data } } end
+        if (RunService:IsClient()) then newPackage[eventName] = { [scope] = { data } }
+        else newPackage[eventName] = { [player] = { [scope] = { data } } } end
 
-        self:Finish(newPackage)
+        self.FinishConnections[eventName](newPackage[eventName])
         return
     end
 
-    if (firstAdded < 0) then
+    if (FirstAdded[eventName] <= 0) then
 
-        firstAdded = os.clock()
+        FirstAdded[eventName] = os.clock()
 
         task.delay(DELAY_TIME, function()
-            self:Finish(Package, scope)
-            self:Clear(scope)
+            self.FinishConnections[eventName](Packages[eventName])
+            self:Clear(eventName)
         end)
     end
 
     if (RunService:IsClient()) then
-        if (not Package[scope]) then Package[scope] = {} end
-        table.insert(Package[scope], data)
+        if (not Packages[eventName][scope]) then Packages[eventName][scope] = {} end
+        table.insert(Packages[eventName][scope], data)
     end
 
     if (RunService:IsServer()) then
-        if (not Package[player]) then Package[player] = {} end
-        if (not Package[player][scope]) then Package[player][scope] = {} end
-        table.insert(Package[player][scope], data)
+        if (not Packages[eventName][player]) then Packages[eventName][player] = {} end
+        if (not Packages[eventName][player][scope]) then Packages[eventName][player][scope] = {} end
+        table.insert(Packages[eventName][player][scope], data)
     end
 end
 
 function PackageComponent:Encode(package)
     local redactedPackage = {}
-    
+
     for scope, vals in pairs(package) do
 
         local sizesOffset = 0
@@ -135,16 +138,12 @@ function PackageComponent:Decode(data, callback: () -> nil)
     end
 end
 
-function PackageComponent:Finish()
-    
-end
-
-function PackageComponent:Clear()
-    disabled = true
-    table.clear(Package)
-    Package = {}
-    firstAdded = 0
-    disabled = false
+function PackageComponent:Clear(eventName: string)
+    disabled[eventName] = true
+    table.clear(Packages[eventName])
+    Packages[eventName] = {}
+    FirstAdded[eventName] = 0
+    disabled[eventName] = false
 end
 
 return PackageComponent

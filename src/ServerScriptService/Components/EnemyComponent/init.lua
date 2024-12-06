@@ -4,8 +4,15 @@ local RunService = game:GetService('RunService')
 local EnemiesInfo = require(ReplicatedStorage.Info.EnemiesInfo)
 
 local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
+local SignalFunctions = require(ReplicatedStorage.Components.SignalComponent.CustomFunctions)
+
+local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 
 local LoadedComponents = {}
+
+local MoveEnemyEvent = ReplicatedStorage.Events.MoveEnemy :: UnreliableRemoteEvent
+
+local UPDATE_RATE = 1/10
 
 for _, component in ipairs(script:GetChildren()) do
 	LoadedComponents[component.Name] = require(component)
@@ -22,6 +29,7 @@ local EnemyComponent = setmetatable({}, {
 })
 
 function EnemyComponent:StartMoving(selectedTrack: number?, startingCFrame: CFrame?, currentStep: number?, direction: number?)
+
 	if (not selectedTrack) then selectedTrack = 1 end
 
 	if (#self.Game.Info.PathPoints < 1) then return end
@@ -33,7 +41,7 @@ function EnemyComponent:StartMoving(selectedTrack: number?, startingCFrame: CFra
 	
 	task.spawn(function()
 		self.CurrentStep = currentStep
-		self.Hitbox.CFrame = startingCFrame + Vector3.new(0, .01, 0) -- prevent CFrame bug
+		self.CFrame = startingCFrame + Vector3.new(0, .01, 0) -- prevent CFrame bug
 		
 		local changablePosition = startingCFrame.Position
 		
@@ -48,22 +56,44 @@ function EnemyComponent:StartMoving(selectedTrack: number?, startingCFrame: CFra
 			local uniformCframe = self.Game.Info.PathPoints[selectedTrack][i]
 			self.CurrentStep = i
 
-			self.Hitbox.AlignPosition.Position = uniformCframe.Position
-			self.Hitbox.AlignOrientation.CFrame = uniformCframe.Rotation
+			--self.CFrame.Position = uniformCframe.Position
+			local stepCFrame = self.CFrame
+			local overallDistance = (self.CFrame.Position - uniformCframe.Position).Magnitude
 
-			repeat 
+			repeat
 				
-				self.Hitbox.AlignPosition.MaxVelocity = self:GetValue('Speed')
-				self.Distance += (self.Hitbox.Position - changablePosition).Magnitude
-				changablePosition = self.Hitbox.Position
+				local distance = (self.CFrame.Position - uniformCframe.Position).Magnitude
+
+				--self.Hitbox.AlignPosition.MaxVelocity = self:GetValue('Speed')
+				self.Distance += (self.CFrame.Position - changablePosition).Magnitude
+				changablePosition = self.CFrame.Position
+
+				self.CFrame = stepCFrame:Lerp(uniformCframe, 1-(distance-self:GetValue('Speed')*UPDATE_RATE)/overallDistance) --(distance+self:GetValue('Speed')*UPDATE_RATE)/overallDistance
+				--self.Hitbox.CFrame = self.CFrame
+
+				--print(overallDistance, distance, self:GetValue('Speed')*UPDATE_RATE, 1-(distance-self:GetValue('Speed')*UPDATE_RATE)/overallDistance)
 
 				task.spawn(self.Attack, self)
 
-				task.wait(1/(10*self.Speed))
+				MoveEnemyEvent:FireAllClients(SignalFunctions.EncodeEnemyMovement(.2, 1, 65))
+				
+				--[[
+				SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateEnemyMovement, 
+					Vector2.new(self.CFrame.X, self.CFrame.Z), Vector2.new(self.CFrame.LookVector.X, self.CFrame.LookVector.Z)
+				)
+				]]
+				
+
+				--SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id, 
+				--	Vector2.new(self.CFrame.X, self.CFrame.Z), Vector2.new(self.CFrame.LookVector.X, self.CFrame.LookVector.Z))
+
+				task.wait(UPDATE_RATE) -- 1/self:GetValue('Speed')
+
+				--task.wait(1/(10*self.Speed))
 				
 				if ((not self.Health) or (self.Health <= 0)) then break end
 				
-			until ((self.Hitbox.Position - self.Hitbox.AlignPosition.Position).Magnitude < .1)
+			until (distance < .5)
 			
 		end
 		
@@ -99,8 +129,10 @@ function EnemyComponent:Destroy()
 		self:RemovePassive(passive.Name, passive.Level)
 	end
 
-	Enemies[self.Hitbox] = nil
-	self.Hitbox:Destroy()
+	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id, self.Name)
+
+	Enemies[self.Id] = nil
+	--self.Hitbox:Destroy()
 	table.clear(self)
 	setmetatable(self, nil)
 end
@@ -110,9 +142,9 @@ function EnemyComponent:CheckRequirements(requirements) -- use later
 end
 
 function EnemyComponent:ReplicateField(fieldName: string, value: number)
-	if (not self.Hitbox) then return end
-	local hitbox: Part? = self.Hitbox
-	hitbox:SetAttribute(fieldName, value)
+	if (not self.CFrame) then return end
+	--local hitbox: Part? = self.Hitbox
+	--hitbox:SetAttribute(fieldName, value)
 end
 
 function EnemyComponent:CheckCD()
@@ -151,16 +183,18 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	if (not EnemiesInfo[name]) then warn(name..' enemy doesnt exist') return end
 
 	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
-	local postfix = string.rep('a', (4-string.len(clockId)))
+	local postfix = string.rep('0', (4-string.len(clockId)))
 
-	local part = ReplicatedStorage.Samples.EnemyPart:Clone()
-	part.Name = clockId..postfix..tostring(math.random(1000, 9999))
-	part.Parent = workspace.Enemies
+	local id = clockId..postfix..tostring(math.random(1000, 9999))
+
+	--local part = ReplicatedStorage.Samples.EnemyPart:Clone()
+	--part.Name = 
+	--part.Parent = workspace.Enemies
 
 	local data = EnemiesInfo[name]()
 
-	data.Id = part.Name
-	data.Hitbox = part
+	data.Id = id
+	--data.Hitbox = part
 	data.Shooting = false
 	data.LastShoot = 0
 	
@@ -174,12 +208,15 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
 	end
 	
-	self:ReplicateField('Name', name)
+	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateEnemy, id, name)
+	--SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id, self.Name)
+
+	--self:ReplicateField('Name', name)
 
 	data.Passives = nil
 	data.Abilities = nil
 
-	Enemies[part] = self
+	Enemies[id] = self
 	
 	return self
 end
@@ -192,10 +229,10 @@ function EnemyComponentFabric:GetEnemiesInRadius(position: Vector3, radius: numb
 	local enemies = {}
 	
 	for _, enemy in pairs(self:GetAll()) do
-		local hitbox = enemy.Hitbox
-		if (not hitbox) then continue end
+		local cframe = enemy.CFrame
+		if (not cframe) then continue end
 
-		local distance = (position - hitbox.Position).Magnitude
+		local distance = (position - cframe.Position).Magnitude
 		if (distance <= radius) then
 			table.insert(enemies, enemy)
 		end

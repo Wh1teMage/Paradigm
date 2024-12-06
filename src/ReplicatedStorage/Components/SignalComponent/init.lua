@@ -65,18 +65,18 @@ function Event:Connect(callback: (scope: string, ...any) -> ())
 end
 
 function Event:Fire(scope: string, ...)
-	
+
 	local args = {...}
 
 	if (not self.IsBindable) then
 		
 		if (RunService:IsClient()) then
 			local data, len = DataTransfer:Encode({...})
-			PackageComponent:AddToPackage(scope, {data, len})
+			PackageComponent:AddToPackage(self.Name, scope, {data, len})
 			--self.Instance:FireServer(scope, DataTransfer:Encode({...}))
 		else
 			local data, len = DataTransfer:Encode({table.unpack(args, 2)})
-			PackageComponent:AddToPackage(scope, {data, len}, args[1] :: Player)
+			PackageComponent:AddToPackage(self.Name, scope, {data, len}, args[1] :: Player)
 			--self.Instance:FireClient(args[1] :: Player, scope, data, len)
 		end
 		
@@ -113,13 +113,15 @@ local function eventConnection(name: string)
 
 	if (RunService:IsClient()) then
 
-		PackageComponent.Finish = function(self, package)
+		PackageComponent.FinishConnections[event.Name] = function(package)
 			event:FireServer(PackageComponent:Encode(package))
 		end
 
 		connection = event.OnClientEvent:Connect(function(data) --scope, buff: buffer, strLen
 
 			PackageComponent:Decode(data, function(scope, value)
+				task.wait()
+				
 				for _, connection in pairs(customEvent['_connections']) do
 					connection(scope, table.unpack(value))
 				end
@@ -132,7 +134,8 @@ local function eventConnection(name: string)
 		end)
 	else
 
-		PackageComponent.Finish = function(self, package)
+		PackageComponent.FinishConnections[event.Name] = function(package)
+
 			for player, data in pairs(package) do
 				event:FireClient(player, PackageComponent:Encode(data))
 			end

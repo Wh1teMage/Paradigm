@@ -161,7 +161,7 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 	local postfix = string.rep('0', (4-string.len(clockId)))
 
 	local part = ReplicatedStorage.Samples.TowerPart:Clone()
-	part.Name = clockId..postfix..tostring(math.random(-9999, 9999))
+	part.Name = clockId..postfix..tostring(math.random(1000, 9999))
 	part.CFrame = CFrame.new(position)
 
 	if (not TowersCache[name]) then

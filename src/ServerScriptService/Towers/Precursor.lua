@@ -14,11 +14,11 @@ return function(position: Vector3)
 	local test = function()
 
 		return AttackPatterns.Burst(self, function()
-			
+
 			SignalComponent:GetSignal('ManageEffects'):FireAllClients(
 				PathConfig.Scope.ReplicateEffect, 
-				PathConfig.Effects.PrecursorTestEffect, 
-				self.SelectedTarget.Hitbox.Position,
+				PathConfig.Effects.PrecursorTestEffect,
+				self.SelectedTarget.CFrame.Position,
 				self.Hitbox.Name
 			)
 	

@@ -8,6 +8,10 @@ local ReplicationComponent = require(ReplicatedComponents.ReplicationComponent)
 
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)	
 
+local SignalFunctions = require(ReplicatedComponents.SignalComponent.CustomFunctions)
+
+local MoveEnemyEvent = ReplicatedStorage:WaitForChild('Events'):WaitForChild('MoveEnemy') :: UnreliableRemoteEvent
+
 local Component = PlayerComponent:GetPlayer()
 
 SignalComponent:GetSignal('ManageTowersBindable', true):Connect(
@@ -23,9 +27,22 @@ SignalComponent:GetSignal('ManageTowersBindable', true):Connect(
 SignalComponent:GetSignal('ManageEffects'):Connect(
 	function(scope: number, ...)
 
+		--print(scope, ...)
+
 		if (tonumber( scope ) == tonumber( PathConfig.Scope.ReplicateEffect )) then
-			ReplicationComponent:TriggerEffect(...) 
+			ReplicationComponent:TriggerEffect(...)
 		end
 
 	end
 )
+
+SignalComponent:GetSignal('ManageEnemies'):Connect(
+	function(scope: string, ...)
+		--print(scope, ...)
+	end
+)
+
+MoveEnemyEvent.OnClientEvent:Connect(function(data: buffer)
+	--print(buffer.len(data))
+	--print(SignalFunctions.DecodeEnemyMovement(data))
+end)

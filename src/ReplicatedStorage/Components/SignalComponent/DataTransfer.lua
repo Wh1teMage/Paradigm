@@ -23,6 +23,13 @@ writeFunctions = {
 		
 		return SPECIAL_SYMBOL..'v'
 	end,
+
+	['Vector2'] = function(val: Vector2, array)
+        table.insert(array, {val.X*100, 2, 'n'})
+        table.insert(array, {val.Y*100, 2, 'n'})
+        
+        return SPECIAL_SYMBOL..'b'
+    end,
 	
 	['number'] = function(val: number, array)
 		local selected = 2
@@ -66,6 +73,17 @@ readFunctions = {
 		)
 		
 		offsetm[1] += 12
+
+		return vector
+	end,
+
+	[SPECIAL_SYMBOL..'b'] = function(offsetm: {number}, buff: buffer)
+		local vector = Vector3.new(
+			buffer.readi16(buff, offsetm[1])/100,
+			buffer.readi16(buff, offsetm[1]+2)/100
+		)
+		
+		offsetm[1] += 4
 
 		return vector
 	end,

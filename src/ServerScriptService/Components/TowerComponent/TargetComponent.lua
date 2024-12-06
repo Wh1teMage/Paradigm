@@ -65,7 +65,7 @@ end
 function TargetComponent:FaceEnemy()
 	if not getmetatable(self.SelectedTarget) then return end
 	local selectedCFrame = CFrame.new(self.Hitbox.Position, 
-		self.SelectedTarget.Hitbox.Position * Vector3.new(1, 0, 1) + 
+		self.SelectedTarget.CFrame.Position * Vector3.new(1, 0, 1) + 
 		self.Hitbox.Position * Vector3.new(0, 1, 0))
 
 	task.spawn(function() -- not sure about this one tho

@@ -8,8 +8,14 @@ local ReplicatedComponents = ReplicatedStorage.Components
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 local DataTransfer = require(ReplicatedComponents.SignalComponent.DataTransfer)
 
+local LobbyComponent = require(Components.LobbyComponent)
+
 SignalComponent:GetSignal('ManageTowers')
+SignalComponent:GetSignal('ManageEnemies')
 SignalComponent:GetSignal('ManageEffects')
+
+
+--LobbyComponent:Survival('TestGame', 'TestModel')
 
 --require(Components.GameComponent).new('TestLobby'):Start()
 

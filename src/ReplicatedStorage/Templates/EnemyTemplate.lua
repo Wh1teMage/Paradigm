@@ -6,7 +6,7 @@ local Enums = require(Templates.Enums)
 local data = {
 	Name = 'Default',
 	Model = nil,
-	Hitbox = nil,
+	CFrame = CFrame.new(),
 	
 	Level = 1,
 	
