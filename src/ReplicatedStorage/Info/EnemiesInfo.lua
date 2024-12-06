@@ -13,11 +13,11 @@ Enemies['Part'] = function(level: number)
 	
 	enemy.Name = 'Part'
 
-	enemy.MaxHealth = 180  -- change later
+	enemy.MaxHealth = 18  -- change later
 	enemy.Health = enemy.MaxHealth
 	enemy.Model = EnemySamples.Walker
 	
-	enemy.Speed = 10
+	enemy.Speed = 3
 	enemy.Firerate = .1
 
 	local idleAnim = Instance.new('Animation')

@@ -28,6 +28,7 @@ TowersFolder.ChildRemoved:Connect(function(child)
     TowersEffects.Remove(child)
 end)
 
+--[[
 EnemiesFolder.ChildAdded:Connect(function(child)
     if (not child:IsA('BasePart')) then return end
     EnemiesEffects.Spawn(child)
@@ -37,6 +38,7 @@ EnemiesFolder.ChildRemoved:Connect(function(child)
     if (not child:IsA('BasePart')) then return end
     EnemiesEffects.Remove(child)
 end)
+]]
 
 function ReplicationComponent:BindTowers()
 	for index, value: Instance in pairs(TowersFolder:GetChildren()) do

@@ -19,6 +19,43 @@ for _, component in ipairs(script:GetChildren()) do
 end
 
 local Enemies = {}
+local MovingEnemies = {}
+
+task.spawn(function()
+
+	local package = {}
+
+	while task.wait(UPDATE_RATE) do
+
+		table.clear(package)
+
+		--print(#MovingEnemies)
+
+		for _, data in pairs(MovingEnemies) do
+	
+			local trackId = data[1]
+			local direction = data[2]
+			local enemy = data[3]
+
+			local track = enemy.Game.Info.Paths[trackId]
+			local length = track:GetPathLength()
+
+			enemy.CurrentStep += (enemy:GetValue('Speed')*UPDATE_RATE)/length * direction
+			enemy.CFrame = track:CalculateUniformCFrame(enemy.CurrentStep)
+			enemy.Distance = enemy.CurrentStep * length
+
+			table.insert(package, {pathPoint = enemy.CurrentStep*2^12, path = trackId, enemyId = enemy.Id})
+
+			if (enemy.CurrentStep >= 1) then enemy:CompletedPath(); continue end
+			if ((not enemy.Health) or (enemy.Health <= 0)) then enemy:Destroy() end
+
+		end
+
+		MoveEnemyEvent:FireAllClients(SignalFunctions.EncodeEnemyMovement(package))
+
+	end
+
+end)
 
 local EnemyComponent = setmetatable({}, {
 	__index = function(t, i)
@@ -28,98 +65,32 @@ local EnemyComponent = setmetatable({}, {
 	end,
 })
 
-function EnemyComponent:StartMoving(selectedTrack: number?, startingCFrame: CFrame?, currentStep: number?, direction: number?)
-
+function EnemyComponent:StartMoving(selectedTrack: number?, startingPoint: number?, direction: number?)
 	if (not selectedTrack) then selectedTrack = 1 end
 
-	if (#self.Game.Info.PathPoints < 1) then return end
-	if (not self.Game.Info.PathPoints[selectedTrack]) then return end
+	if (#self.Game.Info.Paths < 1) then return end
+	if (not self.Game.Info.Paths[selectedTrack]) then return end
 	
-	if (not startingCFrame) then startingCFrame = self.Game.Info.PathPoints[selectedTrack][1] end
-	if (not currentStep) then currentStep = 0 end
+	if (not startingPoint) then startingPoint = 0 end
 	if (not direction) then direction = 1 end
-	
-	task.spawn(function()
-		self.CurrentStep = currentStep
-		self.CFrame = startingCFrame + Vector3.new(0, .01, 0) -- prevent CFrame bug
-		
-		local changablePosition = startingCFrame.Position
-		
-		local start = 1
-		local stop = #self.Game.Info.PathPoints[selectedTrack]
-		
-		if (direction < 0) then start = #self.Game.Info.PathPoints[selectedTrack]; stop = 1 end
-		
-		for i = start, stop, direction do
-			if ((not self.Health) or (self.Health <= 0)) then break end
 
-			local uniformCframe = self.Game.Info.PathPoints[selectedTrack][i]
-			self.CurrentStep = i
+	self.CurrentStep = startingPoint
 
-			--self.CFrame.Position = uniformCframe.Position
-			local stepCFrame = self.CFrame
-			local overallDistance = (self.CFrame.Position - uniformCframe.Position).Magnitude
-
-			repeat
-				
-				local distance = (self.CFrame.Position - uniformCframe.Position).Magnitude
-
-				--self.Hitbox.AlignPosition.MaxVelocity = self:GetValue('Speed')
-				self.Distance += (self.CFrame.Position - changablePosition).Magnitude
-				changablePosition = self.CFrame.Position
-
-				self.CFrame = stepCFrame:Lerp(uniformCframe, 1-(distance-self:GetValue('Speed')*UPDATE_RATE)/overallDistance) --(distance+self:GetValue('Speed')*UPDATE_RATE)/overallDistance
-				--self.Hitbox.CFrame = self.CFrame
-
-				--print(overallDistance, distance, self:GetValue('Speed')*UPDATE_RATE, 1-(distance-self:GetValue('Speed')*UPDATE_RATE)/overallDistance)
-
-				task.spawn(self.Attack, self)
-
-				MoveEnemyEvent:FireAllClients(SignalFunctions.EncodeEnemyMovement(.2, 1, 65))
-				
-				--[[
-				SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateEnemyMovement, 
-					Vector2.new(self.CFrame.X, self.CFrame.Z), Vector2.new(self.CFrame.LookVector.X, self.CFrame.LookVector.Z)
-				)
-				]]
-				
-
-				--SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id, 
-				--	Vector2.new(self.CFrame.X, self.CFrame.Z), Vector2.new(self.CFrame.LookVector.X, self.CFrame.LookVector.Z))
-
-				task.wait(UPDATE_RATE) -- 1/self:GetValue('Speed')
-
-				--task.wait(1/(10*self.Speed))
-				
-				if ((not self.Health) or (self.Health <= 0)) then break end
-				
-			until (distance < .5)
-			
-		end
-		
-		if ((not self.Health) or (self.Health <= 0)) then return end
-		
-		local healthDelta = self.Game.Info.Health - self.Health
-		
-		self:Destroy()
-		
-		print('Finished TestPath')
-		
-		--[[
-		
-		]]
-		
-		--onReachingEnd
-		
-		SignalComponent:GetSignal('ManageGameBindable', true):Fire('ChangeHealth', healthDelta)
-	end)
-	
+	MovingEnemies[self.Id] = { selectedTrack, direction, self }
 end
 
 function EnemyComponent:DealDamage(damage: number)
 	self.Health -= damage
 	if (self.Health > 0) then return end
 	self:Destroy()
+end
+
+function EnemyComponent:CompletedPath()
+	if ((not self.Health) or (self.Health <= 0)) then return end
+	local healthDelta = self.Game.Info.Health - self.Health
+
+	self:Destroy()
+	SignalComponent:GetSignal('ManageGameBindable', true):Fire('ChangeHealth', healthDelta)
 end
 
 function EnemyComponent:Destroy()
@@ -129,9 +100,10 @@ function EnemyComponent:Destroy()
 		self:RemovePassive(passive.Name, passive.Level)
 	end
 
-	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id, self.Name)
+	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id)
 
 	Enemies[self.Id] = nil
+	MovingEnemies[self.Id] = nil
 	--self.Hitbox:Destroy()
 	table.clear(self)
 	setmetatable(self, nil)
@@ -185,7 +157,11 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
 	local postfix = string.rep('0', (4-string.len(clockId)))
 
-	local id = clockId..postfix..tostring(math.random(1000, 9999))
+	local id = 1
+
+	for i = 1, 2^16 do
+		if (not Enemies[i]) then id = i; break end
+	end
 
 	--local part = ReplicatedStorage.Samples.EnemyPart:Clone()
 	--part.Name = 

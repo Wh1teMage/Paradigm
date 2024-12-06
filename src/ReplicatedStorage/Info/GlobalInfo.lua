@@ -7,7 +7,7 @@ return {
 	MaxHealth = 100,
 
 	CurrentWave = 0,
-	PathPoints = {},
+	Paths = {},
 
 	Loaded = false,
 

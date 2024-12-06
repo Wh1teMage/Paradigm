@@ -7,8 +7,10 @@ local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
 local GamesInfo = ReplicatedStorage.Info.Games
 
 local QuadPath = require(ReplicatedStorage.Utilities.QuadPath)
+local BezierPath = require(ReplicatedStorage.Utilities.BezierPath)
 local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
 
+local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 local WaveComponent = require(script.WaveComponent)
 local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 
@@ -37,6 +39,8 @@ function GameComponent:Start()
 			print(self.Info.Health)
 		end
 	)
+
+	--SignalComponent:GetSignal('ManageGame'):FireAllClients(PathConfig.Scope.GameStarted)
 end
 
 function GameComponent:SetupMap(name: string, cframe: CFrame)
@@ -44,21 +48,31 @@ function GameComponent:SetupMap(name: string, cframe: CFrame)
 	if (not map) then return end
 
 	local clonnedMap = map:Clone()
-	clonnedMap.Parent = game.Workspace
+	clonnedMap.Parent = game.Workspace.Map
 	clonnedMap:PivotTo(cframe)
 
 	self.Map = clonnedMap
 end
 
 function GameComponent:CreatePath()
-	if (#self.Info.PathPoints > 0) then return end
+	if (#self.Info.Paths > 0) then return end
 
 	for _, pathFolder: Instance in pairs(self.Map.Path:GetChildren()) do
 		if (not pathFolder:IsA('Folder')) then continue end
-		local path = QuadPath.new(pathFolder:GetChildren())
-		path:SetupPoints()
 
-		table.insert(self.Info.PathPoints, path.Points)
+		local sorted = pathFolder:GetChildren()
+		table.sort(sorted, function(a, b) return tonumber(a.Name) > tonumber(b.Name) end)
+
+		local waypoints = {}
+
+		for _, part: Part in pairs(sorted) do
+			if (not part:IsA('Part')) then continue end
+			table.insert(waypoints, part.Position)
+		end
+
+		local path = BezierPath.new(waypoints, 3)
+
+		table.insert(self.Info.Paths, path)
 	end
 end
 

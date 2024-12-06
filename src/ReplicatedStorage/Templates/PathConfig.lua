@@ -6,10 +6,11 @@ return {
         ['SellTower'] = 3,
         ['ReplicateEffect'] = 4,
 
-        ['ReplicateEnemy'] = 5,
-        ['ReplicateEnemyMovement'] = 5,
-        ['ReplicateAttributes'] = 6,
-        ['DestroyEnemy'] = 7,
+        ['GameStarted'] = 5,
+
+        ['ReplicateEnemy'] = 6,
+        ['ReplicateAttributes'] = 7,
+        ['DestroyEnemy'] = 8,
 	},
 
     Effects = {
