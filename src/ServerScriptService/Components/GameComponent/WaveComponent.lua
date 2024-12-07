@@ -19,9 +19,27 @@ local EnemiesCache = {}
 --{"WaitForClear"}, --wait for every zombie killed
 --{"StopMusic"},
 
+local currentlyPlaying: {Sound} = {}
+
 local parseFunctions = {
+	['StopMusic'] = function()
+		while #currentlyPlaying > 0 do
+			local sound = table.remove(currentlyPlaying)
+			sound:Stop()
+			sound:Destroy()
+		end
+	end,
+
 	['Music'] = function(component, id: number, volume: number, loop: boolean)
 
+		local sound = Instance.new('Sound')
+		sound.SoundId = id
+		sound.Volume = volume
+		sound.Looped = loop
+
+		sound:Play()
+
+		table.insert(currentlyPlaying, sound)
 	end,
 
 	['DialogueLink'] = function(component, name: string)
@@ -33,7 +51,9 @@ local parseFunctions = {
 	end,
 
 	['WaitForClear'] = function()
-
+		while #EnemyComponentFolder:GetChildren() > 0 do
+			task.wait(.1)
+		end
 	end,
 
 	['AwardCash'] = function(component, value: number)
@@ -53,19 +73,31 @@ local parseFunctions = {
 
 		print(name, amount, between, component)
 
-		for i = 1, amount do
-			if (not EnemyComponentFolder:FindFirstChild(name)) then return end
+		local spawnAmount = math.floor( 1/20 / math.max(between, 1/120) ) + 1
+		local packageAmount = amount/spawnAmount
 
-			if (not EnemiesCache[name]) then 
-				EnemiesCache[name] = require(EnemyComponentFolder:FindFirstChild(name))
-			end
+		for j = 1, spawnAmount do
 
-			local enemy = EnemiesCache[name]()
-			enemy:SetCurrentGame(component)
-			enemy:StartMoving(math.random(1, #component.Map.Path:GetChildren()))
-			
-			task.wait(between)
+			coroutine.wrap(function()
+				
+				for i = packageAmount*(j-1)+1, packageAmount*j do
+					if (not EnemyComponentFolder:FindFirstChild(name)) then return end
+		
+					if (not EnemiesCache[name]) then 
+						EnemiesCache[name] = require(EnemyComponentFolder:FindFirstChild(name))
+					end
+		
+					local enemy = EnemiesCache[name]()
+					enemy:SetCurrentGame(component)
+					enemy:StartMoving(math.random(1, #component.Map.Path:GetChildren()))
+					
+					task.wait(between)
+				end
+
+			end)()
+
 		end
+
 	end,
 }
 
@@ -97,18 +129,28 @@ function WaveComponent:Skip()
 	self.Skipped = true
 end
 
-function WaveComponent:LoadWaves(name: string)
+function WaveComponent:LoadWaves(name: string, startWave: number?)
 	local selectedWave = self.Waves
+
+	if (not startWave) then startWave = 1 end
 	
 	self.Skipped = false
 
-	-- add for i = startwave, endwave
+	for index = startWave, #selectedWave do
+		local wave = selectedWave[index]
 
+		self:ChangeWave(index)
+		if (self.Info.Health < 0) then return end
+		self:ParseWave(wave)
+	end
+
+	--[[
 	for index, wave in pairs(selectedWave) do
 		self:ChangeWave(index)
 		if (self.Info.Health < 0) then return end
 		self:ParseWave(wave)
 	end
+	]]
 	
 	if (self.Info.Health < 0) then return end
 end

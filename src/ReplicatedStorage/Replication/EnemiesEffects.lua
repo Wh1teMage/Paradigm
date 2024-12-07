@@ -5,6 +5,7 @@ local Templates = ReplicatedStorage.Templates
 local Info = ReplicatedStorage.Info
 
 local EnemiesInfo = require(Info.EnemiesInfo)
+local GlobalInfo = require(Info.GlobalInfo)
 
 type ITowerInfo = typeof(require(Templates.EnemyTemplate)())
 
@@ -14,6 +15,7 @@ type ITowerInfo = typeof(require(Templates.EnemyTemplate)())
 local Functions = {}
 
 local ReplicatedEnemies = {}
+local EnemyAttributes = {}
 local SpawnQueue = {}
 
 local function FindAttribute(part: Part, name: string)
@@ -31,8 +33,8 @@ local moving = false
 
 local recieveTime = os.clock()
 
-local lastUpdated = {}
-local deltas = {}
+local lastUpdated = os.clock()
+local delta = 1/10
 
 RunService.Heartbeat:Connect(function(dt)
 
@@ -66,11 +68,17 @@ RunService.Heartbeat:Connect(function(dt)
     end
 ]]
 
+    local tetha = (os.clock() - lastUpdated)/delta
+
+    local lowerPoint = (clusterSize*step)+1
+    local upperPoint = clusterSize*(step+1)
+
     for id, enemy in pairs(ReplicatedEnemies) do
 
         count += 1
         if (not enemy.Model) then continue end
-        if (count < (clusterSize*step)+1) or (count > clusterSize*(step+1)) then continue end
+        if (count < lowerPoint) then continue end
+        if (count > upperPoint) then break end
 
 --[[
         local passed = 0
@@ -85,8 +93,10 @@ RunService.Heartbeat:Connect(function(dt)
 
         if passed > 20 then continue end
 ]]
-        local tetha = (os.clock() - lastUpdated[id])/deltas[id]
 
+
+
+        -- maybe do the same thing with lerps as was done with bezierPath
         local lerp = enemy.PreviousCFrame:Lerp(enemy.GoalCFrame, tetha) -- calc step later
         table.insert(lerpCFrames, lerp)
         table.insert(parts, enemy.Model.PrimaryPart)
@@ -95,6 +105,9 @@ RunService.Heartbeat:Connect(function(dt)
 
     workspace:BulkMoveTo(parts, lerpCFrames, Enum.BulkMoveMode.FireCFrameChanged)
 
+    table.clear(parts)
+    table.clear(lerpCFrames)
+
     step += 1
 
     if (1/dt < 30) then task.wait() end
@@ -102,14 +115,13 @@ RunService.Heartbeat:Connect(function(dt)
     moving = false
 
 end)
---[[
-local retryTime = 1/20
+
+local retryTime = 1/5
+local entityFilter = 3
 
 task.spawn(function()
     
     while task.wait(retryTime) do
-
-        --print(#SpawnQueue)
         
         for id, enemy in pairs(SpawnQueue) do
             local passed = 0
@@ -129,28 +141,42 @@ task.spawn(function()
     end
 
 end)
-]]
+
 
 Functions = {
+
+    ['SetAttribute'] = function(id: number, name: string, value: any)
+        if (not EnemyAttributes[id]) then EnemyAttributes[id] = {} end
+        EnemyAttributes[id][name] = value
+    end,
+
+    ['GetAttribute'] = function(id: number, name: string)
+        if (not EnemyAttributes[id]) then EnemyAttributes[id] = {} end
+        return EnemyAttributes[id][name]
+    end,
 
     ['Spawn'] = function(id: number, name: string, fromQueue: boolean)
 
         local self = {
             PreviousCFrame = CFrame.new(0,0,0),
             GoalCFrame = CFrame.new(0,0,0),
-            PathPoint = 0,
-            ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
-            Name = name,
+            --PathPoint = 0,
+            --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
+            --Name = name,
             Model = nil
         }
---[[
+
+        if (#ReplicatedEnemies%entityFilter == 0) then fromQueue = true end
+        
         if (not fromQueue) then
             SpawnQueue[id] = self
             return
         end
 
         SpawnQueue[id] = nil
-]]
+
+        if (ReplicatedEnemies[id]) then return end
+
         local enemyName = name
         if (not EnemiesInfo[enemyName]) then return end
 
@@ -179,8 +205,8 @@ Functions = {
             loadedAnimation:Play()
         end)
 
-        lastUpdated[id] = os.clock()
-        deltas[id] = .1
+        --lastUpdated[id] = os.clock()
+        --delta = .1
 
         ReplicatedEnemies[id] = self
     end,
@@ -196,16 +222,25 @@ Functions = {
         ReplicatedEnemies[id] = nil
     end,
 
-    ['Move'] = function(id: number, cframe: CFrame, pathPoint: number, recieveTime: number)
-        local self = ReplicatedEnemies[id]
-        if (not self) then return end
+    ['Move'] = function(data)
 
-        self.PreviousCFrame = self.GoalCFrame
-        self.GoalCFrame = cframe + self.Offset + cframe.RightVector * self.ZOffset
-        self.PathPoint = pathPoint
+        for _, decoded in pairs(data) do --{pathPoint, path, id}
+            local track = GlobalInfo.Paths[decoded[2]]
+            if (not track) then continue end
+    
+            --local t = decoded[1]/2^12
+            local cframe = track[decoded[1]]
+            local id = decoded[3]
+    
+            local self = ReplicatedEnemies[id]
+            if (not self) then return end
+    
+            self.PreviousCFrame = self.GoalCFrame
+            self.GoalCFrame = cframe
+        end
 
-        deltas[id] = (os.clock() - lastUpdated[id])
-        lastUpdated[id] = os.clock()
+        delta = ((os.clock() - lastUpdated) + delta)/2
+        lastUpdated = os.clock()
     end
 
 }

@@ -6,6 +6,7 @@ local EnemiesEffects = require(ReplicatedStorage.Replication.EnemiesEffects)
 local TowersEffects = require(ReplicatedStorage.Replication.TowersEffects)
 
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
+local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
 
 local EnemiesFolder: Folder = workspace.Enemies
 local TowersFolder: Folder = workspace.Towers
@@ -47,15 +48,17 @@ function ReplicationComponent:BindTowers()
     end
 end
 
+--[[
 function ReplicationComponent:BindEnemies()
 	for index, value in pairs(EnemiesFolder:GetChildren()) do
         if (not value:IsA('BasePart')) then continue end
         EnemiesEffects.Spawn(value)
     end
 end
+]]
 
 function ReplicationComponent:Setup()
-    self:BindEnemies()
+    --self:BindEnemies()
     self:BindTowers()
 end
 

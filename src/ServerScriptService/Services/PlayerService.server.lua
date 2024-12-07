@@ -9,6 +9,8 @@ local LobbyComponent = require(Components.LobbyComponent)
 local PlayerComponent = require(Components.PlayerComponent)
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 
+local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
+
 local testGame = LobbyComponent:Survival('TestGame', 'TestModel')
 
 Players.PlayerAdded:Connect(function(player)
@@ -18,6 +20,9 @@ Players.PlayerAdded:Connect(function(player)
 
 	local component = PlayerComponent:CreatePlayer(player)
 	component:SetCurrentGame(testGame)
+
+	SignalComponent:GetSignal('ManageGame'):FireAllClients(PathConfig.Scope.GameStarted)
+
 	-- connect player to the session
 	
 	--component:AddAttribute('CritChance', 30)

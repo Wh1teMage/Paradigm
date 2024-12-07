@@ -13,7 +13,7 @@ local BezierPath = require(ReplicatedStorage.Utilities.BezierPath)
 
 ReplicationComponent:Setup()
 
-
+--[[
 if (#GlobalInfo.Paths > 0) then return end
 local map = game.Workspace.Map:FindFirstChildWhichIsA('Model')
 
@@ -36,3 +36,4 @@ for _, pathFolder: Instance in pairs(map.Path:GetChildren()) do
 
     table.insert(GlobalInfo.Paths, path)
 end
+]]

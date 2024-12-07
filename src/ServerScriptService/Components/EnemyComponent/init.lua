@@ -115,6 +115,7 @@ end
 
 function EnemyComponent:ReplicateField(fieldName: string, value: number)
 	if (not self.CFrame) then return end
+	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateAttributes, self.Id, fieldName, value)
 	--local hitbox: Part? = self.Hitbox
 	--hitbox:SetAttribute(fieldName, value)
 end
@@ -187,7 +188,7 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateEnemy, id, name)
 	--SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id, self.Name)
 
-	--self:ReplicateField('Name', name)
+	self:ReplicateField('Name', name)
 
 	data.Passives = nil
 	data.Abilities = nil
@@ -199,6 +200,12 @@ end
 
 function EnemyComponentFabric:GetAll()
 	return Enemies
+end
+
+function EnemyComponentFabric:ReplicateAliveEnemiesForPlayer(player: Player)
+	for id, enemy in pairs(EnemyComponentFabric:GetAll()) do
+		SignalComponent:GetSignal('ManageEnemies'):Fire(PathConfig.Scope.ReplicateEnemy, player, id, enemy.Name)
+	end
 end
 
 function EnemyComponentFabric:GetEnemiesInRadius(position: Vector3, radius: number)

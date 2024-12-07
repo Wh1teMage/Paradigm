@@ -25,9 +25,9 @@ function GameComponent:ChangeWave(value: number)
 	print(self.Info.CurrentWave..' Current Wave')
 end
 
-function GameComponent:Start()
+function GameComponent:Start(startWave: number?)
 	self:CreatePath()
-	task.spawn(self.LoadWaves, self, self.SelectedLobby)
+	task.spawn(self.LoadWaves, self, self.SelectedLobby, startWave)
 
 	SignalComponent:GetSignal('ManageGameBindable', true):Connect(
 		function(scope, ...)
