@@ -37,8 +37,8 @@ Enemies['Part'] = function(level: number)
 end
 
 Enemies['Walker'] = function(level: number)
-	local enemy = Template()
-	
+	local enemy = Enemies['Part'](level)
+	--[[
 	if (level) then enemy.Level = level end
 	
 	enemy.MaxHealth = 6 * 100
@@ -50,7 +50,9 @@ Enemies['Walker'] = function(level: number)
 	enemy.Animations = {
 		Idle = 'rbxassetid://15289102971',
 	}
-	
+	]]
+	enemy.Speed = 5
+	enemy.Model = EnemySamples.BigWalker
 	enemy.Name = 'Walker'
 	return enemy
 end

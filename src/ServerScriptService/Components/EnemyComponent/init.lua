@@ -102,6 +102,8 @@ function EnemyComponent:Destroy()
 
 	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id)
 
+	--print('enemy killed')
+
 	Enemies[self.Id] = nil
 	MovingEnemies[self.Id] = nil
 	--self.Hitbox:Destroy()
@@ -153,10 +155,11 @@ end
 local EnemyComponentFabric = {}
 
 function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
+
 	if (not EnemiesInfo[name]) then warn(name..' enemy doesnt exist') return end
 
-	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
-	local postfix = string.rep('0', (4-string.len(clockId)))
+	--local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
+	--local postfix = string.rep('0', (4-string.len(clockId)))
 
 	local id = 1
 

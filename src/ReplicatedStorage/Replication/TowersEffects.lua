@@ -76,9 +76,12 @@ end)
 return {
 
     ['GetTowerByName'] = function(name: string)
+        return ReplicatedTowers[name]
+        --[[
         for _, tower in pairs(ReplicatedTowers) do
             if (tower.Instance.Name == name) then return tower end
         end
+        ]]
     end,
 
     ['Spawn'] = function(part: BasePart)
@@ -108,11 +111,11 @@ return {
             createModel(self, selectedInfo, part)
         end)
 
-        ReplicatedTowers[part] = self
+        ReplicatedTowers[part.Name] = self
     end,
 
     ['Remove'] = function(part: BasePart)
-        local self = ReplicatedTowers[part]
+        local self = ReplicatedTowers[part.Name]
         if (not self) then return end
 
         if (self.Cache) then self.Cache:Destroy() end
@@ -121,7 +124,7 @@ return {
         table.clear(self)
         self = nil
 
-        ReplicatedTowers[part] = nil
+        ReplicatedTowers[part.Name] = nil
     end
 
 }

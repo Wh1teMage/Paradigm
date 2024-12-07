@@ -58,7 +58,9 @@ SignalComponent:GetSignal('ManageEnemies'):Connect(
 SignalComponent:GetSignal('ManageGame'):Connect(
 	function(scope: string, ...)
 		
-		if (scope == PathConfig.Scope.GameStarted) then
+		print('Starting game on client')
+
+		if (scope == tostring( PathConfig.Scope.GameStarted )) then
 			GameComponent:SetupPath()
 		end
 
@@ -67,6 +69,7 @@ SignalComponent:GetSignal('ManageGame'):Connect(
 
 MoveEnemyEvent.OnClientEvent:Connect(function(data: buffer, amount: number)
 	--print(buffer.len(data))
+	
     if (#GlobalInfo.Paths < 1) then return end
 	local result = SignalFunctions.DecodeEnemyMovement(data, amount)
 

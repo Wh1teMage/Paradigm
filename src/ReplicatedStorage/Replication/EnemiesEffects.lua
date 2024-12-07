@@ -25,10 +25,15 @@ local function FindAttribute(part: Part, name: string)
     return value
 end
 
-local step = 0
-local defaultClusterCount = 4
+local enemyCount = 0
+local queueCount = 0
 
-local clusterCount = defaultClusterCount
+local step = 0
+local defaultClusterCount = 2
+
+local maxSpawnCount = 200
+
+local clusterCount = defaultClusterCount --defaultClusterCount
 local moving = false
 
 local recieveTime = os.clock()
@@ -41,12 +46,15 @@ RunService.Heartbeat:Connect(function(dt)
     if (moving) then return end
     if (step >= clusterCount) then step = 0 end
 
-    if (#ReplicatedEnemies < defaultClusterCount) then clusterCount = #ReplicatedEnemies 
-    else clusterCount = defaultClusterCount end
+    --if (#ReplicatedEnemies < defaultClusterCount) then clusterCount = #ReplicatedEnemies 
+    --else clusterCount = defaultClusterCount end
 
-    --defaultClusterCount = (#ReplicatedEnemies//200)+1
+    --clusterCount = (enemyCount//200)+defaultClusterCount
 
-    local clusterSize = #ReplicatedEnemies/clusterCount
+    if (enemyCount < defaultClusterCount) then clusterCount = 1 
+    else clusterCount = defaultClusterCount end --(enemyCount//500)+
+
+    local clusterSize = enemyCount/clusterCount
 
     moving = true
 
@@ -55,7 +63,6 @@ RunService.Heartbeat:Connect(function(dt)
     local lerpCFrames = {}
     local parts = {}
 
-    --print(#ReplicatedEnemies)
 --[[
     for id = (clusterSize*step)+1, clusterSize*(step+1) do
         local enemy = ReplicatedEnemies[id]
@@ -73,12 +80,15 @@ RunService.Heartbeat:Connect(function(dt)
     local lowerPoint = (clusterSize*step)+1
     local upperPoint = clusterSize*(step+1)
 
+    --print(lowerPoint, upperPoint, clusterCount, enemyCount)
+
     for id, enemy in pairs(ReplicatedEnemies) do
 
         count += 1
+
         if (not enemy.Model) then continue end
         if (count < lowerPoint) then continue end
-        if (count > upperPoint) then break end
+        if (count > upperPoint+1) then continue end
 
 --[[
         local passed = 0
@@ -94,14 +104,13 @@ RunService.Heartbeat:Connect(function(dt)
         if passed > 20 then continue end
 ]]
 
-
+        --print(enemy.GoalCFrame)
 
         -- maybe do the same thing with lerps as was done with bezierPath
         local lerp = enemy.PreviousCFrame:Lerp(enemy.GoalCFrame, tetha) -- calc step later
         table.insert(lerpCFrames, lerp)
         table.insert(parts, enemy.Model.PrimaryPart)
     end
-    
 
     workspace:BulkMoveTo(parts, lerpCFrames, Enum.BulkMoveMode.FireCFrameChanged)
 
@@ -110,36 +119,34 @@ RunService.Heartbeat:Connect(function(dt)
 
     step += 1
 
+    --maxSpawnCount = math.floor( 1/dt ) * 10
     if (1/dt < 30) then task.wait() end
 
     moving = false
 
 end)
 
+local lastSpawned = {}
+
 local retryTime = 1/5
-local entityFilter = 3
+local entityFilter = {} --15
 
 task.spawn(function()
     
     while task.wait(retryTime) do
         
+        --print(SpawnQueue)
+
+        if (enemyCount > maxSpawnCount) then continue end
+
         for id, enemy in pairs(SpawnQueue) do
-            local passed = 0
-
-            for _, closeEnemy in pairs(ReplicatedEnemies) do
-                if math.abs(enemy.PathPoint - closeEnemy.PathPoint) < .01 then passed += 1 end
-                if passed > 10 then break end
-            end
-    
-            if passed > 10 then continue end
-
             Functions.Spawn(id, enemy.Name, true)
-
+            if (enemyCount > maxSpawnCount) then break end
             task.wait()
         end
 
     end
-
+    
 end)
 
 
@@ -160,20 +167,40 @@ Functions = {
         local self = {
             PreviousCFrame = CFrame.new(0,0,0),
             GoalCFrame = CFrame.new(0,0,0),
-            --PathPoint = 0,
+            PathPoint = 0,
             --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
-            --Name = name,
+            Name = name,
             Model = nil
         }
 
-        if (#ReplicatedEnemies%entityFilter == 0) then fromQueue = true end
+        --if (not lastSpawned[name]) then lastSpawned[name] = os.clock() end
+        --entityFilter[name] = math.floor( .1/(os.clock() - lastSpawned[name]) ) + 1
+
+        if (not lastSpawned[name]) then lastSpawned[name] = os.clock() end
+        entityFilter[name] = math.floor( .1/(os.clock() - lastSpawned[name]) ) + 1
+        lastSpawned[name] = os.clock()
+        
+        if (entityFilter[name] > 15) then entityFilter[name] = 15 end
+
+        --if (not entityFilter[name]) then entityFilter[name] = 1 end
+        if ((queueCount + enemyCount)%entityFilter[name] == 0) then fromQueue = true end
         
         if (not fromQueue) then
+            queueCount += 1
             SpawnQueue[id] = self
             return
         end
 
-        SpawnQueue[id] = nil
+        if (SpawnQueue[id]) then
+            queueCount -= 1
+            SpawnQueue[id] = nil
+        end
+
+        --print(enemyCount, queueCount)
+
+        --print(entityFilter[name])
+
+        enemyCount += 1
 
         if (ReplicatedEnemies[id]) then return end
 
@@ -220,6 +247,7 @@ Functions = {
         self = nil
 
         ReplicatedEnemies[id] = nil
+        enemyCount -= 1
     end,
 
     ['Move'] = function(data)
@@ -233,10 +261,11 @@ Functions = {
             local id = decoded[3]
     
             local self = ReplicatedEnemies[id]
-            if (not self) then return end
+            if (not self) then continue end
     
             self.PreviousCFrame = self.GoalCFrame
-            self.GoalCFrame = cframe
+            self.GoalCFrame = cframe + self.Model:GetExtentsSize().Y/2 * Vector3.new(0, 1, 0)
+            self.PathPoint = decoded[1]
         end
 
         delta = ((os.clock() - lastUpdated) + delta)/2

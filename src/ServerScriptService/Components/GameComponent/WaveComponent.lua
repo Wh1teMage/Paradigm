@@ -71,8 +71,34 @@ local parseFunctions = {
 
 	['Spawn'] = function(component, name: string, amount: number, between: number)
 
-		print(name, amount, between, component)
+		--print(name, amount, between, component)
 
+		local packageAmount = math.floor( (1/30) / math.max(between, 1/120) ) + 1
+		local iter = 1
+
+		while iter <= amount do
+
+			local randomPath = math.random(1, #component.Map.Path:GetChildren())
+
+			for i = 1, packageAmount do
+				if (not EnemyComponentFolder:FindFirstChild(name)) then return end
+
+				if (not EnemiesCache[name]) then 
+					EnemiesCache[name] = require(EnemyComponentFolder:FindFirstChild(name))
+				end
+	
+				local enemy = EnemiesCache[name]()
+				enemy:SetCurrentGame(component)
+				enemy:StartMoving(randomPath)
+
+				iter += 1
+				if iter > amount then break end
+			end
+
+			task.wait(between)
+		end
+
+		--[[
 		local spawnAmount = math.floor( 1/20 / math.max(between, 1/120) ) + 1
 		local packageAmount = amount/spawnAmount
 
@@ -97,6 +123,7 @@ local parseFunctions = {
 			end)()
 
 		end
+		]]
 
 	end,
 }

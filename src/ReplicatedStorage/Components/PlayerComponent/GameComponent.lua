@@ -33,7 +33,6 @@ function GameComponent:SetupPath()
         table.insert(GlobalInfo.Paths, points)
     end
     
-
 end
 
 return GameComponent
