@@ -7,9 +7,11 @@ local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 local AttackPatterns = require(ServerScriptService.Components.Static.TowerAttackPatterns)
 
 local tower = require(ServerScriptService.Components.TowerComponent)
+local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
 
-return function(position: Vector3)
-	local self = tower.new(position, 'Precursor')
+return function(position: Vector3, callback)
+	local self = tower.new(position, 'Precursor', callback)
+	if (not self) then return end 
 
 	local test = function()
 
@@ -21,8 +23,17 @@ return function(position: Vector3)
 				self.SelectedTarget.CFrame.Position,
 				self.Hitbox.Name
 			)
+
+			local damageAmount = self:GetValue('Damage')
+			local moneyGain = math.min(self.SelectedTarget.Health, damageAmount)
 	
-			self.SelectedTarget:DealDamage(self:GetValue('Damage'))
+			self.SelectedTarget:TakeDamage(damageAmount)
+
+			local owner = PlayerComponent:GetPlayer(self.OwnerInstance)
+			if (not owner) then return end
+
+			owner:AddExp(moneyGain)
+			owner:AddAttribute('Cash', moneyGain)
 		end)
 
 	end

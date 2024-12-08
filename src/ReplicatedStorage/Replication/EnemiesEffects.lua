@@ -140,7 +140,7 @@ task.spawn(function()
         if (enemyCount > maxSpawnCount) then continue end
 
         for id, enemy in pairs(SpawnQueue) do
-            Functions.Spawn(id, enemy.Name, true)
+            Functions.Spawn(id, enemy.Name, enemy.PathPoint, true)
             if (enemyCount > maxSpawnCount) then break end
             task.wait()
         end
@@ -162,12 +162,13 @@ Functions = {
         return EnemyAttributes[id][name]
     end,
 
-    ['Spawn'] = function(id: number, name: string, fromQueue: boolean)
+    ['Spawn'] = function(id: number, name: string, point: number?, fromQueue: boolean?)
+        if (SpawnQueue[id] or ReplicatedEnemies[id]) then return end
 
         local self = {
-            PreviousCFrame = CFrame.new(0,0,0),
-            GoalCFrame = CFrame.new(0,0,0),
-            PathPoint = 0,
+            PreviousCFrame = GlobalInfo.Paths[1][1] + Vector3.new(0,0.01,0),
+            GoalCFrame = GlobalInfo.Paths[1][1],
+            PathPoint = point or 1,
             --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
             Name = name,
             Model = nil
@@ -216,7 +217,11 @@ Functions = {
         self.Offset = Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0)
 
         self.Model.Parent = game.Workspace.Enemies
-        self.Model:PivotTo(self.GoalCFrame + self.Offset)
+
+        self.GoalCFrame = GlobalInfo.Paths[1][self.PathPoint] + self.Offset
+        self.PreviousCFrame = GlobalInfo.Paths[1][self.PathPoint] + self.Offset + Vector3.new(0, .01, 0)
+
+        self.Model:PivotTo(self.GoalCFrame)
 
         if (not self.Model.PrimaryPart) then warn('PrimaryPart '..self.Model.Name..' doesnt exist'); return end
         
@@ -239,12 +244,21 @@ Functions = {
     end,
 
     ['Remove'] = function(id: number)
+        local fromQueue = false
+
         local self = ReplicatedEnemies[id]
+        if (not self) then self = SpawnQueue[id]; fromQueue = true end
         if (not self) then return end
 
         if (self.Model and self.Model.Parent) then self.Model:Destroy() end
         table.clear(self)
         self = nil
+        
+        if (fromQueue) then
+            SpawnQueue[id] = nil
+            queueCount -= 1
+            return
+        end
 
         ReplicatedEnemies[id] = nil
         enemyCount -= 1
@@ -260,12 +274,18 @@ Functions = {
             local cframe = track[decoded[1]]
             local id = decoded[3]
     
+            local fromQueue = false
+
             local self = ReplicatedEnemies[id]
+            if (not self) then self = SpawnQueue[id]; fromQueue = true end
             if (not self) then continue end
-    
+
+            self.PathPoint = decoded[1]
+
+            if (fromQueue) then continue end
+
             self.PreviousCFrame = self.GoalCFrame
             self.GoalCFrame = cframe + self.Model:GetExtentsSize().Y/2 * Vector3.new(0, 1, 0)
-            self.PathPoint = decoded[1]
         end
 
         delta = ((os.clock() - lastUpdated) + delta)/2

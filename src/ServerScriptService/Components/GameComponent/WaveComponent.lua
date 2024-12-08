@@ -6,6 +6,8 @@ local Components = ServerScriptService.Components
 
 local PlayerComponent = require(Components.PlayerComponent)
 local EnemyComponent = require(Components.EnemyComponent)
+local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
+local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 local EnemyComponentFolder = ServerScriptService.Enemies
 
 local EnemiesCache = {}
@@ -51,7 +53,7 @@ local parseFunctions = {
 	end,
 
 	['WaitForClear'] = function()
-		while #EnemyComponentFolder:GetChildren() > 0 do
+		while #EnemyComponent:GetAll() > 0 do
 			task.wait(.1)
 		end
 	end,
@@ -62,6 +64,8 @@ local parseFunctions = {
 			if (not component) then continue end
 			component:AddAttribute('Cash', value)
 		end
+
+		SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.WaveMessage, value..' Cash awarded to everyone')
 	end,
 	
 	['Dialogue'] = function(component, text: string, duration: number)
@@ -71,6 +75,7 @@ local parseFunctions = {
 
 	['Spawn'] = function(component, name: string, amount: number, between: number)
 
+		print(component, name, amount, between)
 		--print(name, amount, between, component)
 
 		local packageAmount = math.floor( (1/30) / math.max(between, 1/120) ) + 1
@@ -154,6 +159,11 @@ end
 
 function WaveComponent:Skip()
 	self.Skipped = true
+end
+
+function WaveComponent:TestSpawnEnemies(name: string, amount: number)
+	print(self.Info)
+	parseFunctions['Spawn'](self, name, amount, 0)
 end
 
 function WaveComponent:LoadWaves(name: string, startWave: number?)

@@ -11,6 +11,10 @@ return {
         ['ReplicateEnemy'] = 6,
         ['ReplicateAttributes'] = 7,
         ['DestroyEnemy'] = 8,
+
+        ['WaveMessage'] = 9,
+        ['ChangeBaseHealth'] = 10,
+        ['ChangeTowerLimit'] = 11,
 	},
 
     Effects = {

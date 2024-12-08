@@ -79,10 +79,12 @@ function EnemyComponent:StartMoving(selectedTrack: number?, startingPoint: numbe
 	MovingEnemies[self.Id] = { selectedTrack, direction, self }
 end
 
-function EnemyComponent:DealDamage(damage: number)
+function EnemyComponent:TakeDamage(damage: number)
 	self.Health -= damage
 	if (self.Health > 0) then return end
 	self:Destroy()
+
+	return true
 end
 
 function EnemyComponent:CompletedPath()
@@ -175,6 +177,7 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 
 	data.Id = id
 	--data.Hitbox = part
+	data.CFrame = CFrame.new(10000, 10000, 10000)
 	data.Shooting = false
 	data.LastShoot = 0
 	

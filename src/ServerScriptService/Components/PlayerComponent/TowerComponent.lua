@@ -23,7 +23,15 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 		Cache[name] = require(info)
 	end
 	
-	local tower = Cache[name](position)
+	local tower = Cache[name](position, function(data)
+		if (self:GetAttribute('Cash') < data.Price) then return end -- add cash warning
+		if (self:GetAttribute('TowerAmount') >= self.Game.Info.TowerLimit) then return end -- add cash warning
+
+		return true
+	end)
+
+	if (not tower) then return end
+
 	tower:ReplicateField('Skin', 'Default')
 	tower:SetOwner(self)
 
@@ -39,11 +47,13 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	
 	-- money check
 
+	self:AddAttribute('Cash', -tower.Price)
+
 	--print(self.Game)
 	
+	self:AddAttribute('TowerAmount', 1)
 
-
-	SignalComponent:GetSignal('ManageTowers'):Fire('Selected', self.Instance)
+	--SignalComponent:GetSignal('ManageTowers'):Fire('Selected', self.Instance)
 end
 
 function TowerComponent:SellTower(partName: string)
@@ -51,6 +61,7 @@ function TowerComponent:SellTower(partName: string)
 	if (not tower) then return end
 	
 	tower:Destroy()
+	self:AddAttribute('TowerAmount', -1)
 end
 
 function TowerComponent:UpgradeTower(partName: string)

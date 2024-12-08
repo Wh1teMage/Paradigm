@@ -11,7 +11,7 @@ Towers[1] = function()
 	local tower = Template()
 
 	tower.ModelsFolder = TowerSamples.Precursor
-	tower.Price = 460
+	tower.Price = 20
 	tower.Range = 18
 	tower.Damage = 18
 	tower.Firerate = 2.05

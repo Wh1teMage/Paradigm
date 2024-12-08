@@ -77,10 +77,12 @@ function TowerComponent:Attack()
 	self.Shooting = false
 end
 
-function TowerComponent:DealDamage(damage: number)
+function TowerComponent:TakeDamage(damage: number)
 	self.Health -= damage
 	if (self.Health > 0) then return end
 	self:Destroy()
+
+	return true
 end
 
 function TowerComponent:Destroy()
@@ -154,15 +156,8 @@ function TowerComponentFabric:GetTowers(): typeof({TowerComponent})
 	return Towers
 end
 
-function TowerComponentFabric.new(position: Vector3, name: string)
+function TowerComponentFabric.new(position: Vector3, name: string, checkCallback: () -> boolean)
 	if (not TowersInfo:FindFirstChild(name)) then warn(name..' tower doesnt exist') return end
-
-	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
-	local postfix = string.rep('0', (4-string.len(clockId)))
-
-	local part = ReplicatedStorage.Samples.TowerPart:Clone()
-	part.Name = clockId..postfix..tostring(math.random(1000, 9999))
-	part.CFrame = CFrame.new(position)
 
 	if (not TowersCache[name]) then
 		local info = TowersInfo:FindFirstChild(name)
@@ -173,8 +168,6 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 	
 	local data = TowersCache[name][1]()
 	
-	data.Id = part.Name
-	data.Hitbox = part
 	data.SelectedTarget = nil
 	data.LastShoot = 0
 	data.Shooting = false
@@ -189,6 +182,18 @@ function TowerComponentFabric.new(position: Vector3, name: string)
 	for _, passiveName in pairs(DEFAULT_TOWER_PASSIVES) do
 		self:AppendPassive(passiveName, 1, {}, { self })
 	end
+
+	if (checkCallback and (not checkCallback(data))) then table.clear(data); return end
+
+	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
+	local postfix = string.rep('0', (4-string.len(clockId)))
+
+	local part = ReplicatedStorage.Samples.TowerPart:Clone()
+	part.Name = clockId..postfix..tostring(math.random(1000, 9999))
+	part.CFrame = CFrame.new(position)
+
+	data.Id = part.Name
+	data.Hitbox = part
 
 	for _, ability in pairs(data.Abilities) do
 		self:AppendAbility(ability.Name, { self.Id, self })

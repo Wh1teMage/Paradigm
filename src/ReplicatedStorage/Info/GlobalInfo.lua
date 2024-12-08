@@ -7,6 +7,10 @@ return {
 	MaxHealth = 100,
 
 	CurrentWave = 0,
+
+	TowerLimit = 100,
+	DefaultTowerLimit = 100,
+
 	Paths = {},
 
 	Loaded = false,

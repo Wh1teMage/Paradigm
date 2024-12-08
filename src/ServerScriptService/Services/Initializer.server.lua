@@ -15,6 +15,8 @@ SignalComponent:GetSignal('ManageEnemies')
 SignalComponent:GetSignal('ManageEffects')
 SignalComponent:GetSignal('ManageGame')
 
+SignalComponent:GetSignal('ManageTowersUIFromServer')
+
 
 --LobbyComponent:Survival('TestGame', 'TestModel')
 

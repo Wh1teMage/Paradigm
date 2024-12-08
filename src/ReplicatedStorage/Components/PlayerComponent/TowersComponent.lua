@@ -163,11 +163,14 @@ function TowersComponent:StartPlacing(slot: number)
 	
 	currentlyPlacing.CFrame = CFrame.new(raycast.Position)
 	model.PrimaryPart.CFrame = currentlyPlacing.CFrame
+
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('StartPlacingUI', selectedTower)
 end
 
 function TowersComponent:StopPlacing()
 	if (not currentlyPlacing) then return end
 
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('StopPlacingUI')
 	DestroyRange(currentlyPlacing)
 	--print('Stopped Placing')
 	currentlyPlacing:Destroy()

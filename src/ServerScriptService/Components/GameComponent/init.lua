@@ -1,3 +1,4 @@
+local Players = game:GetService('Players')
 local ServerScriptService = game:GetService('ServerScriptService')
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local ServerStorage = game:GetService('ServerStorage')
@@ -18,11 +19,18 @@ local GameComponent = setmetatable({}, {__index = WaveComponent})
 
 function GameComponent:ChangeHealth(value: number)
 	self.Info.Health = value
+	SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.ChangeBaseHealth, value)
 end
 
 function GameComponent:ChangeWave(value: number)
 	self.Info.CurrentWave = value
+	SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.WaveMessage, 'Wave '..value)
 	print(self.Info.CurrentWave..' Current Wave')
+end
+
+function GameComponent:CalculateTowerLimit()
+	self.Info.TowerLimit = self.Info.DefaultTowerLimit / #Players:GetPlayers()
+	SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.ChangeTowerLimit, self.Info.TowerLimit)
 end
 
 function GameComponent:Start(startWave: number?)

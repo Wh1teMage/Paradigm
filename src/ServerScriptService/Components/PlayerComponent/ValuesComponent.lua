@@ -16,6 +16,7 @@ end
 
 function ValuesComponent:AddAttribute(key, value: any)
 	self.Session.Attributes[key] = self:GetAttribute(key) + value
+	self.Replica:SetValue('Session.Attributes.'..key, self.Session.Attributes[key])
 end
 
 function ValuesComponent:ApplyReward(reward)
@@ -38,6 +39,14 @@ function ValuesComponent:CheckRequirements(requirements)
 	local sessionData = self.Session
 	
 	return true
+end
+
+function ValuesComponent:AddExp(value: number)
+	local profileData: IProfileTemplate = self.Profile.Data
+	profileData.Values.ExpValue += math.round(value)
+
+	self:LevelUp()
+	self.Replica:SetValue('Profile.Values.ExpValue', profileData.Values.ExpValue)
 end
 
 function ValuesComponent:LevelUp()

@@ -10,6 +10,7 @@ local PlayerComponent = require(Components.PlayerComponent)
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
+local EnemyComponent = require(Components.EnemyComponent)
 
 local testGame = LobbyComponent:Survival('TestGame', 'TestModel')
 
@@ -20,8 +21,12 @@ Players.PlayerAdded:Connect(function(player)
 
 	local component = PlayerComponent:CreatePlayer(player)
 	component:SetCurrentGame(testGame)
+	testGame:CalculateTowerLimit()
 
 	SignalComponent:GetSignal('ManageGame'):FireAllClients(PathConfig.Scope.GameStarted)
+
+	task.wait(7)
+	EnemyComponent:ReplicateAliveEnemiesForPlayer(player)
 
 	-- connect player to the session
 	

@@ -3,6 +3,7 @@ local ServerScriptService = game:GetService('ServerScriptService')
 
 local Enums = require(ReplicatedStorage.Templates.Enums)
 local EnemyComponent = require(ServerScriptService.Components.EnemyComponent)
+--local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
 
 local TargetModes = {
 	[Enums.TargetType.First] = function(self, position: Vector3?, range: number?)
@@ -52,7 +53,17 @@ function TargetComponent:GetTarget(mode: typeof(Enums.TargetType)?, ...)
 	
 	TargetModes[mode](self, ...)
 end
+--[[
+function TargetComponent:DealTargetDamage(damage: number)
+	local hasDied = self.SelectedTarget:TakeDamage(damage)
+	if (not hasDied) then return end
+	local owner = PlayerComponent:GetPlayer(self.OwnerInstance)
+	if (not owner) then return end
 
+	owner:AddAttribute('Cash', 1)
+	owner = nil
+end
+]]
 function TargetComponent:WaitForTarget(delay: number?)
 	if (not delay) then delay = 5 end
 

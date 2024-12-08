@@ -51,6 +51,7 @@ Enemies['Walker'] = function(level: number)
 		Idle = 'rbxassetid://15289102971',
 	}
 	]]
+	--enemy.Health = 2
 	enemy.Speed = 5
 	enemy.Model = EnemySamples.BigWalker
 	enemy.Name = 'Walker'
