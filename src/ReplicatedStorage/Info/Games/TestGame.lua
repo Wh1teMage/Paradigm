@@ -18,11 +18,11 @@ Game.Settings.MaxHealth = 1000
 Game.Waves = {
 	[1] = {
 		{"Wait", 3},
-		{"Spawn", "Part", 1000, 0}, --1/30
+		{"Spawn", "Part", 3000, 0}, --1/30
 		--{"Spawn", "Walker", 100, 1/30},
 		{"WaitForClear"},
 		{"AwardCash", 2550},
-		{"Wait", 5},
+		{"Wait", 50},
 	},
 	[2] = {
 		{"Spawn", "Part", 2000, 0},

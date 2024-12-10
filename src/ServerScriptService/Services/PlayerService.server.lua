@@ -25,8 +25,19 @@ Players.PlayerAdded:Connect(function(player)
 
 	SignalComponent:GetSignal('ManageGame'):FireAllClients(PathConfig.Scope.GameStarted)
 
-	task.wait(7)
+	local start = os.clock()
+	local delta = 5
+
+	repeat task.wait(.1) until (component.Session.LoadedClient or (os.clock() - start) > delta)
+
+	print('--  Client Fully Loaded  --')
+
 	EnemyComponent:ReplicateAliveEnemiesForPlayer(player)
+	SignalComponent:GetSignal('ManageTowersUIFromServer'):Fire(PathConfig.Scope.ChangeBaseHealth, player, testGame.Info.Health)
+	SignalComponent:GetSignal('ManageTowersUIFromServer'):Fire(PathConfig.Scope.WaveMessage, player, 
+		'Wave: '..tostring(testGame.Info.CurrentWave) )
+
+	
 
 	-- connect player to the session
 	

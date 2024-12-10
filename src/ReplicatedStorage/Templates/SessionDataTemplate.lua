@@ -41,6 +41,7 @@ local data = {
 
 	Character = nil,
 	SessionTime = 0,
+	LoadedClient = false,
 	
 	ActiveBuffs = {},
 	Party = {},

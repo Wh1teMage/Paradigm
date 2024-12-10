@@ -18,6 +18,8 @@ for _, component in ipairs(script:GetChildren()) do
 	LoadedComponents[component.Name] = require(component)
 end
 
+local enemyCount = 0
+
 local Enemies = {}
 local MovingEnemies = {}
 
@@ -29,7 +31,7 @@ task.spawn(function()
 
 		table.clear(package)
 
-		--print(#MovingEnemies)
+		SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.ReplicateEnemyAmount, enemyCount)
 
 		for _, data in pairs(MovingEnemies) do
 	
@@ -111,6 +113,8 @@ function EnemyComponent:Destroy()
 	--self.Hitbox:Destroy()
 	table.clear(self)
 	setmetatable(self, nil)
+
+	enemyCount -= 1
 end
 
 function EnemyComponent:CheckRequirements(requirements) -- use later
@@ -200,12 +204,18 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	data.Abilities = nil
 
 	Enemies[id] = self
+
+	enemyCount += 1
 	
 	return self
 end
 
 function EnemyComponentFabric:GetAll()
 	return Enemies
+end
+
+function EnemyComponentFabric:GetEnemyCount()
+	return enemyCount
 end
 
 function EnemyComponentFabric:ReplicateAliveEnemiesForPlayer(player: Player)

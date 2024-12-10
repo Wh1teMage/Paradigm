@@ -15,6 +15,8 @@ return {
         ['WaveMessage'] = 9,
         ['ChangeBaseHealth'] = 10,
         ['ChangeTowerLimit'] = 11,
+
+        ['ReplicateEnemyAmount'] = 12,
 	},
 
     Effects = {

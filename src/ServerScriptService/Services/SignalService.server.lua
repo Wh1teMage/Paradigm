@@ -23,3 +23,14 @@ SignalComponent:GetSignal('ManageTowers'):Connect(
 		if (scope == PathConfig.Scope.SellTower) then component:SellTower(args[2]) return end
 	end
 )
+
+SignalComponent:GetSignal('ManageGame'):Connect(
+	function(scope, ...)
+		local args = {...}
+		local component = PlayerComponent:GetPlayer(args[1])
+
+		if (scope == tostring( PathConfig.Scope.GameStarted )) then 
+			component.Session.LoadedClient = true 
+		end
+	end
+)

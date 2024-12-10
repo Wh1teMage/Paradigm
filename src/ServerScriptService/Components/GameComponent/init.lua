@@ -24,7 +24,7 @@ end
 
 function GameComponent:ChangeWave(value: number)
 	self.Info.CurrentWave = value
-	SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.WaveMessage, 'Wave '..value)
+	SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.WaveMessage, 'Wave: '..value)
 	print(self.Info.CurrentWave..' Current Wave')
 end
 

@@ -62,6 +62,7 @@ SignalComponent:GetSignal('ManageGame'):Connect(
 
 		if (scope == tostring( PathConfig.Scope.GameStarted )) then
 			GameComponent:SetupPath()
+			SignalComponent:GetSignal('ManageGame'):Fire(PathConfig.Scope.GameStarted)
 		end
 
 	end

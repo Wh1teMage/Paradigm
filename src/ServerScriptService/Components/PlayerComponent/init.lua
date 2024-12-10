@@ -35,7 +35,7 @@ function PlayerComponentMethods:OnStart()
 	self:AddPlayerToParty(self)
 	
 	task.spawn(function()
-		while task.wait(1) do
+		while task.wait(.1) do
 			for _, passive in pairs(self.Session.Passives) do
 				passive.OnTick()
 			end

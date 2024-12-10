@@ -27,20 +27,26 @@ function stopPlacingUI()
 	mainUI.PlacingText.Visible = false
 end
 
+function openUpgradeUI()
+	mainUI.Upgrade.Visible = true
+end
+
+function closeUpgradeUI()
+	mainUI.Upgrade.Visible = false
+end
+
 function manageBaseHealth(value: number)
-	local bar: ImageLabel = mainUI.WaveBar.Stats.Health.Bar
-	bar.HealthValue.Text = tostring( value )..' HP'
+	local bar: Frame = mainUI.Container.Health.Health
+	bar.HP.Text = tostring( value )..' HP'
 
 	local defaultValue = 250
-	local percentage = math.clamp(value/defaultValue, 0, 1)*0.71
+	local percentage = math.clamp(value/defaultValue, 0, 1)
 
-	TweenService:Create(bar, TweenInfo.new(.1, Enum.EasingStyle.Linear), { ['Size'] = UDim2.fromScale(percentage, 1) }):Play()
-
-	mainUI.PlacingText.Visible = false
+	TweenService:Create(bar.Green, TweenInfo.new(.1, Enum.EasingStyle.Linear), { ['Size'] = UDim2.fromScale(percentage, 1) }):Play()
 end
 
 function manageWaveText(value: string)
-	local text: TextLabel = mainUI.WaveBar.TextLabel
+	local text: TextLabel = mainUI.Container.WaveText
 	text.MaxVisibleGraphemes = 0
 	text.Text = value
 
@@ -51,11 +57,15 @@ function manageWaveText(value: string)
 end
 
 function managePlayerCash(value: number)
-	mainUI.WaveBar.Stats.PlayerStats.Cash.TextLabel.Text = '$ '..tostring(value)
+	mainUI.Container.Cash.Cash.Text = '$'..tostring(value)
+end
+
+function manageEnemyCount(value: number)
+	mainUI.Container.Extras.ZombiesRemaining.Remaining.Text = tostring(value)
 end
 
 function managePlayerExp(value: number)
-	mainUI.WaveBar.Stats.PlayerStats.Exp.TextLabel.Text = 'XP '..tostring(value)
+	mainUI.Container.Extras.EXPGain.Text = 'EXP Gained: '..tostring(value)
 end
 
 local towerLimit = 60
@@ -65,7 +75,7 @@ function managePlayerLimit(current: number, max: number)
 	if (max) then towerLimit = max end
 	if (current) then towerAmount = current end
 
-	local limit: TextLabel = mainUI.WaveBar.Stats.PlayerStats.Limit.TextLabel
+	local limit: TextLabel = mainUI.Towersbg.TextLabel
 	limit.Text = tostring(towerAmount)..' / '..tostring(towerLimit)
 end
 
@@ -100,8 +110,14 @@ return function(UI: typeof(StarterGui.MainUI))
 
 	SignalComponent:GetSignal('ManageTowersUI', true):Connect(
 		function(scope, ...)
+
+			print(scope, ...)
+
 			if (scope == 'StartPlacingUI') then startPlacingUI(...) end
 			if (scope == 'StopPlacingUI') then stopPlacingUI() end
+			if (scope == 'OpenUpgradeUI') then openUpgradeUI() end
+			if (scope == 'CloseUpgradeUI') then closeUpgradeUI() end
+
 		end
 	)
 	
@@ -110,6 +126,7 @@ return function(UI: typeof(StarterGui.MainUI))
 			if (scope == tostring( PathConfig.Scope.WaveMessage )) then manageWaveText(...) end
 			if (scope == tostring( PathConfig.Scope.ChangeBaseHealth )) then manageBaseHealth(...) end
 			if (scope == tostring( PathConfig.Scope.ChangeTowerLimit )) then managePlayerLimit(nil, ...) end
+			if (scope == tostring( PathConfig.Scope.ReplicateEnemyAmount )) then manageEnemyCount(...) end
 		end
 	)
 end

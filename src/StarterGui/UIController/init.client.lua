@@ -17,9 +17,9 @@ print('working')
 
 require(script.Replication)(mainUI)
 
-for _, slot in pairs(mainUI.Hotbar.UI.Slots:GetChildren()) do
-	if (not slot:IsA('Frame')) then continue end
-	ButtonComponent.new(slot:FindFirstChild('TextButton')):BindToClick(function()
+for _, slot in pairs(mainUI.Towers:GetChildren()) do
+	if (not slot:IsA('GuiButton')) then continue end
+	ButtonComponent.new(slot):BindToClick(function()
 		SignalComponent:GetSignal('ManageTowersBindable', true):Fire('StartPlacing', slot.LayoutOrder)
 	end)
 end

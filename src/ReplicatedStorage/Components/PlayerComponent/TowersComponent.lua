@@ -200,15 +200,19 @@ function TowersComponent:SelectTower()
 	if (currentlySelectedPart) then
 		DestroyRange(currentlySelectedPart)
 		currentlySelectedPart = nil
+		SignalComponent:GetSignal('ManageTowersUI', true):Fire('CloseUpgradeUI')
 	end
 	
 	if (not raycast) then 
 		currentlySelected = nil 
+		SignalComponent:GetSignal('ManageTowersUI', true):Fire('CloseUpgradeUI')
 		return 
 	end
 
 	currentlySelectedPart = raycast.Instance:FindFirstAncestorWhichIsA('Part')
 	currentlySelected = currentlySelectedPart.Name
+
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected)
 
 	CreateRange(currentlySelectedPart, FindAttribute(currentlySelectedPart, 'Range'))
 end
@@ -223,6 +227,7 @@ function TowersComponent:SellTower()
 	if (not currentlySelected) then return end
 
 	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.SellTower, currentlySelected)
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('CloseUpgradeUI')
 
 	currentlySelected = nil 
 	currentlySelectedPart = nil

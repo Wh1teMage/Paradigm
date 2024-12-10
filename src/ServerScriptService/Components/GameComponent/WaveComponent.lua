@@ -53,7 +53,7 @@ local parseFunctions = {
 	end,
 
 	['WaitForClear'] = function()
-		while #EnemyComponent:GetAll() > 0 do
+		while EnemyComponent:GetEnemyCount() > 0 do
 			task.wait(.1)
 		end
 	end,
