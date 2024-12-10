@@ -6,7 +6,7 @@ local Components: {typeof(FrameComponent)} = {}
 function FrameComponent:Open()
 	if (self.locked) then return end
 	self.locked = true
-	for _, callback in pairs(self.OnOpen) do callback() end
+	for _, callback in pairs(self.OnOpen) do callback(self.Instance) end
 	self.open = true
 	self.locked = false
 end
@@ -14,7 +14,7 @@ end
 function FrameComponent:Close()
 	if (self.locked) then return end
 	self.locked = true
-	for _, callback in pairs(self.OnClose) do callback() end
+	for _, callback in pairs(self.OnClose) do callback(self.Instance) end
 	self.open = false
 	self.locked = false
 end

@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local TweenService = game:GetService('TweenService')
 local StarterGui = game:GetService('StarterGui')
 
-local Components = StarterGui.Components
+local Components = script.Parent.Parent.Components
 local Events = ReplicatedStorage.Events
 local Templates = ReplicatedStorage.Templates
 local Info = ReplicatedStorage.Info
@@ -12,6 +12,8 @@ local PlayerComponent = require(ReplicatedStorage.Components.PlayerComponent)
 local SignalComponent = require(ReplicatedStorage.Components.SignalComponent) 
 
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig) 
+
+local FrameComponent = require(Components.UIFrameComponent) 
 
 local sessionData = {}
 local profileData = {}
@@ -27,12 +29,12 @@ function stopPlacingUI()
 	mainUI.PlacingText.Visible = false
 end
 
-function openUpgradeUI()
-	mainUI.Upgrade.Visible = true
+function openUpgradeUI() -- make this one into frame component
+	FrameComponent.new(mainUI.Upgrade):Open()
 end
 
 function closeUpgradeUI()
-	mainUI.Upgrade.Visible = false
+	FrameComponent.new(mainUI.Upgrade):Close()
 end
 
 function manageBaseHealth(value: number)
@@ -77,6 +79,18 @@ function managePlayerLimit(current: number, max: number)
 
 	local limit: TextLabel = mainUI.Towersbg.TextLabel
 	limit.Text = tostring(towerAmount)..' / '..tostring(towerLimit)
+end
+
+function setupButtons()
+	ButtonComponent.new(mainUI.Upgrade.UpgInfo.Upgrade)
+	ButtonComponent.new(mainUI.Upgrade.Targetting)
+	ButtonComponent.new(mainUI.Upgrade.Sell)
+
+	ButtonComponent.new(mainUI.Upgrade.Sell)
+	ButtonComponent.new(mainUI.Upgrade.Sell)
+
+	ButtonComponent.new(mainUI.Upgrade.UpgradeName.arrowLeft)
+	ButtonComponent.new(mainUI.Upgrade.UpgradeName.arrowRight)
 end
 
 return function(UI: typeof(StarterGui.MainUI))
@@ -129,4 +143,6 @@ return function(UI: typeof(StarterGui.MainUI))
 			if (scope == tostring( PathConfig.Scope.ReplicateEnemyAmount )) then manageEnemyCount(...) end
 		end
 	)
+
+	setupButtons()
 end

@@ -17,6 +17,14 @@ function ButtonComponent:BindToLeave(callback: () -> {})
 	table.insert(self.OnLeave, callback)
 end
 
+function ButtonComponent:BindToDown(callback: () -> {})
+	table.insert(self.OnDown, callback)
+end
+
+function ButtonComponent:BindToUp(callback: () -> {})
+	table.insert(self.OnUp, callback)
+end
+
 function ButtonComponent.new(guiButton: GuiButton): typeof(ButtonComponent)
 	if (Components[guiButton]) then return Components[guiButton] end
 	if (not guiButton:IsA('GuiButton')) then return end
@@ -28,23 +36,36 @@ function ButtonComponent.new(guiButton: GuiButton): typeof(ButtonComponent)
 		OnClick = {},
 		OnEnter = {},
 		OnLeave = {},
+
+		OnDown = {},
+		OnUp = {},
 		
 	}, ButtonComponent)
 	
 	local defaultSelectorColor = Color3.fromRGB(255, 255, 255)
+	local defaultOnEnterColor = Color3.fromRGB(255, 255, 255)
+
 	local defaultSelectorTransparency = 0
 	local defaultSize = 1
+	local defaultMulti = .05
 	
 	local stroke = guiButton:FindFirstChildWhichIsA('UIStroke')
 	local size = guiButton:FindFirstChildWhichIsA('UIScale')
+
+
 	
 	if stroke then
 		defaultSelectorColor = stroke.Color
 		defaultSelectorTransparency = stroke.Transparency
+
+		local onEnterColor = stroke:FindFirstChildWhichIsA('Color3Value')
+		if (onEnterColor) then defaultOnEnterColor = onEnterColor.Value end
 	end
 	
 	if size then
 		defaultSize = size.Scale
+		local sizeMulti = size:FindFirstChildWhichIsA('NumberValue')
+		if (sizeMulti) then defaultMulti = sizeMulti.Value end
 	end
 	
 	local TInfo = TweenInfo.new(.2)
@@ -52,7 +73,7 @@ function ButtonComponent.new(guiButton: GuiButton): typeof(ButtonComponent)
 	self:BindToEnter(function()
 		
 		if (size) then 
-			TweenService:Create(size, TInfo, { Scale = defaultSize * 1.1 }):Play()
+			TweenService:Create(size, TInfo, { Scale = defaultSize * (1+defaultMulti) }):Play()
 		end
 		
 		if (stroke) then
@@ -64,7 +85,7 @@ function ButtonComponent.new(guiButton: GuiButton): typeof(ButtonComponent)
 				return
 			end
 			
-			TweenService:Create(stroke, TInfo, { Color = Color3.fromRGB(255, 255, 255) }):Play()
+			TweenService:Create(stroke, TInfo, { Color = defaultOnEnterColor }):Play()
 		end
 	end)
 	
@@ -85,7 +106,19 @@ function ButtonComponent.new(guiButton: GuiButton): typeof(ButtonComponent)
 			TweenService:Create(stroke, TweenInfo.new(.2), { Color = defaultSelectorColor }):Play()
 		end
 	end)
+
+	self:BindToDown(function()
+		if (size) then 
+			TweenService:Create(size, TInfo, { Scale = defaultSize * (1-defaultMulti) }):Play()
+		end
+	end)
 	
+	self:BindToUp(function()
+		if (size) then 
+			TweenService:Create(size, TInfo, { Scale = defaultSize * (1+defaultMulti) }):Play()
+		end
+	end)
+
 	local clickConnection;
 	clickConnection = guiButton.MouseButton1Click:Connect(function()
 		for _, callback in pairs(self.OnClick) do callback() end
@@ -100,17 +133,33 @@ function ButtonComponent.new(guiButton: GuiButton): typeof(ButtonComponent)
 	leaveConnection = guiButton.MouseLeave:Connect(function()
 		for _, callback in pairs(self.OnLeave) do callback() end
 	end)
+
+	local mouseDownConnection;
+	mouseDownConnection = guiButton.MouseButton1Down:Connect(function()
+		for _, callback in pairs(self.OnDown) do callback() end
+	end)
+
+	local mouseUpConnection;
+	mouseUpConnection = guiButton.MouseButton1Up:Connect(function()
+		for _, callback in pairs(self.OnUp) do callback() end
+	end)
+	
 	
 	local destsoyConnection;
 	destsoyConnection = guiButton.Destroying:Connect(function()
 		clickConnection:Disconnect()
 		enterConnection:Disconnect()
 		leaveConnection:Disconnect()
+
+		mouseDownConnection:Disconnect()
+		mouseUpConnection:Disconnect()
 		
 		self.OnClick = nil
 		self.OnEnter = nil
 		self.OnLeave = nil
-		
+		self.OnDown = nil
+		self.OnUp = nil
+
 		setmetatable(self, nil)
 		self = nil
 		Components[guiButton] = nil
@@ -118,6 +167,8 @@ function ButtonComponent.new(guiButton: GuiButton): typeof(ButtonComponent)
 		clickConnection = nil
 		enterConnection = nil
 		leaveConnection = nil
+		mouseDownConnection = nil
+		mouseUpConnection = nil
 		
 		destsoyConnection:Disconnect()
 	end)

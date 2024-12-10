@@ -165,9 +165,17 @@ Functions = {
     ['Spawn'] = function(id: number, name: string, point: number?, fromQueue: boolean?)
         if (SpawnQueue[id] or ReplicatedEnemies[id]) then return end
 
+        local previousCFrame = CFrame.new(0,0,0) + Vector3.new(0,0.01,0)
+        local goalCFrame = CFrame.new(0,0,0)
+
+        if (GlobalInfo.Paths[1]) then
+            previousCFrame = GlobalInfo.Paths[1][1] + Vector3.new(0,0.01,0)
+            goalCFrame = GlobalInfo.Paths[1][1]
+        end
+
         local self = {
-            PreviousCFrame = GlobalInfo.Paths[1][1] + Vector3.new(0,0.01,0),
-            GoalCFrame = GlobalInfo.Paths[1][1],
+            PreviousCFrame = previousCFrame,
+            GoalCFrame = goalCFrame,
             PathPoint = point or 1,
             --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
             Name = name,
@@ -218,8 +226,10 @@ Functions = {
 
         self.Model.Parent = game.Workspace.Enemies
 
-        self.GoalCFrame = GlobalInfo.Paths[1][self.PathPoint] + self.Offset
-        self.PreviousCFrame = GlobalInfo.Paths[1][self.PathPoint] + self.Offset + Vector3.new(0, .01, 0)
+        if (GlobalInfo.Paths[1]) then
+            self.GoalCFrame = GlobalInfo.Paths[1][self.PathPoint] + self.Offset
+            self.PreviousCFrame = GlobalInfo.Paths[1][self.PathPoint] + self.Offset + Vector3.new(0, .01, 0)    
+        end
 
         self.Model:PivotTo(self.GoalCFrame)
 
