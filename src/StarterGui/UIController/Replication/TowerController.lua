@@ -1,30 +1,17 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local TweenService = game:GetService('TweenService')
-local StarterGui = game:GetService('StarterGui')
 
-local Components = script.Parent.Parent.Components
-local Events = ReplicatedStorage.Events
-local Templates = ReplicatedStorage.Templates
-local Info = ReplicatedStorage.Info
-
-local ButtonComponent = require(Components.UIButtonComponent)
-local PlayerComponent = require(ReplicatedStorage.Components.PlayerComponent) 
-local SignalComponent = require(ReplicatedStorage.Components.SignalComponent) 
-
-local PathConfig = require(ReplicatedStorage.Templates.PathConfig) 
+local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
+local Components = script:FindFirstAncestorWhichIsA('Player').PlayerGui.Components
 
 local FrameComponent = require(Components.UIFrameComponent) 
+local ButtonComponent = require(Components.UIButtonComponent)
 local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
-local HotbarController = require(script.HotbarController)
-local TowerController = require(script.TowerController)
---[[
-local sessionData = {}
-local profileData = {}
+
+local mainUI;
 
 local currentlySelectedTower = nil
 local currentlySelectedPart = nil
-
-local mainUI: typeof(StarterGui.MainUI);
 
 function addFrameToUpgradeInfo(text: {string}, passive: boolean?)
 	if (not text) then return end
@@ -108,6 +95,12 @@ function updateUpgradeUI()
 		addFrameToUpgradeInfo(passives[i], true)
 	end
 
+    
+
+	local sellPrice = InstanceUtilities:FindAttribute(currentlySelectedPart, 'SellPrice')
+	if (not sellPrice) then return end
+	mainUI.Upgrade.Sell.SellPrice.Text = '$'..sellPrice
+
 	local upgradePrice = InstanceUtilities:FindAttribute(currentlySelectedPart, 'UpgradePrice')
 	if (not upgradePrice) then return end
 	mainUI.Upgrade.UpgInfo.Upgrade.Price.Text = '$'..upgradePrice
@@ -122,51 +115,7 @@ function closeUpgradeUI()
 	FrameComponent.new(mainUI.Upgrade):Close()
 end
 
-function manageBaseHealth(value: number)
-	local bar: Frame = mainUI.Container.Health.Health
-	bar.HP.Text = tostring( value )..' HP'
-
-	local defaultValue = 250
-	local percentage = math.clamp(value/defaultValue, 0, 1)
-
-	TweenService:Create(bar.Green, TweenInfo.new(.1, Enum.EasingStyle.Linear), { ['Size'] = UDim2.fromScale(percentage, 1) }):Play()
-end
-
-function manageWaveText(value: string)
-	local text: TextLabel = mainUI.Container.WaveText
-	text.MaxVisibleGraphemes = 0
-	text.Text = value
-
-	for i = 1, string.len(value) do
-		text.MaxVisibleGraphemes = i
-		task.wait(1/20)
-	end
-end
-
-function managePlayerCash(value: number)
-	mainUI.Container.Cash.Cash.Text = '$'..tostring(value)
-end
-
-function manageEnemyCount(value: number)
-	mainUI.Container.Extras.ZombiesRemaining.Remaining.Text = tostring(value)
-end
-
-function managePlayerExp(value: number)
-	mainUI.Container.Extras.EXPGain.Text = 'EXP Gained: '..tostring(value)
-end
-
-local towerLimit = 60
-local towerAmount = 0
-
-function managePlayerLimit(current: number, max: number)
-	if (max) then towerLimit = max end
-	if (current) then towerAmount = current end
-
-	local limit: TextLabel = mainUI.Towersbg.TextLabel
-	limit.Text = tostring(towerAmount)..' / '..tostring(towerLimit)
-end
-
-function setupButtons()
+function setupTowerButtons()
 	ButtonComponent.new(mainUI.Upgrade.UpgInfo.Upgrade):BindToClick(function()
 		if (not currentlySelectedTower) then return end
 		SignalComponent:GetSignal('ManageTowersBindable', true):Fire('UpgradeTower')
@@ -187,43 +136,17 @@ function setupButtons()
 	ButtonComponent.new(mainUI.Upgrade.UpgradeName.arrowLeft)
 	ButtonComponent.new(mainUI.Upgrade.UpgradeName.arrowRight)
 end
-]]
-return function(UI: typeof(StarterGui.MainUI))
-	local component = PlayerComponent:GetPlayer()
+
+
+return function(UI, component)
 	local replica = component.Replica
 
-	HotbarController(UI, component)
-	TowerController(UI, component)
-	--[[
-	print(replica, component.Replica, component)
-	
-	mainUI = UI
+    mainUI = UI
 
-	
-	replica:ListenToChange('Session.Attributes.Health', function()
-		setBarValue(values.Health, sessionData.Attributes.Health, sessionData.Attributes.MaxHealth)
-	end)
-	
-
-	replica:ListenToChange('Session.Attributes.Cash', function(newValue: number)
-		managePlayerCash(newValue)
-	end)
-
-	replica:ListenToChange('Session.Attributes.TowerAmount', function(newValue: number)
-		managePlayerLimit(newValue)
-	end)
-
-	replica:ListenToChange('Profile.Values.ExpValue', function(newValue: number)
-		managePlayerExp(newValue)
-	end)
-
-	managePlayerCash(replica.Data.Session.Attributes.Cash)
-	managePlayerExp(replica.Data.Profile.Values.ExpValue)
+    setupTowerButtons()
 
 	SignalComponent:GetSignal('ManageTowersUI', true):Connect(
 		function(scope, ...)
-
-			print(scope, ...)
 
 			if (scope == 'StartPlacingUI') then startPlacingUI(...) end
 			if (scope == 'StopPlacingUI') then stopPlacingUI() end
@@ -237,16 +160,5 @@ return function(UI: typeof(StarterGui.MainUI))
 
 		end
 	)
-	
-	SignalComponent:GetSignal('ManageTowersUIFromServer'):Connect(
-		function(scope, ...)
-			if (scope == tostring( PathConfig.Scope.WaveMessage )) then manageWaveText(...) end
-			if (scope == tostring( PathConfig.Scope.ChangeBaseHealth )) then manageBaseHealth(...) end
-			if (scope == tostring( PathConfig.Scope.ChangeTowerLimit )) then managePlayerLimit(nil, ...) end
-			if (scope == tostring( PathConfig.Scope.ReplicateEnemyAmount )) then manageEnemyCount(...) end
-		end
-	)
 
-	setupButtons()
-	]]
 end

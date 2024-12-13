@@ -9,4 +9,12 @@ function InstanceUtilities:Weld(p1, p2)
     return weld
 end
 
+function InstanceUtilities:FindAttribute(part: Part, name: string)
+    local value = part:GetAttribute(name)
+    if (not value) then return end
+
+    return value
+end
+
+
 return InstanceUtilities

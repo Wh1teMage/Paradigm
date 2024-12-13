@@ -35,13 +35,6 @@ local function GetTowerInfo(towerName: string, towerLevel: number)
     return selectedInfo
 end
 
-local function FindAttribute(part: Part, name: string)
-    local value = part:GetAttribute(name)
-    if (not value) then return end
-
-    return value
-end
-
 local function CreateRange(part: Part, radius: number)
 	local range = ReplicatedStorage.Samples.Range:Clone() :: Part
 	range.Position = part.Position
@@ -212,15 +205,26 @@ function TowersComponent:SelectTower()
 	currentlySelectedPart = raycast.Instance:FindFirstAncestorWhichIsA('Part')
 	currentlySelected = currentlySelectedPart.Name
 
-	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected)
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, currentlySelectedPart)
 
-	CreateRange(currentlySelectedPart, FindAttribute(currentlySelectedPart, 'Range'))
+	CreateRange(currentlySelectedPart, InstanceUtilities:FindAttribute(currentlySelectedPart, 'Range'))
 end
 
 function TowersComponent:UpgradeTower()
 	if (not currentlySelected) then return end
 	
-	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.UpgradeTower, currentlySelected)
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.UpgradeTower, currentlySelected) -- use promise there
+	print('sent promise')
+	local promise;
+
+	promise = SignalComponent:GetSignal('ManageTowers'):Connect(function(scope)
+		if (scope ~= tostring( PathConfig.Scope.TowerUpdated )) then return end
+		print('recieved promise')
+		SignalComponent:GetSignal('ManageTowersUI', true):Fire('UpdateUpgradeUI')
+		promise:Disconnect()
+	end)
+
+	task.delay(5, function() if (getmetatable(promise)) then promise:Disconnect() end end)
 end
 
 function TowersComponent:SellTower()

@@ -68,7 +68,7 @@ function ButtonComponent.new(guiButton: GuiButton): typeof(ButtonComponent)
 		if (sizeMulti) then defaultMulti = sizeMulti.Value end
 	end
 	
-	local TInfo = TweenInfo.new(.2)
+	local TInfo = TweenInfo.new(.15)
 	
 	self:BindToEnter(function()
 		

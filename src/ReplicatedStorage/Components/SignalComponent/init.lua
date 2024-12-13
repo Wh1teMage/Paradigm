@@ -14,9 +14,11 @@ local Event = {}
 local Signal = {}
 
 function Signal:Disconnect()
-	local connection = CustomEvents[self.EventName]['_connections'][self.Id]
-	setmetatable(connection, nil)
+	--local connection = CustomEvents[self.EventName]['_connections'][self.Id]
 	CustomEvents[self.EventName]['_connections'][self.Id] = nil
+
+	setmetatable(self, nil)
+	table.clear(self)
 end
 
 function Event:Wait(scope: string)

@@ -6,6 +6,7 @@ local Components = ServerScriptService.Components
 
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 local TowerFabric = require(Components.TowerComponent)
+local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 
 local Cache = {}
 
@@ -25,7 +26,7 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	
 	local tower = Cache[name](position, function(data)
 		if (self:GetAttribute('Cash') < data.Price) then return end -- add cash warning
-		if (self:GetAttribute('TowerAmount') >= self.Game.Info.TowerLimit) then return end -- add cash warning
+		if (self:GetAttribute('TowerAmount') >= self.Game.Info.TowerLimit) then return end -- add warning
 
 		return true
 	end)
@@ -53,13 +54,15 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	
 	self:AddAttribute('TowerAmount', 1)
 
-	--SignalComponent:GetSignal('ManageTowers'):Fire('Selected', self.Instance)
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.TowerUpdated, self.Instance)
 end
 
 function TowerComponent:SellTower(partName: string)
 	local tower = TowerFabric:GetTower(partName)
 	if (not tower) then return end
 	
+	self:AddAttribute('Cash', tower.SellPrice)
+
 	tower:Destroy()
 	self:AddAttribute('TowerAmount', -1)
 end
@@ -68,7 +71,11 @@ function TowerComponent:UpgradeTower(partName: string)
 	local tower = TowerFabric:GetTower(partName)
 	if (not tower) then return end
 
+	if (self:GetAttribute('Cash') < tower.UpgradePrice) then return end -- add cash warning	
+	self:AddAttribute('Cash', -tower.UpgradePrice)
+
 	tower:Upgrade()
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.TowerUpdated, self.Instance)
 end
 
 return TowerComponent

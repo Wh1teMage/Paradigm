@@ -1,8 +1,10 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local RunService = game:GetService('RunService')
+local ServerScriptService = game:GetService('ServerScriptService')
 
 local TowersInfo = ReplicatedStorage.Info.Towers
 local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
+local EnemyComponent = require(ServerScriptService.Components.EnemyComponent)
 
 local LoadedComponents = {}
 
@@ -33,6 +35,9 @@ task.spawn(function() -- seems nested, refactor later
 		for part, tower in pairs(Towers) do
 			task.spawn(tower.Attack, tower)
 		end
+
+		EnemyComponent:TestFunc()
+		--TestFunc
 	end
 end)
 
@@ -113,6 +118,12 @@ function TowerComponent:Upgrade()
 	
 	if (not upgradeInfo[self.Level]) then return end
 
+	if (#self.Descriptions > 0) then
+		for i = 2, #self.Descriptions do
+			self:ReplicateField('Passive'..(i-1), '')
+		end
+	end
+
 	self:ReplicateField('Level', self.Level)
 	DataModifiers:UpdateTable(self, upgradeInfo[self.Level]())
 
@@ -124,6 +135,30 @@ function TowerComponent:Upgrade()
 
 	for _, passive in pairs(self.Session.Passives) do
 		passive.OnUpgrade()
+	end
+	
+	self:ReplicateDescriptions()
+end
+
+function TowerComponent:ReplicateDescriptions()
+	if (#self.Descriptions > 0) then
+		self:ReplicateField('Description', table.concat(self.Descriptions[1], '/'))
+
+		for i = 2, #self.Descriptions do
+			self:ReplicateField('Passive'..(i-1), table.concat(self.Descriptions[i], '/'))
+		end
+	end
+
+	self:ReplicateField('SellPrice', self.SellPrice)
+
+	local upgradeInfo = TowersCache[self.Name]
+	if (not upgradeInfo[self.Level+1]) then return end
+
+	if (upgradeInfo[self.Level+1]) then
+		local nextInfo = upgradeInfo[self.Level+1]()
+		self.UpgradePrice = nextInfo.Price
+		self:ReplicateField('UpgradePrice', self.UpgradePrice)
+		table.clear(nextInfo)
 	end
 end
 
@@ -216,6 +251,8 @@ function TowerComponentFabric.new(position: Vector3, name: string, checkCallback
 	self:ReplicateField('Range', self.Range)
 	self:ReplicateField('Level', self.Level)
 	self:ReplicateField('Name', name)
+
+	self:ReplicateDescriptions()
 
 	part.Parent = workspace.Towers
 

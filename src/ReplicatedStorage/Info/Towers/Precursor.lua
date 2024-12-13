@@ -21,6 +21,7 @@ Towers[1] = function()
 	tower.BurstCD = .1
 
 	tower.Level = 1
+	tower.SellPrice = tower.Price * .8
 
 	local idleAnim = Instance.new('Animation')
 	idleAnim.AnimationId = 'rbxassetid://14253606347'
@@ -46,6 +47,11 @@ Towers[1] = function()
 		{Name = 'TestPassive2', Level = 1, Requirements = {}}
 	}
 
+	tower.Descriptions = {
+		{'Damage 18 → 13'}, -- somebody make an semi automatic parser for this, im too lazy
+		{'Test Passive1', 'Does some stuff'},
+	}
+
 	return tower
 end
 
@@ -54,6 +60,13 @@ Towers[2] = function()
 
 	tower.Damage = 13
 	tower.Level = 2
+	tower.Price = 40
+	tower.SellPrice += tower.Price * .8
+
+	tower.Descriptions = {
+		{'Damage 18 → 26'},
+		{'Test Passive2', 'Does more stuff'},
+	}
 
 	return tower
 end
@@ -63,10 +76,14 @@ Towers[3] = function()
 
 	tower.Damage = 26
 	tower.Level = 3
+	tower.Price = 60
+	tower.SellPrice += tower.Price * .8
 
 	tower.Passives = {
 		{Name = 'TestPassive', Level = 1, Requirements = {}}
 	}
+
+	tower.Descriptions = {}
 
 	return tower
 end

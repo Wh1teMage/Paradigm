@@ -7,7 +7,11 @@ local EnemyComponent = require(ServerScriptService.Components.EnemyComponent)
 
 local TargetModes = {
 	[Enums.TargetType.First] = function(self, position: Vector3?, range: number?)
-		local enemies = self:GetTargetsInRange(position, range)
+		
+		local enemies = {}--self:GetTargetsInRange(position, range)
+		table.clear(enemies)
+
+		--[[
 		
 		local selectedEnemy;
 		local selectedValue = 0
@@ -22,6 +26,7 @@ local TargetModes = {
 		
 		table.clear(enemies)
 		enemies = nil
+		]]
 	end,
 }
 

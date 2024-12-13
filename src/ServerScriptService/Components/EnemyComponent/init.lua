@@ -22,6 +22,7 @@ local enemyCount = 0
 
 local Enemies = {}
 local MovingEnemies = {}
+local CFrames = {}
 
 task.spawn(function()
 
@@ -33,7 +34,7 @@ task.spawn(function()
 
 		SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.ReplicateEnemyAmount, enemyCount)
 
-		for _, data in pairs(MovingEnemies) do
+		for id, data in pairs(MovingEnemies) do
 	
 			local trackId = data[1]
 			local direction = data[2]
@@ -45,6 +46,8 @@ task.spawn(function()
 			enemy.CurrentStep += (enemy:GetValue('Speed')*UPDATE_RATE)/length * direction
 			enemy.CFrame = track:CalculateUniformCFrame(enemy.CurrentStep)
 			enemy.Distance = enemy.CurrentStep * length
+
+			CFrames[id] = enemy.CFrame
 
 			table.insert(package, {pathPoint = enemy.CurrentStep*2^12, path = trackId, enemyId = enemy.Id})
 
@@ -79,6 +82,7 @@ function EnemyComponent:StartMoving(selectedTrack: number?, startingPoint: numbe
 	self.CurrentStep = startingPoint
 
 	MovingEnemies[self.Id] = { selectedTrack, direction, self }
+	CFrames[self.Id] = self.CFrame
 end
 
 function EnemyComponent:TakeDamage(damage: number)
@@ -227,17 +231,57 @@ end
 function EnemyComponentFabric:GetEnemiesInRadius(position: Vector3, radius: number)
 	local enemies = {}
 	
-	for _, enemy in pairs(self:GetAll()) do
-		local cframe = enemy.CFrame
-		if (not cframe) then continue end
+	debug.profilebegin('gettingEnemies')
 
-		local distance = (position - cframe.Position).Magnitude
-		if (distance <= radius) then
-			table.insert(enemies, enemy)
+	local count = 0
+
+	for id, cframe in pairs(CFrames) do
+		count += 1
+		--local cframe = enemy.CFrame
+		--if (not cframe) then continue end
+
+		--local distance = (position - cframe.Position).Magnitude
+		--if (distance <= radius) then
+		if (count%10 == 0) then
+			enemies[id] = id
+		end
+		--Enemies[id]
+		--end
+	end
+
+	debug.profileend()
+	
+	return {}--enemies
+end
+
+function EnemyComponentFabric:TestFunc()
+	local enemies = table.create(100*3000)
+	
+	debug.profilebegin('gettingEnemiesv2')
+	
+	local count = 0
+
+	for i = 1, 500 do
+		for id, cframe in pairs(CFrames) do
+			count += 1
+			--local cframe = enemy.CFrame
+			--if (not cframe) then continue end
+	
+			--local distance = (position - cframe.Position).Magnitude
+			--if (distance <= radius) then
+	
+			--table.insert(enemies, id)
+	
+			--enemies[id] = id
+			
+			--Enemies[id]
+			--end
 		end
 	end
+
+	debug.profileend()
 	
-	return enemies
+	return {}--enemies
 end
 
 return EnemyComponentFabric

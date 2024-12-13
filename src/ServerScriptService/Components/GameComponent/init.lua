@@ -79,8 +79,10 @@ function GameComponent:CreatePath()
 		end
 
 		local path = BezierPath.new(waypoints, 3)
-
 		table.insert(self.Info.Paths, path)
+
+		local possiblePoints = table.create(4096, {})
+		table.insert(self.Info.PathPoints, possiblePoints)
 	end
 end
 

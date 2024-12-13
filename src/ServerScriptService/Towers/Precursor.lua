@@ -35,7 +35,7 @@ return function(position: Vector3, callback)
 			owner:AddExp(moneyGain)
 			owner:AddAttribute('Cash', moneyGain)
 		end)
-
+		
 	end
 
 	function self:OnAttack()

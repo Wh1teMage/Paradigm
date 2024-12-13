@@ -68,8 +68,8 @@ function PlayerComponent.constructor(): IPlayerComponent
 		{ name = 'PressAction4', code = Enum.KeyCode.Four, state = Enum.UserInputState.Begin },
 		{ name = 'PressAction5', code = Enum.KeyCode.Five, state = Enum.UserInputState.Begin },
 		
-		{ name = 'StopPlacing', code = Enum.KeyCode.Q, state = Enum.UserInputState.Begin },
-		{ name = 'UpgradeTower', code = Enum.KeyCode.F, state = Enum.UserInputState.Begin },
+		{ name = 'StopPlacing', code = Enum.KeyCode.Z, state = Enum.UserInputState.Begin },
+		{ name = 'UpgradeTower', code = Enum.KeyCode.E, state = Enum.UserInputState.Begin },
 		{ name = 'SellTower', code = Enum.KeyCode.X, state = Enum.UserInputState.Begin },
 		
 		{ name = 'SelectAction', code = Enum.UserInputType.MouseButton1, state = Enum.UserInputState.Begin },

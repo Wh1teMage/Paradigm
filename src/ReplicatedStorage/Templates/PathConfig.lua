@@ -17,6 +17,7 @@ return {
         ['ChangeTowerLimit'] = 11,
 
         ['ReplicateEnemyAmount'] = 12,
+        ['TowerUpdated'] = 13,
 	},
 
     Effects = {

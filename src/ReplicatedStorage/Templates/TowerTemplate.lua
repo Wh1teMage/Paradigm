@@ -19,6 +19,8 @@ local data = {
 	
 	Limit = 8,
 	Hidden = true,
+
+	UpgradePrice = nil,
 	
 	PlacementType = Enums.PlacementType.Ground,
 	TargetType = Enums.TargetType.First,

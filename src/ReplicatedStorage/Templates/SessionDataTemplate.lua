@@ -13,7 +13,7 @@ local multipliers = {
 
 local data = {
 	Attributes = {
-		Cash = 1000,
+		Cash = 10000,
 		TowerAmount = 0,
 	},
 	

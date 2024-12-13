@@ -12,6 +12,7 @@ return {
 	DefaultTowerLimit = 100,
 
 	Paths = {},
+	PathPoints = {},
 
 	Loaded = false,
 
