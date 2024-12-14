@@ -31,7 +31,7 @@ Enemies['Part'] = function(level: number)
 		{Name = 'Fireball'}
 	}
 	
-	enemy.CanAttack = true
+	enemy.CanAttack = false
 	--enemy.Model = EnemySamples["Spike Fox"]
 	return enemy
 end

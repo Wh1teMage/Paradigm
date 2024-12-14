@@ -6,6 +6,7 @@ local Info = ReplicatedStorage.Info
 
 local EnemiesInfo = require(Info.EnemiesInfo)
 local GlobalInfo = require(Info.GlobalInfo)
+local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
 
 type ITowerInfo = typeof(require(Templates.EnemyTemplate)())
 
@@ -14,6 +15,7 @@ type ITowerInfo = typeof(require(Templates.EnemyTemplate)())
 ]]
 local Functions = {}
 
+local ReplicatedPackages = {}
 local ReplicatedEnemies = {}
 local EnemyAttributes = {}
 local SpawnQueue = {}
@@ -27,6 +29,7 @@ end
 
 local enemyCount = 0
 local queueCount = 0
+local packageCount = 0
 
 local step = 0
 local defaultClusterCount = 2
@@ -51,10 +54,10 @@ RunService.Heartbeat:Connect(function(dt)
 
     --clusterCount = (enemyCount//200)+defaultClusterCount
 
-    if (enemyCount < defaultClusterCount) then clusterCount = 1 
+    if (packageCount < defaultClusterCount) then clusterCount = 1 
     else clusterCount = defaultClusterCount end --(enemyCount//500)+
 
-    local clusterSize = enemyCount/clusterCount
+    local clusterSize = packageCount/clusterCount
 
     moving = true
 
@@ -82,11 +85,11 @@ RunService.Heartbeat:Connect(function(dt)
 
     --print(lowerPoint, upperPoint, clusterCount, enemyCount)
 
-    for id, enemy in pairs(ReplicatedEnemies) do
+    for id, package in pairs(ReplicatedPackages) do
 
         count += 1
 
-        if (not enemy.Model) then continue end
+        if (not package.Part) then continue end
         if (count < lowerPoint) then continue end
         if (count > upperPoint+1) then continue end
 
@@ -107,9 +110,9 @@ RunService.Heartbeat:Connect(function(dt)
         --print(enemy.GoalCFrame)
 
         -- maybe do the same thing with lerps as was done with bezierPath
-        local lerp = enemy.PreviousCFrame:Lerp(enemy.GoalCFrame, tetha) -- calc step later
+        local lerp = package.PreviousCFrame:Lerp(package.GoalCFrame, tetha) -- calc step later
         table.insert(lerpCFrames, lerp)
-        table.insert(parts, enemy.Model.PrimaryPart)
+        table.insert(parts, package.Part)
     end
 
     workspace:BulkMoveTo(parts, lerpCFrames, Enum.BulkMoveMode.FireCFrameChanged)
@@ -140,7 +143,7 @@ task.spawn(function()
         if (enemyCount > maxSpawnCount) then continue end
 
         for id, enemy in pairs(SpawnQueue) do
-            Functions.Spawn(id, enemy.Name, enemy.PathPoint, true)
+            Functions.Spawn(enemy.PackageId, id, enemy.Name, true)
             if (enemyCount > maxSpawnCount) then break end
             task.wait()
         end
@@ -162,9 +165,55 @@ Functions = {
         return EnemyAttributes[id][name]
     end,
 
-    ['Spawn'] = function(id: number, name: string, point: number?, fromQueue: boolean?)
-        if (SpawnQueue[id] or ReplicatedEnemies[id]) then return end
+    ['DespawnPackage'] = function(packageId: number)
+        local package = ReplicatedPackages[packageId]
+        if (not package) then return end
 
+        package.Part:Destroy()
+
+        ReplicatedPackages[packageId] = nil
+        packageCount -= 1
+
+        table.clear(package)
+    end,
+
+    ['SpawnPackage'] = function(packageId: number,  point: number?)
+        local start = os.clock()
+        while (ReplicatedPackages[packageId] and (os.clock() - start) < 5) do task.wait(.1) end
+
+        local previousCFrame = CFrame.new(0,0,0) + Vector3.new(0,0.01,0)
+        local goalCFrame = CFrame.new(0,0,0)
+
+        local part = Instance.new('Part')
+        part.Transparency = 1
+        part.Anchored = true
+        part.CanCollide = false
+        part.Size = Vector3.new(1,1,1)
+
+        local self = {
+            PreviousCFrame = previousCFrame,
+            GoalCFrame = goalCFrame,
+            PathPoint = point or 1,
+            Part = part
+            --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
+        }
+
+        if (GlobalInfo.Paths[1]) then
+            self.GoalCFrame = GlobalInfo.Paths[1][self.PathPoint]
+            self.PreviousCFrame = GlobalInfo.Paths[1][self.PathPoint] + Vector3.new(0, .01, 0)    
+        end
+
+        packageCount += 1
+
+        part.Parent = game.Workspace.Enemies
+
+        ReplicatedPackages[packageId] = self
+    end,
+
+    ['Spawn'] = function(packageId: number, id: number, name: string, fromQueue: boolean?)
+        --if (SpawnQueue[id] or ReplicatedEnemies[id]) then return end
+
+        --[[
         local previousCFrame = CFrame.new(0,0,0) + Vector3.new(0,0.01,0)
         local goalCFrame = CFrame.new(0,0,0)
 
@@ -172,12 +221,14 @@ Functions = {
             previousCFrame = GlobalInfo.Paths[1][1] + Vector3.new(0,0.01,0)
             goalCFrame = GlobalInfo.Paths[1][1]
         end
+        ]]
 
         local self = {
-            PreviousCFrame = previousCFrame,
-            GoalCFrame = goalCFrame,
-            PathPoint = point or 1,
+            --PreviousCFrame = previousCFrame,
+            --GoalCFrame = goalCFrame,
+            --PathPoint = point or 1,
             --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
+            PackageId = packageId,
             Name = name,
             Model = nil
         }
@@ -213,6 +264,11 @@ Functions = {
 
         if (ReplicatedEnemies[id]) then return end
 
+        local package = ReplicatedPackages[packageId]
+        if (not package) then return end
+        if (not package.Part) then return end
+        --if (package.PathPoint > 4093) then Functions.Remove(id); return end
+
         local enemyName = name
         if (not EnemiesInfo[enemyName]) then return end
 
@@ -224,18 +280,21 @@ Functions = {
 
         self.Offset = Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0)
 
-        self.Model.Parent = game.Workspace.Enemies
+        self.Model.Parent = package.Part
 
+        --[[
         if (GlobalInfo.Paths[1]) then
             self.GoalCFrame = GlobalInfo.Paths[1][self.PathPoint] + self.Offset
             self.PreviousCFrame = GlobalInfo.Paths[1][self.PathPoint] + self.Offset + Vector3.new(0, .01, 0)    
         end
+        ]]
 
-        self.Model:PivotTo(self.GoalCFrame)
+        self.Model:PivotTo(package.Part.CFrame + self.Offset)
 
         if (not self.Model.PrimaryPart) then warn('PrimaryPart '..self.Model.Name..' doesnt exist'); return end
         
-        self.Model.PrimaryPart.Anchored = true    
+        self.Model.PrimaryPart.Anchored = false
+        InstanceUtilities:Weld(self.Model.PrimaryPart, package.Part)
 
         local idle = selectedInfo.Animations.Idle
         if (not idle) then return end
@@ -283,19 +342,13 @@ Functions = {
             --local t = decoded[1]/2^12
             local cframe = track[decoded[1]]
             local id = decoded[3]
-    
-            local fromQueue = false
 
-            local self = ReplicatedEnemies[id]
-            if (not self) then self = SpawnQueue[id]; fromQueue = true end
+            local self = ReplicatedPackages[id]
             if (not self) then continue end
 
             self.PathPoint = decoded[1]
-
-            if (fromQueue) then continue end
-
             self.PreviousCFrame = self.GoalCFrame
-            self.GoalCFrame = cframe + self.Model:GetExtentsSize().Y/2 * Vector3.new(0, 1, 0)
+            self.GoalCFrame = cframe --+ self.Model:GetExtentsSize().Y/2 * Vector3.new(0, 1, 0)
         end
 
         delta = ((os.clock() - lastUpdated) + delta)/2

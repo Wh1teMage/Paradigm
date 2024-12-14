@@ -33,6 +33,8 @@ local data = {
 	Animations = {},
 	Sounds = {},
 	Descriptions = {},
+
+	EnemiesInRange = {},
 	
 	Amplifiers = {
 		[Enums.TowerAmplifiers.Cash] = 1,
@@ -65,6 +67,8 @@ return function()
 	temp.Session.Abilities = {}
 	temp.Session.Passives = {}
 	temp.Session.Buffs = {}
+
+	temp.EnemiesInRange = {}
 
 	return temp
 end

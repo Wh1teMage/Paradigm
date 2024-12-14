@@ -40,7 +40,7 @@ return function()
 	
 	function self.TransferData(args: {any})
 		component = args[1]
-		--owner = PlayerComponent:GetPlayer( component.OwnerInstance )
+		owner = PlayerComponent:GetPlayer( component.OwnerInstance )
 	end
 	
 	return self

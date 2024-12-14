@@ -22,10 +22,10 @@ Game.Waves = {
 		--{"Spawn", "Walker", 100, 1/30},
 		{"WaitForClear"},
 		{"AwardCash", 2550},
-		{"Wait", 50},
+		{"Wait", 5},
 	},
 	[2] = {
-		{"Spawn", "Part", 2000, 0},
+		{"Spawn", "Part", 1, 0},
 		{"WaitForClear"},
 		{"Wait", 5},
 	},

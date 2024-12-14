@@ -7,6 +7,7 @@ local InstanceCache = require(ReplicatedStorage.Utilities.InstanceCache)
 return {
 
     [PathConfig.Effects.PrecursorTestEffect] = function(p1: Vector3, name: string)
+        
         local tower = TowerEffects.GetTowerByName(name)
         if (not tower) then return end
 

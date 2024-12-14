@@ -7,6 +7,7 @@ local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 local SignalFunctions = require(ReplicatedStorage.Components.SignalComponent.CustomFunctions)
 
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
+local PackageComponent = require(script.PackageComponent)
 
 local LoadedComponents = {}
 
@@ -15,6 +16,7 @@ local MoveEnemyEvent = ReplicatedStorage.Events.MoveEnemy :: UnreliableRemoteEve
 local UPDATE_RATE = 1/10
 
 for _, component in ipairs(script:GetChildren()) do
+	if (component.Name) == 'PackageComponent' then continue end
 	LoadedComponents[component.Name] = require(component)
 end
 
@@ -26,38 +28,8 @@ local CFrames = {}
 
 task.spawn(function()
 
-	local package = {}
-
 	while task.wait(UPDATE_RATE) do
-
-		table.clear(package)
-
 		SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.ReplicateEnemyAmount, enemyCount)
-
-		for id, data in pairs(MovingEnemies) do
-	
-			local trackId = data[1]
-			local direction = data[2]
-			local enemy = data[3]
-
-			local track = enemy.Game.Info.Paths[trackId]
-			local length = track:GetPathLength()
-
-			enemy.CurrentStep += (enemy:GetValue('Speed')*UPDATE_RATE)/length * direction
-			enemy.CFrame = track:CalculateUniformCFrame(enemy.CurrentStep)
-			enemy.Distance = enemy.CurrentStep * length
-
-			CFrames[id] = enemy.CFrame
-
-			table.insert(package, {pathPoint = enemy.CurrentStep*2^12, path = trackId, enemyId = enemy.Id})
-
-			if (enemy.CurrentStep >= 1) then enemy:CompletedPath(); continue end
-			if ((not enemy.Health) or (enemy.Health <= 0)) then enemy:Destroy() end
-
-		end
-
-		MoveEnemyEvent:FireAllClients(SignalFunctions.EncodeEnemyMovement(package))
-
 	end
 
 end)
@@ -81,8 +53,10 @@ function EnemyComponent:StartMoving(selectedTrack: number?, startingPoint: numbe
 
 	self.CurrentStep = startingPoint
 
-	MovingEnemies[self.Id] = { selectedTrack, direction, self }
+	--MovingEnemies[self.Id] = { selectedTrack, direction, self }
 	CFrames[self.Id] = self.CFrame
+
+	PackageComponent:AddToQueue({ selectedTrack, direction, self })
 end
 
 function EnemyComponent:TakeDamage(damage: number)
@@ -111,6 +85,12 @@ function EnemyComponent:Destroy()
 	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id)
 
 	--print('enemy killed')
+
+	local package = PackageComponent:GetPackage(self.PackageId)
+
+	package.EnemyCount -= 1
+	--table.clear(package.Enemies[self.Id])
+	--package.Enemies[self.Id] = nil
 
 	Enemies[self.Id] = nil
 	MovingEnemies[self.Id] = nil
@@ -188,6 +168,9 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	data.CFrame = CFrame.new(10000, 10000, 10000)
 	data.Shooting = false
 	data.LastShoot = 0
+	data.RoundedStep = 1
+
+	data.Name = name
 	
 	local self = setmetatable(data, {__index = EnemyComponent})
 
@@ -199,10 +182,10 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 		self:AppendPassive(passive.Name, passive.Level, passive.Requirements, { self })
 	end
 	
-	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateEnemy, id, name)
+	--SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateEnemy, id, name)
 	--SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id, self.Name)
 
-	self:ReplicateField('Name', name)
+	--self:ReplicateField('Name', name)
 
 	data.Passives = nil
 	data.Abilities = nil
@@ -222,46 +205,58 @@ function EnemyComponentFabric:GetEnemyCount()
 	return enemyCount
 end
 
+function EnemyComponentFabric:GetPackagesAmount()
+	return PackageComponent:GetPackagesAmount()
+end
+
+function EnemyComponentFabric:GetPackages()
+	return PackageComponent:GetPackages()
+end
+
+function EnemyComponentFabric:GetPackage(id: number)
+	return PackageComponent:GetPackage(id)
+end
+
 function EnemyComponentFabric:ReplicateAliveEnemiesForPlayer(player: Player)
 	for id, enemy in pairs(EnemyComponentFabric:GetAll()) do
 		SignalComponent:GetSignal('ManageEnemies'):Fire(PathConfig.Scope.ReplicateEnemy, player, id, enemy.Name)
 	end
 end
 
-function EnemyComponentFabric:GetEnemiesInRadius(position: Vector3, radius: number)
-	local enemies = {}
+function EnemyComponentFabric:GetPackagesInRadius(position: Vector3, radius: number)
+	
+	local packages = table.create(EnemyComponentFabric:GetPackagesAmount())
 	
 	debug.profilebegin('gettingEnemies')
 
-	local count = 0
+	for id, package in pairs(EnemyComponentFabric:GetPackages()) do
+		
+		local cframe = package.CFrame
+		if (not cframe) then continue end
 
-	for id, cframe in pairs(CFrames) do
-		count += 1
-		--local cframe = enemy.CFrame
-		--if (not cframe) then continue end
+		local distance = (position - cframe.Position).Magnitude
+		if (distance > radius) then continue end
 
-		--local distance = (position - cframe.Position).Magnitude
-		--if (distance <= radius) then
-		if (count%10 == 0) then
-			enemies[id] = id
-		end
-		--Enemies[id]
-		--end
+		table.insert(packages, package)
 	end
 
 	debug.profileend()
 	
-	return {}--enemies
+	return packages
+	
 end
 
 function EnemyComponentFabric:TestFunc()
-	local enemies = table.create(100*3000)
+	--[[
+	local towerCount = 500
+
+	local enemies = table.create(towerCount*300)
 	
 	debug.profilebegin('gettingEnemiesv2')
 	
 	local count = 0
 
-	for i = 1, 500 do
+	for i = 1, towerCount do
 		for id, cframe in pairs(CFrames) do
 			count += 1
 			--local cframe = enemy.CFrame
@@ -280,6 +275,7 @@ function EnemyComponentFabric:TestFunc()
 	end
 
 	debug.profileend()
+	]]
 	
 	return {}--enemies
 end

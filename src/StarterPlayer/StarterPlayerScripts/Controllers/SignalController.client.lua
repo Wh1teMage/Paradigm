@@ -45,8 +45,10 @@ SignalComponent:GetSignal('ManageEffects'):Connect(
 SignalComponent:GetSignal('ManageEnemies'):Connect(
 	function(scope: string, ...)
 
-		--print(scope, ...)
+		--print(scope, ...) 
 
+		if (scope == tostring( PathConfig.Scope.DestroyPackage )) then EnemiesEffects.DespawnPackage(...) end
+		if (scope == tostring( PathConfig.Scope.ReplicatePackage )) then EnemiesEffects.SpawnPackage(...) end
 		if (scope == tostring( PathConfig.Scope.ReplicateEnemy )) then EnemiesEffects.Spawn(...) end
 		if (scope == tostring( PathConfig.Scope.DestroyEnemy )) then EnemiesEffects.Remove(...) end
 		if (scope == tostring( PathConfig.Scope.ReplicateAttributes )) then EnemiesEffects.SetAttribute(...) end

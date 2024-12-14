@@ -4,29 +4,65 @@ local ServerScriptService = game:GetService('ServerScriptService')
 local Enums = require(ReplicatedStorage.Templates.Enums)
 local EnemyComponent = require(ServerScriptService.Components.EnemyComponent)
 --local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
+--[[
+local test = function()
+	local packages = table.create(EnemyComponent:GetPackagesAmount())
+	
+	debug.profilebegin('gettingEnemies')
+
+	for id, package in pairs(EnemyComponent:GetPackages()) do
+		
+		local cframe = package.CFrame
+		if (not cframe) then continue end
+
+		local distance = (position - cframe.Position).Magnitude
+		if (distance > radius) then continue end
+
+		table.insert(packages, package)
+	end
+
+	debug.profileend()
+	
+	return packages
+end
+]]
 
 local TargetModes = {
 	[Enums.TargetType.First] = function(self, position: Vector3?, range: number?)
 		
-		local enemies = {}--self:GetTargetsInRange(position, range)
-		table.clear(enemies)
+		local enemies = self.EnemiesInRange
 
-		--[[
-		
-		local selectedEnemy;
+		local selectedPackage;
 		local selectedValue = 0
-		
+
 		for _, target in pairs(enemies) do
+			if (not target.Distance) then continue end
+			if (target.EnemyCount < 1) then continue end
 			if (target.Distance < selectedValue) then continue end
 			selectedValue = target.Distance
-			selectedEnemy = target
+			selectedPackage = target
+			--break
 		end
+
+		--print(self.Id, selectedPackage)
+
+		--print(selectedPackage)
 		
-		if selectedEnemy then self.SelectedTarget = selectedEnemy end
+		if selectedPackage then 
+			for _, enemy in pairs(selectedPackage.Enemies) do 
+				if (not enemy.Id) then continue end
+				--enemy.CFrame = selectedPackage.CFrame
+				self.SelectedTarget = enemy
+				break 
+			end
+		end
+
+		--print(self.SelectedTarget.Id, self.Id)
+
+		--print(self.SelectedTarget.Id, self.Id, selectedPackage.Id)
 		
-		table.clear(enemies)
-		enemies = nil
-		]]
+		table.clear(self.EnemiesInRange)
+		
 	end,
 }
 
@@ -36,7 +72,7 @@ function TargetComponent:GetTargetsInRange(position: Vector3?, range: number?)
 	if (not position) then position = self.Hitbox.Position end
 	if (not range) then range = self:GetValue('Range') end
 
-	return EnemyComponent:GetEnemiesInRadius(position, range)
+	return EnemyComponent:GetPackagesInRadius(position, range)
 	--[[
 	for _, enemy in pairs(EnemyComponent:GetAll()) do
 		local hitbox = enemy.Hitbox
@@ -70,12 +106,19 @@ function TargetComponent:DealTargetDamage(damage: number)
 end
 ]]
 function TargetComponent:WaitForTarget(delay: number?)
-	if (not delay) then delay = 5 end
+	if (not delay) then delay = 1 end
 
 	local start = os.clock()
 
 	if (self.SelectedTarget and getmetatable(self.SelectedTarget)) then return end
-	repeat task.wait(.1); self:GetTarget() until self.SelectedTarget or (not getmetatable(self)) or (os.clock() - start > delay)
+
+	self:GetTarget()
+
+	while (not self.SelectedTarget.CFrame) and (os.clock() - start < delay) do
+		task.wait(.1)
+		self:GetTarget()
+	end
+	--repeat task.wait(.1); self:GetTarget(); until self.SelectedTarget or (not getmetatable(self)) 
 end
 
 function TargetComponent:FaceEnemy()

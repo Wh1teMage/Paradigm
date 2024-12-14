@@ -18,6 +18,9 @@ return {
 
         ['ReplicateEnemyAmount'] = 12,
         ['TowerUpdated'] = 13,
+
+        ['ReplicatePackage'] = 14,
+        ['DestroyPackage'] = 15,
 	},
 
     Effects = {

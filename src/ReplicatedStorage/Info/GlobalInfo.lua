@@ -8,11 +8,10 @@ return {
 
 	CurrentWave = 0,
 
-	TowerLimit = 100,
-	DefaultTowerLimit = 100,
+	TowerLimit = 0,
+	DefaultTowerLimit = 500,
 
 	Paths = {},
-	PathPoints = {},
 
 	Loaded = false,
 
