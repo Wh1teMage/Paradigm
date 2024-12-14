@@ -89,6 +89,8 @@ function EnemyComponent:Destroy()
 	local package = PackageComponent:GetPackage(self.PackageId)
 
 	package.EnemyCount -= 1
+	if (package.EnemyCount < 1) then package:Destroy() end
+	
 	--table.clear(package.Enemies[self.Id])
 	--package.Enemies[self.Id] = nil
 
@@ -205,8 +207,8 @@ function EnemyComponentFabric:GetEnemyCount()
 	return enemyCount
 end
 
-function EnemyComponentFabric:GetPackagesAmount()
-	return PackageComponent:GetPackagesAmount()
+function EnemyComponentFabric:GetPackageCount()
+	return PackageComponent:GetPackageCount()
 end
 
 function EnemyComponentFabric:GetPackages()
@@ -225,7 +227,7 @@ end
 
 function EnemyComponentFabric:GetPackagesInRadius(position: Vector3, radius: number)
 	
-	local packages = table.create(EnemyComponentFabric:GetPackagesAmount())
+	local packages = table.create(EnemyComponentFabric:GetPackageCount())
 	
 	debug.profilebegin('gettingEnemies')
 

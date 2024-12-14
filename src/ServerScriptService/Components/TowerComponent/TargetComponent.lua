@@ -3,29 +3,6 @@ local ServerScriptService = game:GetService('ServerScriptService')
 
 local Enums = require(ReplicatedStorage.Templates.Enums)
 local EnemyComponent = require(ServerScriptService.Components.EnemyComponent)
---local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
---[[
-local test = function()
-	local packages = table.create(EnemyComponent:GetPackagesAmount())
-	
-	debug.profilebegin('gettingEnemies')
-
-	for id, package in pairs(EnemyComponent:GetPackages()) do
-		
-		local cframe = package.CFrame
-		if (not cframe) then continue end
-
-		local distance = (position - cframe.Position).Magnitude
-		if (distance > radius) then continue end
-
-		table.insert(packages, package)
-	end
-
-	debug.profileend()
-	
-	return packages
-end
-]]
 
 local TargetModes = {
 	[Enums.TargetType.First] = function(self, position: Vector3?, range: number?)
@@ -33,17 +10,17 @@ local TargetModes = {
 		local enemies = self.EnemiesInRange
 
 		local selectedPackage;
-		local selectedValue = 0
+		--local selectedValue = 0
 
-		for _, target in pairs(enemies) do
-			if (not target.Distance) then continue end
+		for _, target in pairs(enemies) do -- iter from start to end
+			if (not target.EnemyCount) then continue end
 			if (target.EnemyCount < 1) then continue end
-			if (target.Distance < selectedValue) then continue end
-			selectedValue = target.Distance
-			selectedPackage = target
-			--break
+			--if (target.CurrentStep < selectedValue) then continue end
+			--selectedValue = target.Distance
+			selectedPackage = EnemyComponent:GetPackage(target.Id)
+			break
 		end
-
+		
 		--print(self.Id, selectedPackage)
 
 		--print(selectedPackage)
@@ -62,6 +39,7 @@ local TargetModes = {
 		--print(self.SelectedTarget.Id, self.Id, selectedPackage.Id)
 		
 		table.clear(self.EnemiesInRange)
+		enemies = nil
 		
 	end,
 }

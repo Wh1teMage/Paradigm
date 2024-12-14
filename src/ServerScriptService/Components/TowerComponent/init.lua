@@ -13,6 +13,8 @@ for _, component in ipairs(script:GetChildren()) do
 	LoadedComponents[component.Name] = require(component)
 end
 
+local towerCount = 0
+
 local TowersCache = {}
 
 local Towers = {}
@@ -104,6 +106,8 @@ function TowerComponent:Destroy()
 			passive.OnTowerRemoved(self)
 		end
 	end
+
+	towerCount -= 1
 
 	Towers[self.Hitbox] = nil
 	self.Hitbox:Destroy()
@@ -259,41 +263,43 @@ function TowerComponentFabric.new(position: Vector3, name: string, checkCallback
 
 	Towers[part] = self
 
+	towerCount += 1
+
 	return self
 end
 
 --! make this one into different module (Target support or smt)
 
 local MAX_TOWERS_AMOUNT = 2000
-local PACKAGE_SIZE = 300
+local PACKAGE_SIZE = 30
 
-local UPDATE_RATE = 1/10
-local Actors = {}
-
-local setupActors = function()
-	local packageAmount = MAX_TOWERS_AMOUNT/PACKAGE_SIZE
-
-	for i = 1, packageAmount do
-		local clonned = script.Templates.TargettingHelper:Clone()
-		clonned.Parent = script.Actors
-		table.insert(Actors, clonned)
-	end
-end
-
-setupActors()
+local UPDATE_RATE = 1
 
 task.spawn(function()
 	
-	while task.wait(UPDATE_RATE) do
+	while task.wait() do
 
 		local enemies = EnemyComponent:GetPackages()
+		local count = 0
+
+		local start = os.clock()
+		
+		table.sort(enemies, function(a, b)
+			return (a.CurrentStep > b.CurrentStep)
+		end)
 
 		for _, tower in pairs(Towers) do
+
+			count += 1
+
+			if (count % PACKAGE_SIZE == 0) then
+				task.wait() --UPDATE_RATE / (towerCount / PACKAGE_SIZE)
+			end
 
 			local position = tower.Hitbox.Position
 			local radius = tower:GetValue('Range')
 
-			local packages = {}
+			local packages = table.create(EnemyComponent:GetPackageCount())
 
 			for _, package in pairs(enemies) do
 
@@ -303,47 +309,19 @@ task.spawn(function()
 				local distance = (position - cframe.Position).Magnitude
 				if (distance > radius) then continue end
 
-				table.insert(packages, package)
+				table.insert(packages, { CurrentStep = package.CurrentStep, Id = package.Id })
 
 			end
 
 			tower.EnemiesInRange = packages
 
 			--table.insert(answer, {tower.Name, packages})
-
 		end
 
-		--[[
+		local elapsed = os.clock() - start
 
-		for i, tower in pairs(Towers) do
-			count += 1
-			table.insert(package, {Name = tower.Name, Range = tower.Range, Position = tower.Hitbox.Position})
+		task.wait(UPDATE_RATE - elapsed)
 
-			if (count > currentSize) then
-				currentSize += PACKAGE_SIZE
-				iterations += 1
-
-				task.defer(function() 
-					Actors[iterations]:SendMessage('Calculate', package, enemies)
-				end)
-
-			end
-		end
-
-		]]
-	end
-
-end);
-
-(ReplicatedStorage.Events.TargetEnemy :: BindableEvent).Event:Connect(function(answer) --partName, packages
-
-	for _, data in pairs(answer) do
-		local tower = TowerComponentFabric:GetTower(data[1])
-		if (not tower) then return end
-		tower.EnemiesInRange = data[2]
-		print(tower.EnemiesInRange)
-
-		task.wait()
 	end
 
 end)

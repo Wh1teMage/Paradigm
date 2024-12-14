@@ -176,7 +176,7 @@ function PackageComponentFabric:GetPackages()
     return ExistingPackages
 end
 
-function PackageComponentFabric:GetPackagesAmount()
+function PackageComponentFabric:GetPackageCount()
     return packageCount
 end
 
