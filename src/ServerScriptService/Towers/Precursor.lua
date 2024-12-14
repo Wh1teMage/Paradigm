@@ -17,12 +17,14 @@ return function(position: Vector3, callback)
 
 		return AttackPatterns.Burst(self, function()
 
+			--[[
 			SignalComponent:GetSignal('ManageEffects'):FireAllClients(
 				PathConfig.Scope.ReplicateEffect, 
 				PathConfig.Effects.PrecursorTestEffect,
 				self.SelectedTarget.CFrame.Position,
 				self.Hitbox.Name
 			)
+			]]
 
 			local damageAmount = self:GetValue('Damage')
 			local moneyGain = math.min(self.SelectedTarget.Health, damageAmount)
@@ -32,8 +34,8 @@ return function(position: Vector3, callback)
 			local owner = PlayerComponent:GetPlayer(self.OwnerInstance)
 			if (not owner) then return end
 
-			owner:AddExp(moneyGain)
-			owner:AddAttribute('Cash', moneyGain)
+			--owner:AddExp(moneyGain)
+			--owner:AddAttribute('Cash', moneyGain)
 		end)
 		
 	end

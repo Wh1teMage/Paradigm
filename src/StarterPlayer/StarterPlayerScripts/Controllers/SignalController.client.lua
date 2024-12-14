@@ -33,8 +33,6 @@ SignalComponent:GetSignal('ManageTowersBindable', true):Connect(
 SignalComponent:GetSignal('ManageEffects'):Connect(
 	function(scope: number, ...)
 
-		--print(scope, ...)
-
 		if (tonumber( scope ) == tonumber( PathConfig.Scope.ReplicateEffect )) then
 			ReplicationComponent:TriggerEffect(...)
 		end
@@ -44,8 +42,6 @@ SignalComponent:GetSignal('ManageEffects'):Connect(
 
 SignalComponent:GetSignal('ManageEnemies'):Connect(
 	function(scope: string, ...)
-
-		--print(scope, ...) 
 
 		if (scope == tostring( PathConfig.Scope.DestroyPackage )) then EnemiesEffects.DespawnPackage(...) end
 		if (scope == tostring( PathConfig.Scope.ReplicatePackage )) then EnemiesEffects.SpawnPackage(...) end

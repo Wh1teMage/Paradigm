@@ -120,7 +120,7 @@ local function eventConnection(name: string)
 		end
 
 		connection = event.OnClientEvent:Connect(function(data) --scope, buff: buffer, strLen
-
+			
 			PackageComponent:Decode(data, function(scope, value)
 				task.wait()
 				
@@ -134,6 +134,7 @@ local function eventConnection(name: string)
 			end)
 
 		end)
+
 	else
 
 		PackageComponent.FinishConnections[event.Name] = function(package)

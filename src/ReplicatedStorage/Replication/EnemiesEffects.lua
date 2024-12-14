@@ -178,8 +178,9 @@ Functions = {
     end,
 
     ['SpawnPackage'] = function(packageId: number,  point: number?)
-        local start = os.clock()
-        while (ReplicatedPackages[packageId] and (os.clock() - start) < 5) do task.wait(.1) end
+        if (ReplicatedPackages[packageId]) then return end
+        --local start = os.clock()
+        --while (ReplicatedPackages[packageId] and (os.clock() - start) < 5) do task.wait(.1) end
 
         local previousCFrame = CFrame.new(0,0,0) + Vector3.new(0,0.01,0)
         local goalCFrame = CFrame.new(0,0,0)

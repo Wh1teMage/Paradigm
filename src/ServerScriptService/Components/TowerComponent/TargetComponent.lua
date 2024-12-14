@@ -10,20 +10,24 @@ local TargetModes = {
 		local enemies = self.EnemiesInRange
 
 		local selectedPackage;
-		--local selectedValue = 0
+		local selectedValue = 0
+
+		self.SelectedTarget = nil
 
 		for _, target in pairs(enemies) do -- iter from start to end
 			if (not target.EnemyCount) then continue end
 			if (target.EnemyCount < 1) then continue end
-			--if (target.CurrentStep < selectedValue) then continue end
-			--selectedValue = target.Distance
+			if (target.Distance < selectedValue) then continue end
+			selectedValue = target.Distance
 			selectedPackage = EnemyComponent:GetPackage(target.Id)
 			break
 		end
 		
 		--print(self.Id, selectedPackage)
-
-		--print(selectedPackage)
+		--print(#self.EnemiesInRange)
+		--if (selectedPackage) then
+			--print(selectedPackage.Id)
+		--end
 		
 		if selectedPackage then 
 			for _, enemy in pairs(selectedPackage.Enemies) do 
@@ -34,11 +38,21 @@ local TargetModes = {
 			end
 		end
 
+		--[[
+		if (self.SelectedTarget) then
+			local distance = (self.Hitbox.Position - self.SelectedTarget.CFrame.Position).Magnitude
+			if (distance > self:GetValue('Range')) then  end
+		end
+		]]
+
+		--if (self.SelectedTarget) then print(self.SelectedTarget.Id) end
+
+		--print(self.SelectedTarget.Id)
+
 		--print(self.SelectedTarget.Id, self.Id)
 
 		--print(self.SelectedTarget.Id, self.Id, selectedPackage.Id)
 		
-		table.clear(self.EnemiesInRange)
 		enemies = nil
 		
 	end,
@@ -92,7 +106,7 @@ function TargetComponent:WaitForTarget(delay: number?)
 
 	self:GetTarget()
 
-	while (not self.SelectedTarget.CFrame) and (os.clock() - start < delay) do
+	while (not self.SelectedTarget) and (os.clock() - start < delay) do
 		task.wait(.1)
 		self:GetTarget()
 	end
@@ -105,6 +119,7 @@ function TargetComponent:FaceEnemy()
 		self.SelectedTarget.CFrame.Position * Vector3.new(1, 0, 1) + 
 		self.Hitbox.Position * Vector3.new(0, 1, 0))
 
+	
 	task.spawn(function() -- not sure about this one tho
 		for i = 1, 3 do
 			if ((not getmetatable(self.SelectedTarget)) or (not getmetatable(self))) then continue end

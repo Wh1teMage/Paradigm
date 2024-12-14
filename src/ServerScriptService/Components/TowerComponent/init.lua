@@ -273,7 +273,7 @@ end
 local MAX_TOWERS_AMOUNT = 2000
 local PACKAGE_SIZE = 30
 
-local UPDATE_RATE = 1
+local UPDATE_RATE = 1/3
 
 task.spawn(function()
 	
@@ -283,10 +283,12 @@ task.spawn(function()
 		local count = 0
 
 		local start = os.clock()
-		
+
+		--[[
 		table.sort(enemies, function(a, b)
 			return (a.CurrentStep > b.CurrentStep)
 		end)
+		]]
 
 		for _, tower in pairs(Towers) do
 
@@ -295,6 +297,8 @@ task.spawn(function()
 			if (count % PACKAGE_SIZE == 0) then
 				task.wait() --UPDATE_RATE / (towerCount / PACKAGE_SIZE)
 			end
+
+			table.clear(tower.EnemiesInRange)
 
 			local position = tower.Hitbox.Position
 			local radius = tower:GetValue('Range')
@@ -309,7 +313,7 @@ task.spawn(function()
 				local distance = (position - cframe.Position).Magnitude
 				if (distance > radius) then continue end
 
-				table.insert(packages, { CurrentStep = package.CurrentStep, Id = package.Id })
+				table.insert(packages, package) --{ CurrentStep = package.CurrentStep, Id = package.Id }
 
 			end
 

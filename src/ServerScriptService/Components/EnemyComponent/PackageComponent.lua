@@ -31,6 +31,7 @@ task.spawn(function()
             --SignalComponent:GetSignal('ManageTowersUIFromServer'):FireAllClients(PathConfig.Scope.ReplicateEnemyAmount, enemyCount)
     
             for id, data in pairs(ExistingPackages) do
+                if (not data.EnemyCount) then continue end
     
                 local length = data.Track:GetPathLength()
     
@@ -54,6 +55,7 @@ task.spawn(function()
                     enemy.CFrame = data.CFrame
                 end
     
+                if (not data.EnemyCount) then continue end
                 if (data.EnemyCount < 1) then data:Destroy() end
             end
     
@@ -79,9 +81,11 @@ end
 function PackageComponent:Destroy()
 	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyPackage, self.Id)
 
-	ExistingPackages[self.Id] = nil
+	ExistingPackages[self.StringId] = nil
 	table.clear(self)
 	setmetatable(self, nil)
+
+    --print('destroyed')
 
 	packageCount -= 1
 end
@@ -121,10 +125,11 @@ function PackageComponent.new(data, info)
 	local id = 1
 
 	for i = 1, 2^16 do
-		if (not ExistingPackages[i]) then id = i; break end
+		if (not ExistingPackages[tostring(i)]) then id = i; break end
 	end
 
     self.Id = id
+    self.StringId = tostring(id)
 
     task.spawn(function()
 
@@ -137,12 +142,12 @@ function PackageComponent.new(data, info)
     end)
 
     for _, enemy in pairs(info) do
-        enemy.PackageId = self.Id
+        enemy.PackageId = id
     end
 
     packageCount += 1
 
-    ExistingPackages[id] = self
+    ExistingPackages[self.StringId] = self
 end
 
 function PackageComponentFabric:AddToQueue(info)
@@ -169,7 +174,7 @@ function PackageComponentFabric:FinishQueue()
 end
 
 function PackageComponentFabric:GetPackage(id: number)
-    return ExistingPackages[id]
+    return ExistingPackages[tostring(id)]
 end
 
 function PackageComponentFabric:GetPackages()

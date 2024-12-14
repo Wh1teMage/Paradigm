@@ -177,7 +177,10 @@ function TowersComponent:PlaceTower()
 	local raycast = createRaycast(raycastParams)
 	if (not raycast) then return end
 
-	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.PlaceTower, raycast.Position, currentlySelected)
+	for i = 1, 10 do
+		SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.PlaceTower, raycast.Position 
+		 + Vector3.new(math.random(-100, 100)/100*2, 0, math.random(-100, 100)/100*2), currentlySelected)
+	end
 
 	self:StopPlacing()
 	
