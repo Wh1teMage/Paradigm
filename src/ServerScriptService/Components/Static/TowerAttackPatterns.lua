@@ -25,6 +25,24 @@ Patterns['Burst'] = function(component, callback: () -> nil)
 
 end
 
+Patterns['Single'] = function(component, callback: () -> nil)
+
+	--print(component.SelectedTarget)
+
+	if (not getmetatable(component)) then return end
+
+	component:WaitForTarget()
+	if ((not getmetatable(component.SelectedTarget)) or (not getmetatable(component))) then return end
+
+	component:FaceEnemy()
+	callback()
+
+	component.SelectedTarget = nil
+
+	if (not getmetatable(component)) then return end
+
+end
+
 
 
 return Patterns

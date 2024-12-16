@@ -20,6 +20,9 @@ local ReplicatedEnemies = {}
 local EnemyAttributes = {}
 local SpawnQueue = {}
 
+local Models = {}
+local ModelDeltas = {}
+
 local function FindAttribute(part: Part, name: string)
     local value = part:GetAttribute(name)
     if (not value) then warn(part.Name..' Failed to find '..name); return end
@@ -152,6 +155,20 @@ task.spawn(function()
     
 end)
 
+local clearTime = 1
+
+task.spawn(function()
+    while task.wait(3) do
+
+        for name, values in pairs(Models) do
+            if ((os.clock() - ModelDeltas[name]) < clearTime) then continue end
+
+            table.clear(values)
+        end
+        
+    end
+end)
+
 
 Functions = {
 
@@ -277,11 +294,17 @@ Functions = {
         --prob include speed, check stats in the original game
 
         if (not selectedInfo.Model) then return end
-        self.Model = selectedInfo.Model:Clone()
 
-        self.Offset = Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0)
+        if (Models[enemyName] and #Models[enemyName] > 0) then -- less readable for optimization
+            self.Model = table.remove(Models[enemyName])
+            ModelDeltas[self.Name] = os.clock()
+        else
+            self.Model = selectedInfo.Model:Clone()
+        end
 
         self.Model.Parent = package.Part
+
+        self.Offset = Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0)
 
         --[[
         if (GlobalInfo.Paths[1]) then
@@ -320,7 +343,13 @@ Functions = {
         if (not self) then self = SpawnQueue[id]; fromQueue = true end
         if (not self) then return end
 
-        if (self.Model and self.Model.Parent) then self.Model:Destroy() end
+        if (self.Model and self.Model.Parent) then
+            self.Model.Parent = nil
+            if (not Models[self.Name]) then Models[self.Name] = {} end
+            table.insert(Models[self.Name], self.Model)
+            ModelDeltas[self.Name] = os.clock()
+        end
+
         table.clear(self)
         self = nil
         

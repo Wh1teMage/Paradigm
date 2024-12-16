@@ -141,6 +141,14 @@ function TowersComponent:StartPlacing(slot: number)
 	currentlySelected = selectedTower
 	currentlyPlacing.Parent = workspace['_ignore']
 
+	local raycast = createRaycast(raycastParams)
+	if (not raycast) then return end
+	
+	currentlyPlacing.CFrame = CFrame.new(raycast.Position)
+	model.PrimaryPart.CFrame = currentlyPlacing.CFrame
+
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('StartPlacingUI', selectedTower)
+
 	local idle = selectedInfo.Animations.Idle
     if (not idle) then return end
 
@@ -150,14 +158,6 @@ function TowersComponent:StartPlacing(slot: number)
     loadedAnimation:Play()
 
 	selectedInfo = nil
-
-	local raycast = createRaycast(raycastParams)
-	if (not raycast) then return end
-	
-	currentlyPlacing.CFrame = CFrame.new(raycast.Position)
-	model.PrimaryPart.CFrame = currentlyPlacing.CFrame
-
-	SignalComponent:GetSignal('ManageTowersUI', true):Fire('StartPlacingUI', selectedTower)
 end
 
 function TowersComponent:StopPlacing()
@@ -177,7 +177,7 @@ function TowersComponent:PlaceTower()
 	local raycast = createRaycast(raycastParams)
 	if (not raycast) then return end
 
-	for i = 1, 10 do
+	for i = 1, 35 do
 		SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.PlaceTower, raycast.Position 
 		 + Vector3.new(math.random(-100, 100)/100*2, 0, math.random(-100, 100)/100*2), currentlySelected)
 	end

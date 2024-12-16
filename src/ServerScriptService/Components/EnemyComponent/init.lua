@@ -56,6 +56,8 @@ function EnemyComponent:StartMoving(selectedTrack: number?, startingPoint: numbe
 	--MovingEnemies[self.Id] = { selectedTrack, direction, self }
 	CFrames[self.Id] = self.CFrame
 
+	if (not self.IsTower) then enemyCount += 1 end
+
 	PackageComponent:AddToQueue({ selectedTrack, direction, self })
 end
 
@@ -90,17 +92,17 @@ function EnemyComponent:Destroy()
 
 	package.EnemyCount -= 1
 	if (package.EnemyCount < 1) then package:Destroy() end
-	
+
 	--table.clear(package.Enemies[self.Id])
 	--package.Enemies[self.Id] = nil
+
+	if (not self.IsTower) then enemyCount -= 1 end
 
 	Enemies[self.Id] = nil
 	MovingEnemies[self.Id] = nil
 	--self.Hitbox:Destroy()
 	table.clear(self)
 	setmetatable(self, nil)
-
-	enemyCount -= 1
 end
 
 function EnemyComponent:CheckRequirements(requirements) -- use later
@@ -193,8 +195,6 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 	data.Abilities = nil
 
 	Enemies[id] = self
-
-	enemyCount += 1
 	
 	return self
 end

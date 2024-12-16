@@ -12,12 +12,12 @@ Towers[1] = function()
 
 	tower.ModelsFolder = TowerSamples.Precursor
 	tower.Price = 20
-	tower.Range = 18
-	tower.Damage = 1
+	tower.Range = 20
+	tower.Damage = 5
 	tower.Firerate = 2.05
 
 	tower.ShootType = Enums.ShootType.Burst
-	tower.BurstCount = 600
+	tower.BurstCount = 6
 	tower.BurstCD = .1
 
 	tower.Level = 1

@@ -177,12 +177,16 @@ function TowerComponent:ReplicateField(fieldName: string, value: number)
 	hitbox:SetAttribute(fieldName, value)
 end
 
+function TowerComponent:SetCurrentGame(match)
+	self.Game = match
+end
+
 function TowerComponent:SetOwner(owner)
 	for _, passive in pairs(owner.Session.Passives) do
 		passive.OnTowerAdded(self)
 	end
 
-	self.Game = owner.Game
+	self:SetCurrentGame(owner.Game)
 	self.OwnerInstance = owner.Instance
 end
 
@@ -291,14 +295,14 @@ task.spawn(function()
 		]]
 
 		for _, tower in pairs(Towers) do
-
 			count += 1
 
 			if (count % PACKAGE_SIZE == 0) then
 				task.wait() --UPDATE_RATE / (towerCount / PACKAGE_SIZE)
 			end
 
-			table.clear(tower.EnemiesInRange)
+			if (tower.EnemiesInRange) then table.clear(tower.EnemiesInRange) end
+			if (not tower.EnemiesInRange) then continue end
 
 			local position = tower.Hitbox.Position
 			local radius = tower:GetValue('Range')
@@ -306,6 +310,7 @@ task.spawn(function()
 			local packages = table.create(EnemyComponent:GetPackageCount())
 
 			for _, package in pairs(enemies) do
+				if (package.IsTower) then continue end
 
 				local cframe = package.CFrame
 				if (not cframe) then continue end

@@ -62,8 +62,8 @@ function ValuesComponent:LevelUp()
 		requiredExp = values.LevelValue*100*(1.01^values.LevelValue) + 100
 	end
 	
-	self.Replica:SetValue('Profile.Values.LevelValue', profileData.Values.LevelValue)
-	self.Replica:SetValue('Profile.Values.ExpValue', profileData.Values.ExpValue)
+	--self.Replica:SetValue('Profile.Values.LevelValue', profileData.Values.LevelValue)
+	--self.Replica:SetValue('Profile.Values.ExpValue', profileData.Values.ExpValue)
 end
 
 return ValuesComponent

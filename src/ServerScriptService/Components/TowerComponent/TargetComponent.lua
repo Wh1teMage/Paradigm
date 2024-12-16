@@ -20,7 +20,7 @@ local TargetModes = {
 			if (target.Distance < selectedValue) then continue end
 			selectedValue = target.Distance
 			selectedPackage = EnemyComponent:GetPackage(target.Id)
-			break
+			--break
 		end
 		
 		--print(self.Id, selectedPackage)

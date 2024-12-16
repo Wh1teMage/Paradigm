@@ -58,5 +58,14 @@ Enemies['Walker'] = function(level: number)
 	return enemy
 end
 
+Enemies['TowerWalker'] = function(level: number)
+	local enemy = Enemies['Part'](level)
+
+	enemy.Speed = 8
+	enemy.Name = 'TowerWalker'
+	return enemy
+end
+
+
 
 return Enemies

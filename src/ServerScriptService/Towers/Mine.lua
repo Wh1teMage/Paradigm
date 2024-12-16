@@ -10,31 +10,26 @@ local tower = require(ServerScriptService.Components.TowerComponent)
 local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
 
 return function(position: Vector3, callback)
-	local self = tower.new(position, 'Precursor', callback)
+	local self = tower.new(position, 'Mine', callback)
 	if (not self) then return end 
 
 	local test = function()
 
-		return AttackPatterns.Burst(self, function()
-			
-			SignalComponent:GetSignal('ManageEffects'):FireAllClients(
-				PathConfig.Scope.ReplicateEffect, 
-				PathConfig.Effects.PrecursorTestEffect,
-				self.SelectedTarget.CFrame.Position,
-				self.Hitbox.Name
-			)
+		return AttackPatterns.Single(self, function()
 			
 			local damageAmount = self:GetValue('Damage')
 			local moneyGain = math.min(self.SelectedTarget.Health, damageAmount)
 	
 			self.SelectedTarget:TakeDamage(damageAmount)
 
+            self:Destroy()
+
 			local owner = PlayerComponent:GetPlayer(self.OwnerInstance)
 			if (not owner) then return end
 
 			owner:AddExp(moneyGain)
 			owner:AddAttribute('Cash', moneyGain)
-
+            owner:AddAttribute('TowerAmount', -1)
 		end)
 		
 	end

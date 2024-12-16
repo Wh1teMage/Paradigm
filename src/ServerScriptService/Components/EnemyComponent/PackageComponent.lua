@@ -49,7 +49,8 @@ task.spawn(function()
                         continue 
                     end
 
-                    if (data.CurrentStep >= 1) then enemy:CompletedPath(); continue end
+                    if (data.Direction < 0 and data.CurrentStep <= 0) then enemy:Destroy(); continue end
+                    if (data.Direction > 0 and data.CurrentStep >= 1) then enemy:CompletedPath(); continue end
                     if (enemy.CanAttack) then enemy:Attack() end
 
                     enemy.CFrame = data.CFrame
@@ -99,11 +100,12 @@ function PackageComponent.new(data, info)
     local startingPoint = tonumber(data[4])
 
     local currentGame; --= info[1].Game --! store only enemies ids later on
+    local isTower = false;
 
     local count = info.count
     info.count = nil
 
-    for _, obj in pairs(info) do currentGame = obj.Game; break end
+    for _, obj in pairs(info) do currentGame = obj.Game; isTower = obj.IsTower; break end
     local track = currentGame.Info.Paths[selectedTrack]
 
     local self = setmetatable({
@@ -119,7 +121,8 @@ function PackageComponent.new(data, info)
         EnemyCount = count,
 
         Game = currentGame,
-        Enemies = info
+        Enemies = info,
+        IsTower = isTower
     }, { __index = PackageComponent })
 
 	local id = 1

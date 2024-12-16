@@ -9,7 +9,7 @@ return {
 	CurrentWave = 0,
 
 	TowerLimit = 0,
-	DefaultTowerLimit = 500,
+	DefaultTowerLimit = 1000,
 
 	Paths = {},
 

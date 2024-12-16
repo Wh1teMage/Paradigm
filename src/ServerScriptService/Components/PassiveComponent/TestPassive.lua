@@ -7,6 +7,8 @@ local TowersComponent = require(Components.TowerComponent)
 local PlayerComponent = require(Components.PlayerComponent)
 local passive = require(script.Parent)
 
+local EnemyComponentFolder = ServerScriptService.Enemies
+
 return function()
 	local self = passive.new()
 	
@@ -35,6 +37,42 @@ return function()
 			--task.wait()
 		end
 		
+
+		task.spawn(function()
+			while not component.Game do task.wait(.1) end
+			
+			for i = 1, 150 do
+
+				task.spawn(function()
+					local enemy = require(EnemyComponentFolder:FindFirstChild('TowerWalker'))()
+					enemy.IsTower = true
+					enemy:SetCurrentGame(component.Game)
+					enemy:StartMoving(1, 1, -1)
+		
+					local tower = require(ServerScriptService.Towers:FindFirstChild('Precursor'))(enemy.CFrame.Position, function() return true end)
+					tower:SetCurrentGame(component.Game)
+
+					local tower2 = require(ServerScriptService.Towers:FindFirstChild('Mine'))(enemy.CFrame.Position, function() return true end)
+					tower2:SetCurrentGame(component.Game)
+		
+					while tower.Id and enemy.Id and tower2.Id do
+						tower.Hitbox.CFrame = enemy.CFrame
+						tower2.Hitbox.CFrame = enemy.CFrame
+						task.wait()
+					end
+		
+					if (enemy.Id) then enemy:Destroy() end
+					if (tower.Id) then tower:Destroy() end
+					if (tower2.Id) then tower2:Destroy() end
+				end)
+
+				task.wait()
+
+			end
+
+
+		end)
+
 		--print('Placed')
 	end
 	

@@ -59,6 +59,8 @@ return function()
 	function self.Start()
 		component:UseAbility('Fireball')
 		ApplyBuffs()
+
+		--local tower = ServerScriptService.Towers:FindFirstChild('Mine')()
 	end
 
 	function self.Stop()

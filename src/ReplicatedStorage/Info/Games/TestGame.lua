@@ -15,6 +15,15 @@ local Game = Template()
 Game.Settings.Health = 1000
 Game.Settings.MaxHealth = 1000
 
+Game.Settings.UseCustomLoadout = true
+Game.Settings.EquippedTowers = {
+	TowerSlot1 = 'Precursor',
+	TowerSlot2 = 'Mine',
+	TowerSlot3 = nil,
+	TowerSlot4 = nil,
+	TowerSlot5 = nil,
+}
+
 Game.Waves = {
 	[1] = {
 		{"Wait", 3},

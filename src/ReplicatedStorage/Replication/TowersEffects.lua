@@ -90,7 +90,8 @@ return {
             LevelChange = nil,
             Model = nil,
             Info = nil,
-            Cache = nil
+            Cache = nil,
+            FXCache = {}
         }
 
         local towerLevel = FindAttribute(part, 'Level')
@@ -100,6 +101,15 @@ return {
         self.Info = selectedInfo
 
         createModel(self, selectedInfo, part)
+
+        if (self.Info.Animations.Attack) then
+            self.FXCache['AttackAnimation'] = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(self.Info.Animations.Attack)
+        end
+
+        local sound = self.Info.Sounds.AttackSound:Clone()
+        sound.Parent = self.Instance
+
+        self.FXCache['AttackSound'] = sound
 
         self.LevelChange = part:GetAttributeChangedSignal('Level'):Connect(function()
             towerLevel = FindAttribute(part, 'Level')

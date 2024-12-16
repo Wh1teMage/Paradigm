@@ -19,6 +19,7 @@ local data = {
 	Range = 5,
 
 	CanAttack = false,
+	IsTower = false, -- change to enum
 	Distance = 0,
 
 	Defense = {

@@ -95,6 +95,7 @@ function PlayerComponentFabric:CreatePlayer(player: Player): IPlayerComponent
 end
 
 function PlayerComponentFabric:GetPlayer(player: Player): IPlayerComponent
+	if (not player) then return end
 	return Components[player.UserId]
 end
 
