@@ -10,20 +10,18 @@ local tower = require(ServerScriptService.Components.TowerComponent)
 local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
 
 return function(position: Vector3, callback)
-	local self = tower.new(position, 'Precursor', callback)
+	local self = tower.new(position, 'MovingPrecursor', callback)
 	if (not self) then return end 
 
 	local test = function()
 
 		return AttackPatterns.Burst(self, function()
 			
-			--print('shooting')
-
 			SignalComponent:GetSignal('ManageEffects'):FireAllClients(
 				PathConfig.Scope.ReplicateEffect, 
 				PathConfig.Effects.PrecursorTestEffect,
 				self.SelectedTarget.CFrame.Position,
-				self.Id
+				self.Hitbox.Name
 			)
 			
 			local damageAmount = self:GetValue('Damage')

@@ -29,7 +29,7 @@ function Functions:TableClone(transfer, template)
 			proxy[index] = transfer[index]
 		end
 	end
-	--print(transfer, proxy)
+	print(transfer, proxy)
 	return proxy
 end
 

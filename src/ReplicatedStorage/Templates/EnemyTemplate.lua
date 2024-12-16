@@ -2,53 +2,23 @@ local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local Templates = ReplicatedStorage.Templates
 
 local Enums = require(Templates.Enums)
+local EntityTemplate = require(Templates.EntityTemplate)
 
-local data = {
-	Name = 'Default',
-	Model = nil,
-	CFrame = CFrame.new(),
-	
-	Level = 1,
-	
-	MaxHealth = 100,
-	Health = 100,
-	Speed = 1,
-	
+--[[
 	Firerate = 5,
 	Damage = 1,
 	Range = 5,
+]]
 
-	CanAttack = false,
-	IsTower = false, -- change to enum
-	Distance = 0,
+local data = EntityTemplate()
 
-	Defense = {
-		[Enums.DamageType.Bullet] = 1,
-		[Enums.DamageType.Energy] = 1,
-		[Enums.DamageType.Splash] = 1,
-	},
-	
-	Amplifiers = {
-		[Enums.EnemyAmplifiers.Speed] = 1,
-		[Enums.EnemyAmplifiers.Range] = 1,
-		[Enums.EnemyAmplifiers.Damage] = 1,
-		[Enums.EnemyAmplifiers.Health] = 1,
-		[Enums.EnemyAmplifiers.Firerate] = 1,
-	},
+data.Name = 'Default'
+data.Model = nil
 
-	Attributes = {},
-	Passives = {},
-	Abilities = {},
-
-	Animations = {},
-	Sounds = {},
-	Descriptions = {},
-	
-	Session = {
-		Abilities = {},
-		Passives = {},
-		Buffs = {},
-	},
+data.Defense = {
+	[Enums.DamageType.Bullet] = 1,
+	[Enums.DamageType.Energy] = 1,
+	[Enums.DamageType.Splash] = 1,
 }
 
 return function()

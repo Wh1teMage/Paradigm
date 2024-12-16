@@ -9,8 +9,9 @@ return {
         ['GameStarted'] = 5,
 
         ['ReplicateEnemy'] = 6,
-        ['ReplicateAttributes'] = 7,
         ['DestroyEnemy'] = 8,
+
+        ['ReplicateAttributes'] = 7,
 
         ['WaveMessage'] = 9,
         ['ChangeBaseHealth'] = 10,
@@ -25,6 +26,7 @@ return {
 
     Effects = {
         ['PrecursorTestEffect'] = 1,
+        ['MovingPrecursorTestEffect'] = 2,
     }
 
 }

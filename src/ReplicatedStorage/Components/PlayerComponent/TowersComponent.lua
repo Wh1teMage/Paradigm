@@ -165,7 +165,7 @@ function TowersComponent:StopPlacing()
 
 	SignalComponent:GetSignal('ManageTowersUI', true):Fire('StopPlacingUI')
 	DestroyRange(currentlyPlacing)
-	--print('Stopped Placing')
+	print('Stopped Placing')
 	currentlyPlacing:Destroy()
 	currentlySelected = nil
 	currentlyPlacing = nil
@@ -177,9 +177,11 @@ function TowersComponent:PlaceTower()
 	local raycast = createRaycast(raycastParams)
 	if (not raycast) then return end
 
-	for i = 1, 35 do
+	for i = 1, 500 do
 		SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.PlaceTower, raycast.Position 
 		 + Vector3.new(math.random(-100, 100)/100*2, 0, math.random(-100, 100)/100*2), currentlySelected)
+
+		task.wait()
 	end
 
 	self:StopPlacing()
@@ -205,7 +207,7 @@ function TowersComponent:SelectTower()
 		return 
 	end
 
-	currentlySelectedPart = raycast.Instance:FindFirstAncestorWhichIsA('Part')
+	currentlySelectedPart = raycast.Instance:FindFirstAncestorWhichIsA('Model')
 	currentlySelected = currentlySelectedPart.Name
 
 	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, currentlySelectedPart)
@@ -217,12 +219,12 @@ function TowersComponent:UpgradeTower()
 	if (not currentlySelected) then return end
 	
 	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.UpgradeTower, currentlySelected) -- use promise there
-	print('sent promise')
+	--print('sent promise')
 	local promise;
 
 	promise = SignalComponent:GetSignal('ManageTowers'):Connect(function(scope)
 		if (scope ~= tostring( PathConfig.Scope.TowerUpdated )) then return end
-		print('recieved promise')
+		--print('recieved promise')
 		SignalComponent:GetSignal('ManageTowersUI', true):Fire('UpdateUpgradeUI')
 		promise:Disconnect()
 	end)

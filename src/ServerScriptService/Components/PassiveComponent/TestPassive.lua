@@ -6,6 +6,7 @@ local Components = ServerScriptService.Components
 local TowersComponent = require(Components.TowerComponent)
 local PlayerComponent = require(Components.PlayerComponent)
 local passive = require(script.Parent)
+local TowerAttackPatterns = require(Components.Static.TowerAttackPatterns)
 
 local EnemyComponentFolder = ServerScriptService.Enemies
 
@@ -16,7 +17,7 @@ return function()
 	local owner;
 	
 	function self.OnAttack()
-		--print('Attack', component.Damage)
+		print('Attack', component.Damage)
 		--component.Damage += 1
 	end
 
@@ -41,8 +42,11 @@ return function()
 		task.spawn(function()
 			while not component.Game do task.wait(.1) end
 			
-			for i = 1, 150 do
+			for i = 1, 1 do
 
+				TowerAttackPatterns.Spawn(component, 'TowerWalker', 'MovingPrecursor')
+
+				--[[
 				task.spawn(function()
 					local enemy = require(EnemyComponentFolder:FindFirstChild('TowerWalker'))()
 					enemy.IsTower = true
@@ -65,6 +69,7 @@ return function()
 					if (tower.Id) then tower:Destroy() end
 					if (tower2.Id) then tower2:Destroy() end
 				end)
+				]]
 
 				task.wait()
 
@@ -73,7 +78,7 @@ return function()
 
 		end)
 
-		--print('Placed')
+		print('Placed')
 	end
 	
 	function self.TransferData(args: {any})

@@ -4,6 +4,10 @@ return {
 		Uncommon = 2,
 		Rare = 3,
 	},
+	PackageType = {
+		Enemy = 0,
+		Tower = 1,
+	},
 	BattleMode = {
 		Single = 1,
 		Public = 2,

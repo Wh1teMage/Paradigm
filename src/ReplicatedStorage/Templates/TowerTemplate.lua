@@ -1,54 +1,34 @@
-local Enums = require(script.Parent.Enums)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Templates = ReplicatedStorage.Templates
 
-local data = {
-	Name = 'Precursor',
-	Hitbox = nil,
-	ModelsFolder = nil,
+local Enums = require(Templates.Enums)
+local EntityTemplate = require(Templates.EntityTemplate)
 
-	Level = 1,
+local data = EntityTemplate()
 
-	MaxHealth = 100,
-	Health = 100,
-	
-	Price = 325,
-	SellPrice = 250,
-	
-	Firerate = 1,
-	Damage = 1,
-	Range = 5,
-	
-	Limit = 8,
-	Hidden = true,
+data.Name = 'Precursor'
+data.ModelsFolder = nil
+data.Skin = 'Default'
 
-	UpgradePrice = nil,
-	
-	PlacementType = Enums.PlacementType.Ground,
-	TargetType = Enums.TargetType.First,
-	ShootType = Enums.ShootType.Single,
+data.Price = 325
+data.SellPrice = 250
 
-	Attributes = {},
-	Passives = {},
-	Abilities = {},
+data.Firerate = 1
+data.Damage = 1
+data.Range = 5
 
-	Animations = {},
-	Sounds = {},
-	Descriptions = {},
+data.Limit = 8
 
-	EnemiesInRange = {},
-	
-	Amplifiers = {
-		[Enums.TowerAmplifiers.Cash] = 1,
-		[Enums.TowerAmplifiers.Range] = 1,
-		[Enums.TowerAmplifiers.Damage] = 1,
-		[Enums.TowerAmplifiers.Firerate] = 1,
-	},
+data.PlacementType = Enums.PlacementType.Ground
+data.TargetType = Enums.TargetType.First
+data.ShootType = Enums.ShootType.Single
 
-	Session = {
-		Passives = {},
-		Buffs = {},
-		Abilities = {},
-	},
-}
+data.PackageType = Enums.PackageType.Tower
+
+data.EnemiesInRange = {}
+
+--	Hidden = true,
+--	UpgradePrice = nil,
 
 return function()
 	local temp = table.clone(data)

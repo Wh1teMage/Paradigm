@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
+local RunService = game:GetService('RunService')
 
 local GlobalEffects = ReplicatedStorage.Replication.Effects
 
@@ -18,7 +19,7 @@ for index, value in GlobalEffects:GetChildren() do
 end
 
 local ReplicationComponent = {}
-
+--[[
 TowersFolder.ChildAdded:Connect(function(child) -- refactor later
     if (not child:IsA('BasePart')) then return end
     TowersEffects.Spawn(child)
@@ -29,7 +30,7 @@ TowersFolder.ChildRemoved:Connect(function(child)
     TowersEffects.Remove(child)
 end)
 
---[[
+
 EnemiesFolder.ChildAdded:Connect(function(child)
     if (not child:IsA('BasePart')) then return end
     EnemiesEffects.Spawn(child)
@@ -39,7 +40,7 @@ EnemiesFolder.ChildRemoved:Connect(function(child)
     if (not child:IsA('BasePart')) then return end
     EnemiesEffects.Remove(child)
 end)
-]]
+
 
 function ReplicationComponent:BindTowers()
 	for index, value: Instance in pairs(TowersFolder:GetChildren()) do
@@ -47,7 +48,7 @@ function ReplicationComponent:BindTowers()
         TowersEffects.Spawn(value)
     end
 end
-
+]]
 --[[
 function ReplicationComponent:BindEnemies()
 	for index, value in pairs(EnemiesFolder:GetChildren()) do
@@ -59,11 +60,19 @@ end
 
 function ReplicationComponent:Setup()
     --self:BindEnemies()
-    self:BindTowers()
+    --self:BindTowers()
 end
+
+local delta = 1
+
+RunService.Heartbeat:Connect(function(deltaTime)
+    delta = deltaTime
+end)
 
 function ReplicationComponent:TriggerEffect(path: number, ...)
     
+    if (1/delta < 45) then return end
+
     for _, module in pairs(LoadedModules) do
         if (module[path]) then module[path](...) end
     end

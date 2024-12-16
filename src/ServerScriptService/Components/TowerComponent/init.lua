@@ -4,7 +4,11 @@ local ServerScriptService = game:GetService('ServerScriptService')
 
 local TowersInfo = ReplicatedStorage.Info.Towers
 local DataModifiers = require(ReplicatedStorage.Utilities.DataModifiers)
+local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
+local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
+
 local EnemyComponent = require(ServerScriptService.Components.EnemyComponent)
+--local PackageComponent = require(ServerScriptService.Components.EnemyComponent.PackageComponent)
 
 local LoadedComponents = {}
 
@@ -30,69 +34,6 @@ local TowerComponent = setmetatable({}, {
 
 local DEFAULT_TOWER_PASSIVES = { 'TowerReplication' }
 
-local ATTACK_TICK = 1/20
-local PASSIVE_TICK = 1
-
-task.spawn(function() -- seems nested, refactor later
-	while task.wait(ATTACK_TICK) do
-		for part, tower in pairs(Towers) do
-			task.spawn(tower.Attack, tower)
-		end
-
-		--EnemyComponent:TestFunc()
-		--TestFunc
-	end
-end)
-
-task.spawn(function()
-	while task.wait(PASSIVE_TICK) do
-		for part, tower in pairs(Towers) do
-			for _, passive in pairs(tower.Session.Passives) do
-				passive.OnTick()
-			end
-		end
-	end
-end)
-
-function TowerComponent:CheckCD()
-	if (not self.Game) then return end
-	if (self.Shooting) then return end
-	if (self:GetAttribute('Stunned') > 0) then return end
-	if (os.clock() - self.LastShoot) < self:GetValue('Firerate') then return end
-	return true
-end
-
-function TowerComponent:OnAttack() -- virtual
-	
-end
-
-function TowerComponent:Attack()
-	if (not self:CheckCD()) then return end
-	self.Shooting = true
-
-	self:GetTarget()
-	if (not self.SelectedTarget) then self.Shooting = false; return end
-	
-	for _, passive in pairs(self.Session.Passives) do
-		passive.OnAttack()
-	end
-	
-	self:OnAttack()
-	
-	self.SelectedTarget = nil
-	
-	self.LastShoot = os.clock()
-	self.Shooting = false
-end
-
-function TowerComponent:TakeDamage(damage: number)
-	self.Health -= damage
-	if (self.Health > 0) then return end
-	self:Destroy()
-
-	return true
-end
-
 function TowerComponent:Destroy()
 	while (#self.Session.Passives > 0) do
 		local passive = table.remove(self.Session.Passives)
@@ -101,16 +42,17 @@ function TowerComponent:Destroy()
 	end
 
 	for _, tower in pairs(TowerComponentFabric:GetTowers()) do
-		if (tower.Hitbox == self.Hitbox) then continue end
+		if (tower.Id == self.Id) then continue end
 		for _, passive in pairs(tower.Session.Passives) do
 			passive.OnTowerRemoved(self)
 		end
 	end
 
+	SignalComponent:GetSignal('ManageTowers'):FireAllClients(PathConfig.Scope.SellTower, self.Id)
+
 	towerCount -= 1
 
-	Towers[self.Hitbox] = nil
-	self.Hitbox:Destroy()
+	Towers[tostring(self.Id)] = nil
 	table.clear(self)
 	setmetatable(self, nil)
 end
@@ -167,14 +109,15 @@ function TowerComponent:ReplicateDescriptions()
 	end
 end
 
-function TowerComponent:CheckRequirements(requirements) -- use later
-	return true
+function TowerComponent:ReplicateField(fieldName: string, value: number)
+	if (not self.CFrame) then return end
+	--SignalComponent:GetSignal('ManageTowers'):FireAllClients(PathConfig.Scope.ReplicateAttributes, self.Id, fieldName, value)
 end
 
-function TowerComponent:ReplicateField(fieldName: string, value: number)
-	if (not self.Hitbox) then return end
-	local hitbox: Part? = self.Hitbox
-	hitbox:SetAttribute(fieldName, value)
+function TowerComponent:ReplicateCreation()
+	--print('sent')
+	SignalComponent:GetSignal('ManageTowers'):FireAllClients(PathConfig.Scope.PlaceTower, self.PackageId, self.Id, 
+		self.Name, self.CFrame.Position, self.Skin)
 end
 
 function TowerComponent:SetCurrentGame(match)
@@ -200,7 +143,7 @@ function TowerComponentFabric:GetTowers(): typeof({TowerComponent})
 	return Towers
 end
 
-function TowerComponentFabric.new(position: Vector3, name: string, checkCallback: () -> boolean)
+function TowerComponentFabric.new(position: Vector3, name: string) --, checkCallback: () -> boolean
 	if (not TowersInfo:FindFirstChild(name)) then warn(name..' tower doesnt exist') return end
 
 	if (not TowersCache[name]) then
@@ -212,6 +155,7 @@ function TowerComponentFabric.new(position: Vector3, name: string, checkCallback
 	
 	local data = TowersCache[name][1]()
 	
+	data.CFrame = CFrame.new(position)
 	data.SelectedTarget = nil
 	data.LastShoot = 0
 	data.Shooting = false
@@ -227,17 +171,15 @@ function TowerComponentFabric.new(position: Vector3, name: string, checkCallback
 		self:AppendPassive(passiveName, 1, {}, { self })
 	end
 
-	if (checkCallback and (not checkCallback(data))) then table.clear(data); return end
+	--if (checkCallback and (not checkCallback(data))) then table.clear(data); return end
 
-	local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
-	local postfix = string.rep('0', (4-string.len(clockId)))
+	local id = 1
 
-	local part = ReplicatedStorage.Samples.TowerPart:Clone()
-	part.Name = clockId..postfix..tostring(math.random(1000, 9999))
-	part.CFrame = CFrame.new(position)
+	for i = 1, 2^12 do
+		if (not Towers[tostring(i)]) then id = i; break end
+	end
 
-	data.Id = part.Name
-	data.Hitbox = part
+	data.Id = id
 
 	for _, ability in pairs(data.Abilities) do
 		self:AppendAbility(ability.Name, { self.Id, self })
@@ -248,7 +190,7 @@ function TowerComponentFabric.new(position: Vector3, name: string, checkCallback
 	end
 
 	for _, tower in pairs(TowerComponentFabric:GetTowers()) do
-		if (tower.Hitbox == part) then continue end
+		if (tower.Id == data.Id) then continue end
 		for _, passive in pairs(tower.Session.Passives) do
 			passive.OnTowerAdded(self)
 		end
@@ -263,76 +205,11 @@ function TowerComponentFabric.new(position: Vector3, name: string, checkCallback
 
 	self:ReplicateDescriptions()
 
-	part.Parent = workspace.Towers
-
-	Towers[part] = self
+	Towers[tostring(data.Id)] = self
 
 	towerCount += 1
 
 	return self
 end
-
---! make this one into different module (Target support or smt)
-
-local MAX_TOWERS_AMOUNT = 2000
-local PACKAGE_SIZE = 30
-
-local UPDATE_RATE = 1/3
-
-task.spawn(function()
-	
-	while task.wait() do
-
-		local enemies = EnemyComponent:GetPackages()
-		local count = 0
-
-		local start = os.clock()
-
-		--[[
-		table.sort(enemies, function(a, b)
-			return (a.CurrentStep > b.CurrentStep)
-		end)
-		]]
-
-		for _, tower in pairs(Towers) do
-			count += 1
-
-			if (count % PACKAGE_SIZE == 0) then
-				task.wait() --UPDATE_RATE / (towerCount / PACKAGE_SIZE)
-			end
-
-			if (tower.EnemiesInRange) then table.clear(tower.EnemiesInRange) end
-			if (not tower.EnemiesInRange) then continue end
-
-			local position = tower.Hitbox.Position
-			local radius = tower:GetValue('Range')
-
-			local packages = table.create(EnemyComponent:GetPackageCount())
-
-			for _, package in pairs(enemies) do
-				if (package.IsTower) then continue end
-
-				local cframe = package.CFrame
-				if (not cframe) then continue end
-
-				local distance = (position - cframe.Position).Magnitude
-				if (distance > radius) then continue end
-
-				table.insert(packages, package) --{ CurrentStep = package.CurrentStep, Id = package.Id }
-
-			end
-
-			tower.EnemiesInRange = packages
-
-			--table.insert(answer, {tower.Name, packages})
-		end
-
-		local elapsed = os.clock() - start
-
-		task.wait(UPDATE_RATE - elapsed)
-
-	end
-
-end)
 
 return TowerComponentFabric

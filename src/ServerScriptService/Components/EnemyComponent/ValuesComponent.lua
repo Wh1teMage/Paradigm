@@ -30,4 +30,10 @@ function ValuesComponent:SetAttribute(key, value: any)
 	self.Attributes[key] = value
 end
 
+function ValuesComponent:CheckRequirements(requirements) -- use later
+	return true
+end
+
+
+
 return ValuesComponent

@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local ServerScriptService = game:GetService('ServerScriptService')
 
 local Enums = require(ReplicatedStorage.Templates.Enums)
-local EnemyComponent = require(ServerScriptService.Components.EnemyComponent)
+local MovablePackageComponent = require(ServerScriptService.Components.MovablePackageComponent)
 
 local TargetModes = {
 	[Enums.TargetType.First] = function(self, position: Vector3?, range: number?)
@@ -15,13 +15,15 @@ local TargetModes = {
 		self.SelectedTarget = nil
 
 		for _, target in pairs(enemies) do -- iter from start to end
-			if (not target.EnemyCount) then continue end
-			if (target.EnemyCount < 1) then continue end
-			if (target.Distance < selectedValue) then continue end
-			selectedValue = target.Distance
-			selectedPackage = EnemyComponent:GetPackage(target.Id)
+			if (not target.EntityCount) then continue end
+			if (target.EntityCount < 1) then continue end
+			if (target.CurrentStep < selectedValue) then continue end
+			selectedValue = target.CurrentStep
+			selectedPackage = MovablePackageComponent:GetPackage(target.Id)
 			--break
 		end
+
+		--if (selectedPackage) then print(selectedPackage.Id) end
 		
 		--print(self.Id, selectedPackage)
 		--print(#self.EnemiesInRange)
@@ -30,7 +32,7 @@ local TargetModes = {
 		--end
 		
 		if selectedPackage then 
-			for _, enemy in pairs(selectedPackage.Enemies) do 
+			for _, enemy in pairs(selectedPackage.Entities) do 
 				if (not enemy.Id) then continue end
 				--enemy.CFrame = selectedPackage.CFrame
 				self.SelectedTarget = enemy
@@ -61,10 +63,10 @@ local TargetModes = {
 local TargetComponent = {}
 
 function TargetComponent:GetTargetsInRange(position: Vector3?, range: number?)
-	if (not position) then position = self.Hitbox.Position end
+	if (not position) then position = self.CFrame.Position end
 	if (not range) then range = self:GetValue('Range') end
 
-	return EnemyComponent:GetPackagesInRadius(position, range)
+	return MovablePackageComponent:GetPackagesInRadius(position, range)
 	--[[
 	for _, enemy in pairs(EnemyComponent:GetAll()) do
 		local hitbox = enemy.Hitbox
@@ -107,13 +109,14 @@ function TargetComponent:WaitForTarget(delay: number?)
 	self:GetTarget()
 
 	while (not self.SelectedTarget) and (os.clock() - start < delay) do
-		task.wait(.1)
+		task.wait()
 		self:GetTarget()
 	end
 	--repeat task.wait(.1); self:GetTarget(); until self.SelectedTarget or (not getmetatable(self)) 
 end
 
 function TargetComponent:FaceEnemy()
+	--[[
 	if not getmetatable(self.SelectedTarget) then return end
 	local selectedCFrame = CFrame.new(self.Hitbox.Position, 
 		self.SelectedTarget.CFrame.Position * Vector3.new(1, 0, 1) + 
@@ -127,6 +130,7 @@ function TargetComponent:FaceEnemy()
 			task.wait(1/20)
 		end
 	end)
+	]]
 end
 
 

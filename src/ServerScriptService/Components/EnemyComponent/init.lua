@@ -1,4 +1,6 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
+local ServerScriptService = game:GetService('ServerScriptService')
+
 local RunService = game:GetService('RunService')
 
 local EnemiesInfo = require(ReplicatedStorage.Info.EnemiesInfo)
@@ -7,7 +9,7 @@ local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 local SignalFunctions = require(ReplicatedStorage.Components.SignalComponent.CustomFunctions)
 
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
-local PackageComponent = require(script.PackageComponent)
+local MovablePackageComponent = require(ServerScriptService.Components.MovablePackageComponent)
 
 local LoadedComponents = {}
 
@@ -16,15 +18,12 @@ local MoveEnemyEvent = ReplicatedStorage.Events.MoveEnemy :: UnreliableRemoteEve
 local UPDATE_RATE = 1/10
 
 for _, component in ipairs(script:GetChildren()) do
-	if (component.Name) == 'PackageComponent' then continue end
 	LoadedComponents[component.Name] = require(component)
 end
 
 local enemyCount = 0
 
 local Enemies = {}
-local MovingEnemies = {}
-local CFrames = {}
 
 task.spawn(function()
 
@@ -42,33 +41,6 @@ local EnemyComponent = setmetatable({}, {
 	end,
 })
 
-function EnemyComponent:StartMoving(selectedTrack: number?, startingPoint: number?, direction: number?)
-	if (not selectedTrack) then selectedTrack = 1 end
-
-	if (#self.Game.Info.Paths < 1) then return end
-	if (not self.Game.Info.Paths[selectedTrack]) then return end
-	
-	if (not startingPoint) then startingPoint = 0 end
-	if (not direction) then direction = 1 end
-
-	self.CurrentStep = startingPoint
-
-	--MovingEnemies[self.Id] = { selectedTrack, direction, self }
-	CFrames[self.Id] = self.CFrame
-
-	if (not self.IsTower) then enemyCount += 1 end
-
-	PackageComponent:AddToQueue({ selectedTrack, direction, self })
-end
-
-function EnemyComponent:TakeDamage(damage: number)
-	self.Health -= damage
-	if (self.Health > 0) then return end
-	self:Destroy()
-
-	return true
-end
-
 function EnemyComponent:CompletedPath()
 	if ((not self.Health) or (self.Health <= 0)) then return end
 	local healthDelta = self.Game.Info.Health - self.Health
@@ -78,35 +50,37 @@ function EnemyComponent:CompletedPath()
 end
 
 function EnemyComponent:Destroy()
+	
 	while (#self.Session.Passives > 0) do
 		local passive = table.remove(self.Session.Passives)
 		passive.Stop()
 		self:RemovePassive(passive.Name, passive.Level)
 	end
 
+	--print('destroyed')
+
 	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.DestroyEnemy, self.Id)
 
 	--print('enemy killed')
+	
+	-- !! remake this into bindable signal on death connected from package component
+	local package = MovablePackageComponent:GetPackage(self.PackageId)
 
-	local package = PackageComponent:GetPackage(self.PackageId)
-
-	package.EnemyCount -= 1
-	if (package.EnemyCount < 1) then package:Destroy() end
+	if (package) then
+		package.EntityCount -= 1
+		if (package.EntityCount < 1) then package:Destroy() end
+	end
 
 	--table.clear(package.Enemies[self.Id])
 	--package.Enemies[self.Id] = nil
+	
+	enemyCount -= 1
 
-	if (not self.IsTower) then enemyCount -= 1 end
-
-	Enemies[self.Id] = nil
-	MovingEnemies[self.Id] = nil
+	Enemies[tostring(self.Id)] = nil
 	--self.Hitbox:Destroy()
 	table.clear(self)
 	setmetatable(self, nil)
-end
-
-function EnemyComponent:CheckRequirements(requirements) -- use later
-	return true
+	
 end
 
 function EnemyComponent:ReplicateField(fieldName: string, value: number)
@@ -116,30 +90,8 @@ function EnemyComponent:ReplicateField(fieldName: string, value: number)
 	--hitbox:SetAttribute(fieldName, value)
 end
 
-function EnemyComponent:CheckCD()
-	if (not self.CanAttack) then return end
-	if (self.Shooting) then return end
-	if (self:GetAttribute('Stunned') > 0) then return end
-	if (os.clock() - self.LastShoot) < self:GetValue('Firerate') then return end
-	return true
-end
-
-function EnemyComponent:OnAttack()
-	
-end
-
-function EnemyComponent:Attack()
-	if (not self:CheckCD()) then return end
-	self.Shooting = true
-
-	for _, passive in pairs(self.Session.Passives) do
-		passive.OnAttack()
-	end
-	
-	self:OnAttack()
-		
-	self.LastShoot = os.clock()
-	self.Shooting = false
+function EnemyComponent:ReplicateCreation()
+	SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateEnemy, self.PackageId, self.Id, self.Name)
 end
 
 function EnemyComponent:SetCurrentGame(match)
@@ -157,8 +109,8 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 
 	local id = 1
 
-	for i = 1, 2^16 do
-		if (not Enemies[i]) then id = i; break end
+	for i = 1, 2^14 do
+		if (not Enemies[tostring(i)]) then id = i; break end
 	end
 
 	--local part = ReplicatedStorage.Samples.EnemyPart:Clone()
@@ -191,10 +143,15 @@ function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 
 	--self:ReplicateField('Name', name)
 
-	data.Passives = nil
-	data.Abilities = nil
+	table.clear(data.Passives)
+	table.clear(data.Abilities)
 
-	Enemies[id] = self
+	--data.Passives = nil
+	--data.Abilities = nil
+
+	enemyCount += 1
+
+	Enemies[tostring(id)] = self
 	
 	return self
 end
@@ -207,45 +164,24 @@ function EnemyComponentFabric:GetEnemyCount()
 	return enemyCount
 end
 
+--[[
 function EnemyComponentFabric:GetPackageCount()
-	return PackageComponent:GetPackageCount()
+	return 1 --PackageComponent:GetPackageCount()
 end
 
 function EnemyComponentFabric:GetPackages()
-	return PackageComponent:GetPackages()
+	return MovablePackageComponent:GetPackages()
 end
 
 function EnemyComponentFabric:GetPackage(id: number)
-	return PackageComponent:GetPackage(id)
+	return MovablePackageComponent:GetPackage(id)
 end
+]]
 
 function EnemyComponentFabric:ReplicateAliveEnemiesForPlayer(player: Player)
 	for id, enemy in pairs(EnemyComponentFabric:GetAll()) do
 		SignalComponent:GetSignal('ManageEnemies'):Fire(PathConfig.Scope.ReplicateEnemy, player, id, enemy.Name)
 	end
-end
-
-function EnemyComponentFabric:GetPackagesInRadius(position: Vector3, radius: number)
-	
-	local packages = table.create(EnemyComponentFabric:GetPackageCount())
-	
-	debug.profilebegin('gettingEnemies')
-
-	for id, package in pairs(EnemyComponentFabric:GetPackages()) do
-		
-		local cframe = package.CFrame
-		if (not cframe) then continue end
-
-		local distance = (position - cframe.Position).Magnitude
-		if (distance > radius) then continue end
-
-		table.insert(packages, package)
-	end
-
-	debug.profileend()
-	
-	return packages
-	
 end
 
 function EnemyComponentFabric:TestFunc()

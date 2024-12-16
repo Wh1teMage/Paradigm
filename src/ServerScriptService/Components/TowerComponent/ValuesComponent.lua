@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local ServerScriptService = game:GetService('ServerScriptService')
 
-local avaliableScopes = { 'Range', 'Damage', 'Firerate' }
+local avaliableScopes = { 'Range', 'Damage', 'Firerate', 'Speed' }
 
 local ValuesComponent = {}
 
@@ -33,6 +33,10 @@ end
 
 function ValuesComponent:SetAttribute(key, value: any)
 	self.Attributes[key] = value
+end
+
+function ValuesComponent:CheckRequirements(requirements) -- use later
+	return true
 end
 
 return ValuesComponent

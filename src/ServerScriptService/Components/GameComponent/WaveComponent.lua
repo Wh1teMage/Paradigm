@@ -76,7 +76,7 @@ local parseFunctions = {
 	['Spawn'] = function(component, name: string, amount: number, between: number)
 
 		print(component, name, amount, between)
-		--print(name, amount, between, component)
+		print(name, amount, between, component)
 
 		local packageAmount = math.floor( (1/30) / math.max(between, 1/120) ) + 1
 		local iter = 1

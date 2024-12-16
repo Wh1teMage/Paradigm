@@ -33,17 +33,19 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 
 	if (not tower) then return end
 
-	tower:ReplicateField('Skin', 'Default')
+	--tower:ReplicateField('Skin', 'Default')
 	tower:SetOwner(self)
+	tower:StartMoving(1, 1, -1)
+	--tower:ReplicateCreation()
 
-	-- set owner
+	--[[
 	local blockingParts = workspace:GetPartBoundsInBox(CFrame.new(position), tower.Hitbox.Size) 
 	local canBePlaced = true
 	
 	for _, part in ipairs(blockingParts) do
 		if (part:IsAncestorOf(workspace.Towers)) then canBePlaced = false; break end
 	end
-	
+	]]
 	--if (not canBePlaced) then tower:Destroy() return end
 	
 	-- money check

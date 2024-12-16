@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 
 local EnemySamples = ReplicatedStorage.Samples.EnemyModels
+local TowerSamples = ReplicatedStorage.Samples.TowerModels
 
 local Template = require(script.Parent.Parent.Templates.EnemyTemplate)
 
@@ -61,6 +62,7 @@ end
 Enemies['TowerWalker'] = function(level: number)
 	local enemy = Enemies['Part'](level)
 
+	enemy.Model = TowerSamples.Precursor.Default['1']
 	enemy.Speed = 8
 	enemy.Name = 'TowerWalker'
 	return enemy

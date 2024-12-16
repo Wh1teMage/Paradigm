@@ -12,11 +12,11 @@ local LobbyComponent = require(Components.LobbyComponent)
 
 SignalComponent:GetSignal('ManageTowers')
 SignalComponent:GetSignal('ManageEnemies')
-SignalComponent:GetSignal('ManageEffects')
+SignalComponent:GetSignal('ManagePackages')
 SignalComponent:GetSignal('ManageGame')
 
 SignalComponent:GetSignal('ManageTowersUIFromServer')
-
+SignalComponent:GetSignal('ManageEffects')
 
 --LobbyComponent:Survival('TestGame', 'TestModel')
 

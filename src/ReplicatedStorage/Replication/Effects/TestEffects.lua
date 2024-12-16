@@ -5,25 +5,21 @@ local TowerEffects = require(script.Parent.Parent.TowersEffects)
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 local InstanceCache = require(ReplicatedStorage.Utilities.InstanceCache)
 
-local delta = 1
-
-RunService.Heartbeat:Connect(function(deltaTime)
-    delta = deltaTime
-end)
-
 return {
 
-    [PathConfig.Effects.PrecursorTestEffect] = function(p1: Vector3, name: string)
+    [PathConfig.Effects.MovingPrecursorTestEffect] = function(p1: Vector3, packageName: string, name: string)
         
-        if (1/delta < 45) then return end
+    end,
 
-        local tower = TowerEffects.GetTowerByName(name)
+    [PathConfig.Effects.PrecursorTestEffect] = function(p1: Vector3, id: number)
+
+        local tower = TowerEffects.GetTowerById(id)
         if (not tower) then return end
 
         local effect = ReplicatedStorage.Samples.Effects.AttackBeam :: Beam
 
-        tower.FXCache['AttackAnimation']:Play()
-        tower.FXCache['AttackSound']:Play()
+        --tower.FXCache['AttackAnimation']:Play()
+        --tower.FXCache['AttackSound']:Play()
 
         --[[
         tower.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(tower.Info.Animations.Attack):Play()

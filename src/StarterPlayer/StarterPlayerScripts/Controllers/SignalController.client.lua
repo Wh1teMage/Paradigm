@@ -14,7 +14,11 @@ local SignalFunctions = require(ReplicatedComponents.SignalComponent.CustomFunct
 
 local BezierPath = require(ReplicatedStorage.Utilities.BezierPath)
 local GlobalInfo = require(ReplicatedStorage.Info.GlobalInfo)
+
+local TowersEffects = require(ReplicatedStorage.Replication.TowersEffects)
 local EnemiesEffects = require(ReplicatedStorage.Replication.EnemiesEffects)
+local EntitiesEffects = require(ReplicatedStorage.Replication.EntitiesEffects)
+
 
 local MoveEnemyEvent = ReplicatedStorage:WaitForChild('Events'):WaitForChild('MoveEnemy') :: RemoteEvent
 
@@ -43,11 +47,42 @@ SignalComponent:GetSignal('ManageEffects'):Connect(
 SignalComponent:GetSignal('ManageEnemies'):Connect(
 	function(scope: string, ...)
 
-		if (scope == tostring( PathConfig.Scope.DestroyPackage )) then EnemiesEffects.DespawnPackage(...) end
-		if (scope == tostring( PathConfig.Scope.ReplicatePackage )) then EnemiesEffects.SpawnPackage(...) end
+		--if (scope == tostring( PathConfig.Scope.DestroyPackage )) then EnemiesEffects.DespawnPackage(...) end
+		--if (scope == tostring( PathConfig.Scope.ReplicatePackage )) then EnemiesEffects.SpawnPackage(...) end
 		if (scope == tostring( PathConfig.Scope.ReplicateEnemy )) then EnemiesEffects.Spawn(...) end
 		if (scope == tostring( PathConfig.Scope.DestroyEnemy )) then EnemiesEffects.Remove(...) end
 		if (scope == tostring( PathConfig.Scope.ReplicateAttributes )) then EnemiesEffects.SetAttribute(...) end
+
+		--print(scope, ...)
+	end
+)
+
+SignalComponent:GetSignal('ManageTowers'):Connect(
+	function(scope: string, ...)
+
+		scope = tostring( scope )
+
+		--if (scope == tostring( PathConfig.Scope.DestroyPackage )) then EnemiesEffects.DespawnPackage(...) end
+		--if (scope == tostring( PathConfig.Scope.ReplicatePackage )) then EnemiesEffects.SpawnPackage(...) end
+		if (scope == tostring( PathConfig.Scope.PlaceTower )) then TowersEffects.Spawn(...) end
+		if (scope == tostring( PathConfig.Scope.SellTower )) then TowersEffects.Remove(...) end
+		if (scope == tostring( PathConfig.Scope.ReplicateAttributes )) then TowersEffects.SetAttribute(...) end
+
+		--print(scope, ...)
+	end
+)
+
+
+SignalComponent:GetSignal('ManagePackages'):Connect(
+	function(scope: string, ...)
+
+		--print(scope, ...)
+
+		if (scope == tostring( PathConfig.Scope.DestroyPackage )) then EntitiesEffects.DespawnPackage(...) end
+		if (scope == tostring( PathConfig.Scope.ReplicatePackage )) then EntitiesEffects.SpawnPackage(...) end
+		--if (scope == tostring( PathConfig.Scope.ReplicateEnemy )) then EnemiesEffects.Spawn(...) end
+		--if (scope == tostring( PathConfig.Scope.DestroyEnemy )) then EnemiesEffects.Remove(...) end
+		--if (scope == tostring( PathConfig.Scope.ReplicateAttributes )) then EnemiesEffects.SetAttribute(...) end
 
 		--print(scope, ...)
 	end
@@ -72,6 +107,7 @@ MoveEnemyEvent.OnClientEvent:Connect(function(data: buffer, amount: number)
     if (#GlobalInfo.Paths < 1) then return end
 	local result = SignalFunctions.DecodeEnemyMovement(data, amount)
 
-	ReplicationComponent:TriggerEffect('Move', result)
+	EntitiesEffects.Move(result)
+	--ReplicationComponent:TriggerEffect('Move', result)
 
 end)
