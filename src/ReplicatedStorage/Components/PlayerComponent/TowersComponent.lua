@@ -213,7 +213,8 @@ function TowersComponent:SelectTower()
 
 	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, currentlySelectedPart)
 
-	CreateRange(currentlySelectedPart, InstanceUtilities:FindAttribute(currentlySelectedPart, 'Range'))
+	--!! implement range calculations
+	CreateRange(currentlySelectedPart, 10)
 end
 
 function TowersComponent:UpgradeTower()

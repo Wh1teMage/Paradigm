@@ -146,7 +146,7 @@ task.spawn(function()
         if (entityCount > maxSpawnCount) then continue end
 
         for id, enemy in pairs(SpawnQueue) do
-            Functions.Spawn(enemy.PackageId, id, enemy.Name, enemy.Model, enemy.Callback, true)
+            Functions.Spawn(enemy.PackageId, id, enemy.Name, enemy.Model, true)
             if (entityCount > maxSpawnCount) then break end
             task.wait()
         end
@@ -162,7 +162,7 @@ task.spawn(function()
 
         for name, values in pairs(Models) do
             if ((os.clock() - ModelDeltas[name]) < clearTime) then continue end
-
+            -- add models gc here
             table.clear(values)
         end
         
@@ -246,15 +246,15 @@ Functions = {
         end
         ]]
 
-        local self = {
+        local self;
+        self = {
             --PreviousCFrame = previousCFrame,
             --GoalCFrame = goalCFrame,
             --PathPoint = point or 1,
             --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
             PackageId = packageId,
             Name = name,
-            Model = nil,
-            Callback = callback,
+            Model = nil
         }
 
         --if (not lastSpawned[name]) then lastSpawned[name] = os.clock() end
@@ -273,7 +273,7 @@ Functions = {
 
         if (not fromQueue) then
             queueCount += 1
-            self.Model = model
+            self.Model = model:Clone()
             SpawnQueue[id] = self
             return self
         end
@@ -312,6 +312,7 @@ Functions = {
         if (not selectedInfo.Model) then return end
         ]]
 
+        -- to store models in cache (for further reuse)
         if (Models[name] and #Models[name] > 0) then -- less readable for optimization
             self.Model = table.remove(Models[name])
             ModelDeltas[self.Name] = os.clock()
@@ -365,6 +366,10 @@ Functions = {
         --delta = .1
     end,
 
+    ['GetReplicatedEntities'] = function()
+        return ReplicatedEntities
+    end,
+
     ['Remove'] = function(id: string)
         local fromQueue = false
 
@@ -372,10 +377,10 @@ Functions = {
         if (not self) then self = SpawnQueue[id]; fromQueue = true end
         if (not self) then return end
 
-        if (self.Model and self.Model.Parent and not fromQueue) then
+        if (self.Model and self.Model.Parent) then
             self.Model.Parent = nil
             if (not Models[self.Name]) then Models[self.Name] = {} end
-            table.insert(Models[self.Name], self.Model)
+            table.insert(Models[self.Name], self.Model:Clone())
             ModelDeltas[self.Name] = os.clock()
         end
 

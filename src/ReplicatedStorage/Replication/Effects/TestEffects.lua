@@ -18,13 +18,12 @@ return {
         local tower = TowerEffects.GetTowerById(id)
         
         if (not tower) then return end
-        if (not tower.Clonned) then return end
-        if (not tower.Model.PrimaryPart) then return end
+        if (not tower.Model.Parent) then return end
 
         local effect = ReplicatedStorage.Samples.Effects.AttackBeam :: Beam
 
-        --tower.FXCache['AttackAnimation']:Play()
-        --tower.FXCache['AttackSound']:Play()
+        tower.FXCache['AttackAnimation']:Play()
+        tower.FXCache['AttackSound']:Play()
 
         --[[
         tower.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(tower.Info.Animations.Attack):Play()
@@ -50,17 +49,17 @@ return {
 
         for _, val: Instance in pairs(tower.Model:GetDescendants()) do
             if (val:IsA('ParticleEmitter')) then val:Emit(1) end
-            if (val:IsA('Attachment') and val.Name == 'BeamAttachment') then
+            if (not (val:IsA('Attachment') and val.Name == 'BeamAttachment')) then return end
                 
-                local attachment;
-                local clonnedEffect;
+            local attachment;
+            local clonnedEffect;
 
                 if (#cache.Table < 1) then
                     attachment = Instance.new('Attachment')
-                    attachment.Parent = tower.Model.PrimaryPart --IgnoreFolder
+                    attachment.Parent = tower.Instance
                     
                     clonnedEffect = effect:Clone()
-                    clonnedEffect.Parent = tower.Model.PrimaryPart --IgnoreFolder
+                    clonnedEffect.Parent = tower.Instance
     
                     clonnedEffect.Attachment0 = val
                     clonnedEffect.Attachment1 = attachment
@@ -71,15 +70,15 @@ return {
                     clonnedEffect = vals[2]
                 end
 
-                attachment.WorldCFrame = CFrame.new(p1)
-                clonnedEffect.Enabled = true
+            attachment.WorldCFrame = CFrame.new(p1)
+            clonnedEffect.Enabled = true
 
-                task.delay(.1, function()
-                    clonnedEffect.Enabled = false
-                    if (not getmetatable(cache)) then return end
-                    cache:Add({ attachment, clonnedEffect })
-                end)
-            end
+            task.delay(.1, function()
+                clonnedEffect.Enabled = false
+                if (not getmetatable(cache)) then return end
+                cache:Add({ attachment, clonnedEffect })
+            end)
+            
         end
 
         --print(test)
