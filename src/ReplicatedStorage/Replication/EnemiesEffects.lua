@@ -8,6 +8,8 @@ local EnemiesInfo = require(ReplicatedStorage.Info.EnemiesInfo)
 
 type IEnemyInfo = typeof(require(Templates.EnemyTemplate)())
 
+local MAX_DELAY = 60
+
 local ReplicatedEnemies = {}
 
 local function FindAttribute(part: Part, name: string)
@@ -92,18 +94,29 @@ return {
 
         local newId = tostring(Enums.PackageType.Enemy)..'-'..tostring(id)
 
-        local newInfo = EntitiesEffects.Spawn(packageId, newId, name, self.Model)
-        self.Model = newInfo.Model
+        EntitiesEffects.Spawn(packageId, newId, name, self.Model)
+
+        local start = os.clock()
+        local entityList = EntitiesEffects.GetReplicatedEntities()
+
+        local entity = entityList[newId]
+
+        while (not entity and os.clock() - start < MAX_DELAY) do
+            entity = entityList[newId]
+            task.wait(1/10)
+        end
+
+        if (not entity) then return end
+
+        self.Model = entity.Model
 
         local idle = selectedInfo.Animations.Idle
         if (not idle) then return end
     
-        pcall(function()
-            local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
-            loadedAnimation.Looped = true
-        
-            loadedAnimation:Play()
-        end)
+        local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
+        loadedAnimation.Looped = true
+    
+        loadedAnimation:Play()
 
         --[[
         self.LevelChange = part:GetAttributeChangedSignal('Level'):Connect(function()
