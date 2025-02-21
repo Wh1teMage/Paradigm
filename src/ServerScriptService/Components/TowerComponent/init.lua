@@ -143,6 +143,8 @@ function TowerComponentFabric:GetTower(partName: string): typeof(TowerComponent)
 	for part, tower in pairs(Towers) do
 		if (part.Name == partName) then return tower end
 	end
+
+	return
 end
 
 function TowerComponentFabric:GetTowers(): typeof({TowerComponent})
@@ -150,7 +152,7 @@ function TowerComponentFabric:GetTowers(): typeof({TowerComponent})
 end
 
 function TowerComponentFabric.new(position: Vector3, name: string) --, checkCallback: () -> boolean
-	if (not TowersInfo:FindFirstChild(name)) then warn(name..' tower doesnt exist') return end
+	if (not TowersInfo:FindFirstChild(name)) then warn(name..' tower doesnt exist'); return end
 
 	if (not TowersCache[name]) then
 		local info = TowersInfo:FindFirstChild(name)

@@ -9,6 +9,8 @@ local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
 local SignalComponent = require(ReplicatedComponents.SignalComponent)
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 
+local TowersEffects = require(ReplicatedStorage.Replication.TowersEffects)
+
 local Templates = ReplicatedStorage.Templates
 local TowerSamples = ReplicatedStorage.Samples.TowerModels
 local TowersInfo = ReplicatedStorage.Info.Towers
@@ -36,6 +38,8 @@ local function GetTowerInfo(towerName: string, towerLevel: number)
 end
 
 local function CreateRange(part: Part, radius: number)
+	print('creating range')
+
 	local range = ReplicatedStorage.Samples.Range:Clone() :: Part
 	range.Position = part.Position
 	range.Transparency = .2
@@ -48,7 +52,7 @@ local function CreateRange(part: Part, radius: number)
 end
 
 local function DestroyRange(part: Part)
-	local range = part.Range
+	local range = part:FindFirstChild('Range')
 	range.Parent = workspace['_ignore']
 	range.Anchored = true
 	TweenService:Create(range, TweenInfo.new(.3), { Size = Vector3.new(.1, .1, .1), Transparency = 1 }):Play()
@@ -77,13 +81,13 @@ local createRaycast = function(params: RaycastParams): RaycastResult
 
 	local ray = workspace:Raycast(endPosition.Origin, endPosition.Direction * 1000, params)
 
-	if (not ray) then return end
+	--if (not ray) then return end
 	return ray
 end
 
-local currentlyPlacing: Part;
-local currentlySelected: string;
-local currentlySelectedPart: Part;
+local currentlyPlacing: Part | nil;
+local currentlySelected: string | nil;
+local currentlySelectedModel: Model | nil;
 local modelOffset: Vector3
 
 RunService:BindToRenderStep('TowerPlacement', 10, function()
@@ -93,7 +97,7 @@ RunService:BindToRenderStep('TowerPlacement', 10, function()
 	if (not raycast) then return end
 	
 	local unit = (currentlyPlacing.Position - raycast.Position).Unit * math.min( (currentlyPlacing.Position - raycast.Position).Magnitude, 1/5 )
-	local model = currentlyPlacing.Model
+	local model = currentlyPlacing:FindFirstChildWhichIsA('Model') :: Model
 
 	currentlyPlacing.CFrame = currentlyPlacing.CFrame:Lerp(CFrame.new( raycast.Position ), .3)
 	model.PrimaryPart.CFrame = (currentlyPlacing.CFrame + modelOffset) * CFrame.Angles(unit.Z, 0, -unit.X)
@@ -120,6 +124,7 @@ function TowersComponent:StartPlacing(slot: number)
 	if (not TowerSamples:FindFirstChild(selectedTower):FindFirstChild(selectedSkin)) then return end
 	
 	currentlyPlacing = ReplicatedStorage.Samples.TowerPart:Clone()
+	if (not currentlyPlacing) then return end
 
 	local model = TowerSamples[selectedTower][selectedSkin][1]:Clone() :: Model
 	model.Name = 'Model'
@@ -178,12 +183,16 @@ function TowersComponent:PlaceTower()
 	local raycast = createRaycast(raycastParams)
 	if (not raycast) then return end
 
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.PlaceTower, raycast.Position, currentlySelected)
+
+	--[[
 	for i = 1, 100 do
 		SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.PlaceTower, raycast.Position 
 		 + Vector3.new(math.random(-1000, 1000)/100*2, 0, math.random(-1000, 1000)/100*2), currentlySelected)
 
 		task.wait()
 	end
+	]]
 
 	self:StopPlacing()
 	
@@ -192,13 +201,13 @@ function TowersComponent:PlaceTower()
 end
 
 function TowersComponent:SelectTower()
-	if (currentlyPlacing) then self:PlaceTower() return end
+	if (currentlyPlacing) then self:PlaceTower(); return end
 	
 	local raycast = createRaycast(selectParams)
 	
-	if (currentlySelectedPart) then
-		DestroyRange(currentlySelectedPart)
-		currentlySelectedPart = nil
+	if (currentlySelectedModel) then
+		DestroyRange(currentlySelectedModel.PrimaryPart :: Part)
+		currentlySelectedModel = nil
 		SignalComponent:GetSignal('ManageTowersUI', true):Fire('CloseUpgradeUI')
 	end
 	
@@ -208,13 +217,15 @@ function TowersComponent:SelectTower()
 		return 
 	end
 
-	currentlySelectedPart = raycast.Instance:FindFirstAncestorWhichIsA('Model')
-	currentlySelected = currentlySelectedPart.Name
+	currentlySelectedModel = raycast.Instance:FindFirstAncestorWhichIsA('Model')
+	if (not currentlySelectedModel) then return end
 
-	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, currentlySelectedPart)
+	currentlySelected = currentlySelectedModel.Name
 
 	--!! implement range calculations
-	CreateRange(currentlySelectedPart, 10)
+	CreateRange(currentlySelectedModel.PrimaryPart :: Part, 10)
+
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, currentlySelectedModel)
 end
 
 function TowersComponent:UpgradeTower()
@@ -241,7 +252,7 @@ function TowersComponent:SellTower()
 	SignalComponent:GetSignal('ManageTowersUI', true):Fire('CloseUpgradeUI')
 
 	currentlySelected = nil 
-	currentlySelectedPart = nil
+	currentlySelectedModel = nil
 end
 
 return TowersComponent

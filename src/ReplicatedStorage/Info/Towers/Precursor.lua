@@ -14,7 +14,7 @@ Towers[1] = function()
 	tower.Price = 20
 	tower.Range = 20
 	tower.Damage = 4.5
-	tower.Firerate = 6.05
+	tower.Firerate = 1.05
 	tower.Speed = 5
 
 	tower.ShootType = Enums.ShootType.Burst

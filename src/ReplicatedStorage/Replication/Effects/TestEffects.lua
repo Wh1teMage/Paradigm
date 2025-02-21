@@ -45,30 +45,33 @@ return {
         end
         ]]
 
-        tower.Model:PivotTo(CFrame.new( tower.Model.PrimaryPart.Position, p1 ))
+        tower.Model:PivotTo(CFrame.new( 
+            tower.Model.PrimaryPart.Position, 
+            p1 * Vector3.new(1, 0, 1) + Vector3.new(0, tower.Model.PrimaryPart.Position.Y, 0) 
+        ))
 
         for _, val: Instance in pairs(tower.Model:GetDescendants()) do
             if (val:IsA('ParticleEmitter')) then val:Emit(1) end
-            if (not (val:IsA('Attachment') and val.Name == 'BeamAttachment')) then return end
+            if (not (val:IsA('Attachment') and val.Name == 'BeamAttachment')) then continue end
                 
             local attachment;
             local clonnedEffect;
 
-                if (#cache.Table < 1) then
-                    attachment = Instance.new('Attachment')
-                    attachment.Parent = tower.Instance
-                    
-                    clonnedEffect = effect:Clone()
-                    clonnedEffect.Parent = tower.Instance
-    
-                    clonnedEffect.Attachment0 = val
-                    clonnedEffect.Attachment1 = attachment
-                else
-                    local vals = cache:Remove()
-                    
-                    attachment = vals[1]
-                    clonnedEffect = vals[2]
-                end
+            if (#cache.Table < 1) then
+                attachment = Instance.new('Attachment')
+                attachment.Parent = tower.Model.PrimaryPart
+                
+                clonnedEffect = effect:Clone()
+                clonnedEffect.Parent = tower.Model.PrimaryPart
+
+                clonnedEffect.Attachment0 = val
+                clonnedEffect.Attachment1 = attachment
+            else
+                local vals = cache:Remove()
+                
+                attachment = vals[1]
+                clonnedEffect = vals[2]
+            end
 
             attachment.WorldCFrame = CFrame.new(p1)
             clonnedEffect.Enabled = true

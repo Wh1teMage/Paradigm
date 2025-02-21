@@ -10,11 +10,6 @@ local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
 
 type ITowerInfo = typeof(require(Templates.EnemyTemplate)())
 
---[[
-
-]]
-local Functions = {}
-
 local ReplicatedPackages = {}
 local ReplicatedEntities = {}
 --local EnemyAttributes = {}
@@ -137,40 +132,9 @@ local lastSpawned = {}
 local retryTime = 1/5
 local entityFilter = {} --15
 
-task.spawn(function()
-    
-    while task.wait(retryTime) do
-        
-        --print(SpawnQueue)
-
-        if (entityCount > maxSpawnCount) then continue end
-
-        for id, enemy in pairs(SpawnQueue) do
-            Functions.Spawn(enemy.PackageId, id, enemy.Name, enemy.Model, true)
-            if (entityCount > maxSpawnCount) then break end
-            task.wait()
-        end
-
-    end
-    
-end)
-
 local clearTime = 1
 
-task.spawn(function()
-    while task.wait(3) do
-
-        for name, values in pairs(Models) do
-            if ((os.clock() - ModelDeltas[name]) < clearTime) then continue end
-            -- add models gc here
-            table.clear(values)
-        end
-        
-    end
-end)
-
-
-Functions = {
+local Functions = {
 --[[
     ['SetAttribute'] = function(id: number, name: string, value: any)
         if (not EnemyAttributes[id]) then EnemyAttributes[id] = {} end
@@ -233,7 +197,7 @@ Functions = {
         --print(ReplicatedPackages)
     end,
 
-    ['Spawn'] = function(packageId: number, id: string, name: string, model: Model, callback: (model: Model) -> nil, fromQueue: boolean?)
+    ['Spawn'] = function(packageId: number, id: string, name: string, model: Model, fromQueue: boolean?)
         --if (SpawnQueue[id] or ReplicatedEntities[id]) then return end
 
         --[[
@@ -340,10 +304,6 @@ Functions = {
         self.Model.PrimaryPart.Anchored = false
         InstanceUtilities:Weld(self.Model.PrimaryPart, package.Part)
 
-        callback(self.Model)
-        callback = nil
-        self.Callback = nil
-
         ReplicatedEntities[id] = self
 
         return self
@@ -426,5 +386,36 @@ Functions = {
     end
 
 }
+
+
+task.spawn(function()
+    
+    while task.wait(retryTime) do
+        
+        --print(SpawnQueue)
+
+        if (entityCount > maxSpawnCount) then continue end
+
+        for id, enemy in pairs(SpawnQueue) do
+            Functions['Spawn'](enemy.PackageId, id, enemy.Name, enemy.Model, true)
+            if (entityCount > maxSpawnCount) then break end
+            task.wait()
+        end
+
+    end
+    
+end)
+
+task.spawn(function()
+    while task.wait(3) do
+
+        for name, values in pairs(Models) do
+            if ((os.clock() - ModelDeltas[name]) < clearTime) then continue end
+            -- add models gc here
+            table.clear(values)
+        end
+        
+    end
+end)
 
 return Functions

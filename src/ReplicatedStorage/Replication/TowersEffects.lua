@@ -23,11 +23,11 @@ end
 
 local function GetTowerInfo(towerName: string, towerLevel: number)
     if (not TowersCache[towerName]) then
-        if (not TowersInfo:FindFirstChild(towerName)) then warn(towerName..' Upgrades dont exist') ;return end
+        if (not TowersInfo:FindFirstChild(towerName)) then warn(towerName..' Upgrades dont exist'); return end
         TowersCache[towerName] = require(TowersInfo:FindFirstChild(towerName))
     end
 
-    if (not TowersCache[towerName][towerLevel]) then warn(towerLevel..' for '..towerName..' doesnt exist') return end
+    if (not TowersCache[towerName][towerLevel]) then warn(towerLevel..' for '..towerName..' doesnt exist'); return end
 
     local selectedInfo: ITowerInfo? = TowersCache[towerName][towerLevel]()
 
@@ -90,6 +90,8 @@ return {
         for _, tower in pairs(ReplicatedTowers) do
             if (tower.Model == model) then return tower end
         end
+
+        return
     end,
 
     ['GetTowerById'] = function(id: number)
@@ -153,40 +155,20 @@ return {
         createModel(self, selectedInfo, skin)
         local newId = tostring(Enums.PackageType.Tower)..'-'..tostring(id)
 
-        local onModelAdded = function(model: Model)
-            self.Model = model
-            self.Clonned = true
-
-            local idle = selectedInfo.Animations.Idle
-            if (not idle) then return end
-    
-            local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
-            loadedAnimation.Looped = true
-        
-            loadedAnimation:Play()       
-
-            local sound = self.Info.Sounds.AttackSound:Clone()
-            sound.Parent = self.Model
-    
-            self.FXCache['AttackAnimation'] = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(self.Info.Animations.Attack)
-            self.FXCache['AttackSound'] = sound
-
-        end
-
-
         -- remake this one into flag type args (this one isnt really a great solution)
         if (packageId == 0) then
             self.Model = self.Model:Clone()
 
             self.Model:PivotTo(CFrame.new( position + Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0) ))
             self.Model.PrimaryPart.Anchored = true
+            self.Model.Name = tostring(id)
             self.Model.Parent = game.Workspace.Towers
         else
-            EntitiesEffects.Spawn(packageId, newId, name, self.Model)
+            EntitiesEffects['Spawn'](packageId, newId, name, self.Model)
 
             --!! this one should be in coroutines (with suspend)
             local start = os.clock()
-            local entityList = EntitiesEffects.GetReplicatedEntities()
+            local entityList = EntitiesEffects['GetReplicatedEntities']()
 
             local entity = entityList[newId]
 

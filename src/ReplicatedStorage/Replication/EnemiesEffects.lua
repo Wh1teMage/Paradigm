@@ -21,7 +21,7 @@ local function FindAttribute(part: Part, name: string)
 end
 
 local function GetEnemyInfo(enemyName: string)
-    if (not EnemiesInfo[enemyName]) then warn(enemyName..' doesnt exist') return end
+    if (not EnemiesInfo[enemyName]) then warn(enemyName..' doesnt exist'); return end
 
     local selectedInfo: IEnemyInfo? = EnemiesInfo[enemyName]()
 
@@ -89,17 +89,17 @@ return {
         --local towerLevel = FindAttribute(part, 'Level')
         --local towerName = FindAttribute(part, 'Name')
 
-        local selectedInfo = GetEnemyInfo(name, 1)
+        local selectedInfo = GetEnemyInfo(name)
         self.Info = selectedInfo
 
         createModel(self, selectedInfo)
 
         local newId = tostring(Enums.PackageType.Enemy)..'-'..tostring(id)
 
-        EntitiesEffects.Spawn(packageId, newId, name, self.Model)
+        EntitiesEffects['Spawn'](packageId, newId, name, self.Model)
 
         local start = os.clock()
-        local entityList = EntitiesEffects.GetReplicatedEntities()
+        local entityList = EntitiesEffects['GetReplicatedEntities']()
 
         local entity = entityList[newId]
 
@@ -112,15 +112,17 @@ return {
 
         self.Model = entity.Model
 
-            local idle = selectedInfo.Animations.Idle
-            if (not idle) then return end
-    
-        pcall(function()
-            local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
-            loadedAnimation.Looped = true
+        local idle = selectedInfo.Animations.Idle
+        if (not idle) then return end
+
+        local animationController = self.Model:FindFirstChildWhichIsA('AnimationController')
+        if (not animationController) then return end
+
+        local loadedAnimation: AnimationTrack = animationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
+        loadedAnimation.Looped = true
         
-            loadedAnimation:Play()
-        end)
+        loadedAnimation:Play()
+        
 
         --[[
         self.LevelChange = part:GetAttributeChangedSignal('Level'):Connect(function()
@@ -141,7 +143,7 @@ return {
         local self = ReplicatedEnemies[tostring(id)]
         if (not self) then return end
 
-        EntitiesEffects.Remove(tostring(Enums.PackageType.Enemy)..'-'..tostring(id))
+        EntitiesEffects['Remove'](tostring(Enums.PackageType.Enemy)..'-'..tostring(id))
 
         if (self.Cache) then self.Cache:Destroy() end
         if (self.LevelChange) then self.LevelChange:Disconnect() end
