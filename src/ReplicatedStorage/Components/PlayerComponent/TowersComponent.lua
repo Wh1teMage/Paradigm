@@ -135,7 +135,8 @@ function TowersComponent:StartPlacing(slot: number)
 	local selectedInfo = GetTowerInfo(selectedTower, 1)
 	local range = CreateRange(currentlyPlacing, selectedInfo.Range)
 
-	InstanceUtilities:Weld(currentlyPlacing, range)
+	local weld = InstanceUtilities:Weld(currentlyPlacing, range)
+	weld.C0 = CFrame.Angles(0, 0, math.rad(90))
 	range.Anchored = false
 
 	currentlySelected = selectedTower
@@ -177,9 +178,9 @@ function TowersComponent:PlaceTower()
 	local raycast = createRaycast(raycastParams)
 	if (not raycast) then return end
 
-	for i = 1, 500 do
+	for i = 1, 100 do
 		SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.PlaceTower, raycast.Position 
-		 + Vector3.new(math.random(-100, 100)/100*2, 0, math.random(-100, 100)/100*2), currentlySelected)
+		 + Vector3.new(math.random(-1000, 1000)/100*2, 0, math.random(-1000, 1000)/100*2), currentlySelected)
 
 		task.wait()
 	end

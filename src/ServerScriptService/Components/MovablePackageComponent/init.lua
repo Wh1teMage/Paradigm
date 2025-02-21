@@ -5,9 +5,6 @@ local SignalFunctions = require(ReplicatedStorage.Components.SignalComponent.Cus
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 local PackageTemplate = require(ReplicatedStorage.Templates.PackageTemplate)
 
-local UPDATE_RATE = 1/10
-local PACK_TIME = 1/10
-
 local Queue = {}
 local ExistingPackages = {}
 local CFrames = {}
@@ -29,8 +26,6 @@ function PackageComponent:Destroy()
 	ExistingPackages[tostring(self.Id)] = nil
 	table.clear(self)
 	setmetatable(self, nil)
-
-    --print('destroyed')
 
 	packageCount -= 1
 end
@@ -89,8 +84,11 @@ function PackageComponent.new(data, info)
         
         task.delay(.1, function()
             for _, entity in pairs(info) do
+                if (not getmetatable(entity)) then continue end
+
                 entity.PackageId = id
                 entity:ReplicateCreation()
+                entity:AppendPassive('PackagePassive', 1, {}, { self })
                 --SignalComponent:GetSignal('ManageEnemies'):FireAllClients(PathConfig.Scope.ReplicateEnemy, self.Id, enemy.Id, enemy.Name)
             end
         end)

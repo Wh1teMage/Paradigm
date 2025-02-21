@@ -35,6 +35,10 @@ local TowerComponent = setmetatable({}, {
 local DEFAULT_TOWER_PASSIVES = { 'TowerReplication' }
 
 function TowerComponent:Destroy()
+	for _, passive in pairs(self.Session.Passives) do
+		passive.OnDeath()
+	end
+
 	while (#self.Session.Passives > 0) do
 		local passive = table.remove(self.Session.Passives)
 		passive.Stop()
@@ -49,6 +53,8 @@ function TowerComponent:Destroy()
 	end
 
 	SignalComponent:GetSignal('ManageTowers'):FireAllClients(PathConfig.Scope.SellTower, self.Id)
+
+	--print(self.Session.Passives)
 
 	towerCount -= 1
 

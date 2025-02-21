@@ -5,6 +5,7 @@ local RunService = game:GetService('RunService')
 local Templates = ReplicatedStorage.Templates
 local Enums = require(Templates.Enums)
 local EnemiesInfo = require(ReplicatedStorage.Info.EnemiesInfo)
+local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 
 type IEnemyInfo = typeof(require(Templates.EnemyTemplate)())
 
@@ -80,6 +81,7 @@ return {
             Model = nil,
             Info = nil,
             Cache = nil,
+            Clonned = false,
         }
 
         --local towerLevel = FindAttribute(part, 'Level')
@@ -92,18 +94,23 @@ return {
 
         local newId = tostring(Enums.PackageType.Enemy)..'-'..tostring(id)
 
-        local newInfo = EntitiesEffects.Spawn(packageId, newId, name, self.Model)
-        self.Model = newInfo.Model
+        local onModelAdded = function(model: Model)
+            self.Model = model
+            self.Clonned = true
 
-        local idle = selectedInfo.Animations.Idle
-        if (not idle) then return end
+            --print(self.Model, self.Clonned)
+
+            local idle = selectedInfo.Animations.Idle
+            if (not idle) then return end
     
-        pcall(function()
             local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
             loadedAnimation.Looped = true
         
-            loadedAnimation:Play()
-        end)
+            loadedAnimation:Play()       
+    
+        end
+
+        EntitiesEffects.Spawn(packageId, newId, name, self.Model, onModelAdded)
 
         --[[
         self.LevelChange = part:GetAttributeChangedSignal('Level'):Connect(function()

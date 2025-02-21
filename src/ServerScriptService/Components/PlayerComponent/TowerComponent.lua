@@ -23,20 +23,27 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 
 		Cache[name] = require(info)
 	end
-	
-	local tower = Cache[name](position, function(data)
-		if (self:GetAttribute('Cash') < data.Price) then return end -- add cash warning
-		if (self:GetAttribute('TowerAmount') >= self.Game.Info.TowerLimit) then return end -- add warning
 
-		return true
-	end)
+	local tower = Cache[name](position)
 
-	if (not tower) then return end
+	local toBeDestroyed = false
+
+	if (self:GetAttribute('Cash') < tower.Price) then toBeDestroyed = true end -- add cash warning
+	if (self:GetAttribute('TowerAmount') >= self.Game.Info.TowerLimit) then toBeDestroyed = true end -- add warning
+
+	if (toBeDestroyed) then
+		tower:Destroy()
+		tower = nil
+		toBeDestroyed = nil
+		return
+	end
+
+	--if (not tower) then return end
 
 	--tower:ReplicateField('Skin', 'Default')
 	tower:SetOwner(self)
-	tower:StartMoving(1, 1, -1)
-	--tower:ReplicateCreation()
+	--tower:StartMoving(1, 1, -1)
+	tower:ReplicateCreation()
 
 	--[[
 	local blockingParts = workspace:GetPartBoundsInBox(CFrame.new(position), tower.Hitbox.Size) 

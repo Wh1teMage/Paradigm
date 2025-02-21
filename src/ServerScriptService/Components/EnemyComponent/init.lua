@@ -51,6 +51,10 @@ end
 
 function EnemyComponent:Destroy()
 	
+	for _, passive in pairs(self.Session.Passives) do
+		passive.OnDeath()
+	end
+
 	while (#self.Session.Passives > 0) do
 		local passive = table.remove(self.Session.Passives)
 		passive.Stop()
@@ -63,13 +67,14 @@ function EnemyComponent:Destroy()
 
 	--print('enemy killed')
 	
-	-- !! remake this into bindable signal on death connected from package component
-	local package = MovablePackageComponent:GetPackage(self.PackageId)
+	--local package = MovablePackageComponent:GetPackage(self.PackageId)
 
+	--[[
 	if (package) then
 		package.EntityCount -= 1
 		if (package.EntityCount < 1) then package:Destroy() end
 	end
+	]]
 
 	--table.clear(package.Enemies[self.Id])
 	--package.Enemies[self.Id] = nil

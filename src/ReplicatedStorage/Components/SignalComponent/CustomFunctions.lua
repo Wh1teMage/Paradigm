@@ -1,18 +1,22 @@
 return {
 
-    ['EncodeEnemyMovement'] = function(info: {{pathPoint: number, path: number, packageId: number, packageType: number}})
+    ['EncodeEnemyMovement'] = function(info: {{pathPoint: number, path: number, packageId: number, packageDirection: number}})
         
         local pathPointBits = 0b0000_1111_1111_1111
         local pathBits = 0b1111_0000_0000_0000
 
         local packageIdBits = 0b0011_1111_1111_1111
-        local packageTypeBits = 0b1100_0000_0000_0000
+        local packageDirectionBits = 0b1100_0000_0000_0000
 
         local buff = buffer.create(4*#info)
         local offset = 0
 
+        
+
         for i = 1, #info do
             local currentInfo = info[i]
+
+            currentInfo.packageDirection = math.min(0, currentInfo.packageDirection)
 
             local result = 0
             result += bit32.band(currentInfo.pathPoint, pathPointBits)
@@ -20,7 +24,7 @@ return {
 
             local additional = 0
             additional += bit32.band(currentInfo.packageId, packageIdBits)
-            additional += bit32.band(bit32.lshift(currentInfo.packageType, 14), packageTypeBits)
+            additional += bit32.band(bit32.lshift(currentInfo.packageDirection, 14), packageDirectionBits)
 
             buffer.writeu16(buff, offset, result)
             buffer.writeu16(buff, offset+2, additional)

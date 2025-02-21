@@ -146,7 +146,7 @@ task.spawn(function()
         if (entityCount > maxSpawnCount) then continue end
 
         for id, enemy in pairs(SpawnQueue) do
-            Functions.Spawn(enemy.PackageId, id, enemy.Name, true)
+            Functions.Spawn(enemy.PackageId, id, enemy.Name, enemy.Model, enemy.Callback, true)
             if (entityCount > maxSpawnCount) then break end
             task.wait()
         end
@@ -215,7 +215,7 @@ Functions = {
             PreviousCFrame = previousCFrame,
             GoalCFrame = goalCFrame,
             PathPoint = point or 1,
-            Part = part
+            Part = part,
             --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
         }
 
@@ -233,7 +233,7 @@ Functions = {
         --print(ReplicatedPackages)
     end,
 
-    ['Spawn'] = function(packageId: number, id: string, name: string, model: Model, fromQueue: boolean?)
+    ['Spawn'] = function(packageId: number, id: string, name: string, model: Model, callback: (model: Model) -> nil, fromQueue: boolean?)
         --if (SpawnQueue[id] or ReplicatedEntities[id]) then return end
 
         --[[
@@ -253,7 +253,8 @@ Functions = {
             --ZOffset = Vector3.new(math.random(-20, 20)/20, 0, math.random(-20, 20)/20),
             PackageId = packageId,
             Name = name,
-            Model = nil
+            Model = nil,
+            Callback = callback,
         }
 
         --if (not lastSpawned[name]) then lastSpawned[name] = os.clock() end
@@ -272,7 +273,7 @@ Functions = {
 
         if (not fromQueue) then
             queueCount += 1
-            self.Model = model:Clone()
+            self.Model = model
             SpawnQueue[id] = self
             return self
         end
@@ -296,7 +297,10 @@ Functions = {
 
         if (not package) then return end
         if (not package.Part) then return end
-        --if (package.PathPoint > 4093) then Functions.Remove(id); return end
+        --if (fromQueue and package.PathPoint < 3) then return end
+        --if (fromQueue and package.PathPoint > 4093) then return end
+
+        --print(package.PathPoint)
 
         --[[
         local enemyName = name
@@ -335,6 +339,10 @@ Functions = {
         self.Model.PrimaryPart.Anchored = false
         InstanceUtilities:Weld(self.Model.PrimaryPart, package.Part)
 
+        callback(self.Model)
+        callback = nil
+        self.Callback = nil
+
         ReplicatedEntities[id] = self
 
         return self
@@ -364,7 +372,7 @@ Functions = {
         if (not self) then self = SpawnQueue[id]; fromQueue = true end
         if (not self) then return end
 
-        if (self.Model and self.Model.Parent) then
+        if (self.Model and self.Model.Parent and not fromQueue) then
             self.Model.Parent = nil
             if (not Models[self.Name]) then Models[self.Name] = {} end
             table.insert(Models[self.Name], self.Model)
@@ -390,16 +398,22 @@ Functions = {
             local track = GlobalInfo.Paths[decoded[2]]
             if (not track) then continue end
     
+            --print(decoded[1])
+
             --local t = decoded[1]/2^12
-            local cframe = track[decoded[1]]
+            local cframe = track[decoded[1]+1]
             local id = tostring(decoded[3])
+            local direction = decoded[4]
 
             local self = ReplicatedPackages[id]
             if (not self) then continue end
 
+            --if (direction < .5) then direction = -1 end
+
             self.PathPoint = decoded[1]
             self.PreviousCFrame = self.GoalCFrame
-            self.GoalCFrame = cframe --+ self.Model:GetExtentsSize().Y/2 * Vector3.new(0, 1, 0)
+            self.GoalCFrame = cframe * CFrame.Angles(0, math.rad(180)*direction, 0)
+            --+ self.Model:GetExtentsSize().Y/2 * Vector3.new(0, 1, 0) 
         end
 
         delta = ((os.clock() - lastUpdated) + delta)/2

@@ -23,7 +23,7 @@ local TargetModes = {
 			--break
 		end
 
-		--if (selectedPackage) then print(selectedPackage.Id) end
+		--if (selectedPackage) then print(selectedPackage.EntityCount) end
 		
 		--print(self.Id, selectedPackage)
 		--print(#self.EnemiesInRange)
@@ -39,6 +39,8 @@ local TargetModes = {
 				break 
 			end
 		end
+
+		--if (self.SelectedTarget) then print(self.SelectedTarget.Id) end
 
 		--[[
 		if (self.SelectedTarget) then
@@ -109,13 +111,15 @@ function TargetComponent:WaitForTarget(delay: number?)
 	self:GetTarget()
 
 	while (not self.SelectedTarget) and (os.clock() - start < delay) do
-		task.wait()
+		task.wait(.1)
+		if (not getmetatable(self)) then return end
 		self:GetTarget()
 	end
 	--repeat task.wait(.1); self:GetTarget(); until self.SelectedTarget or (not getmetatable(self)) 
 end
 
 function TargetComponent:FaceEnemy()
+
 	--[[
 	if not getmetatable(self.SelectedTarget) then return end
 	local selectedCFrame = CFrame.new(self.Hitbox.Position, 

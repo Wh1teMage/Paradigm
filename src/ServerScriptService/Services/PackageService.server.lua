@@ -37,9 +37,11 @@ task.spawn(function()
             data.CFrame = data.Track:CalculateUniformCFrame(data.CurrentStep)
             data.Distance = data.CurrentStep * length
 
-            table.insert(package, {pathPoint = data.CurrentStep*2^12, path = data.TrackId, packageId = data.Id, packageType = data.PackageType})
+            table.insert(package, {pathPoint = data.CurrentStep*2^12, path = data.TrackId, packageId = data.Id, packageDirection = data.Direction})
             
             for enemyId, entity in pairs(data.Entities) do
+
+                if (not entity.PackageId) then continue end
 
                 entity.CFrame = data.CFrame
 

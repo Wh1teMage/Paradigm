@@ -9,8 +9,8 @@ local AttackPatterns = require(ServerScriptService.Components.Static.TowerAttack
 local tower = require(ServerScriptService.Components.TowerComponent)
 local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
 
-return function(position: Vector3, callback)
-	local self = tower.new(position, 'Precursor', callback)
+return function(position: Vector3)
+	local self = tower.new(position, 'Precursor')
 	if (not self) then return end 
 
 	local test = function()
@@ -18,6 +18,8 @@ return function(position: Vector3, callback)
 		return AttackPatterns.Burst(self, function()
 			
 			--print('shooting')
+
+			--if ( EnemyComponent:GetEnemyCount() < 1 ) then return end
 
 			SignalComponent:GetSignal('ManageEffects'):FireAllClients(
 				PathConfig.Scope.ReplicateEffect, 

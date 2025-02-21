@@ -96,7 +96,7 @@ return {
 
     ['Spawn'] = function(packageId: number, id: number, name: string, position: Vector3, skin: string)
 
-        print(packageId, name)
+        --print(packageId, name)
 
         local self = {
             LevelChange = nil,
@@ -105,6 +105,7 @@ return {
             Cache = nil,
             FXCache = {},
             Attributes = {},
+            Clonned = false,
         }
 
         --local towerLevel = FindAttribute(part, 'Level')
@@ -116,38 +117,44 @@ return {
         createModel(self, selectedInfo, skin)
         local newId = tostring(Enums.PackageType.Tower)..'-'..tostring(id)
 
+        local onModelAdded = function(model: Model)
+            self.Model = model
+            self.Clonned = true
+
+            local idle = selectedInfo.Animations.Idle
+            if (not idle) then return end
+    
+            local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
+            loadedAnimation.Looped = true
+        
+            loadedAnimation:Play()       
+
+            local sound = self.Info.Sounds.AttackSound:Clone()
+            sound.Parent = self.Model
+    
+            self.FXCache['AttackAnimation'] = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(self.Info.Animations.Attack)
+            self.FXCache['AttackSound'] = sound
+
+        end
+
         if (packageId == 0) then
             self.Model = self.Model:Clone()
 
             self.Model:PivotTo(CFrame.new( position + Vector3.new(0, self.Model:GetExtentsSize().Y/2, 0) ))
             self.Model.PrimaryPart.Anchored = true
             self.Model.Parent = game.Workspace.Towers
-        else
-            local newInfo = EntitiesEffects.Spawn(packageId, newId, name, self.Model)
-            self.Model = newInfo.Model
+
+            onModelAdded(self.Model)
+            onModelAdded = nil
+
+            ReplicatedTowers[tostring(id)] = self
+            return
         end
 
-        pcall(function()
-            self.FXCache['AttackAnimation'] = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(self.Info.Animations.Attack)
-        end)
-
+        EntitiesEffects.Spawn(packageId, newId, name, self.Model, onModelAdded)
+        
         --if (self.Info.Animations.Attack) then end
-
-        local sound = self.Info.Sounds.AttackSound:Clone()
-        sound.Parent = self.Model
-
-        self.FXCache['AttackSound'] = sound
-
-        local idle = selectedInfo.Animations.Idle
-        if (not idle) then return end
     
-        pcall(function()
-            local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
-            loadedAnimation.Looped = true
-        
-            loadedAnimation:Play()
-        end)
-        
         --[[
         self.LevelChange = part:GetAttributeChangedSignal('Level'):Connect(function()
             towerLevel = FindAttribute(part, 'Level')

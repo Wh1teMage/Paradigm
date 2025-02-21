@@ -10,12 +10,16 @@ Patterns['Burst'] = function(component, callback: () -> nil)
 	--print(component.SelectedTarget)
 
 	for i = 1, component.BurstCount do
+		if (not getmetatable(component)) then break end
 
 		task.wait(component.BurstCD/component:GetAmplifier('Firerate'))
 		if (not getmetatable(component)) then break end
 
 		component:WaitForTarget()
-		if ((not getmetatable(component.SelectedTarget)) or (not getmetatable(component))) then continue end
+		if ((not getmetatable(component.SelectedTarget)) or (not getmetatable(component))) then 
+			component.SelectedTarget = nil
+			continue 
+		end
 
 		component:FaceEnemy()
 		callback()

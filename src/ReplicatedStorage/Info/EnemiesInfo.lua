@@ -29,7 +29,7 @@ Enemies['Part'] = function(level: number)
 	}
 
 	enemy.Abilities = {
-		{Name = 'Fireball'}
+		{ Name = 'Fireball' }
 	}
 	
 	enemy.CanAttack = false

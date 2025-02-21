@@ -5,6 +5,8 @@ local TowerEffects = require(script.Parent.Parent.TowersEffects)
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
 local InstanceCache = require(ReplicatedStorage.Utilities.InstanceCache)
 
+local IgnoreFolder = game.Workspace['_ignore']
+
 return {
 
     [PathConfig.Effects.MovingPrecursorTestEffect] = function(p1: Vector3, packageName: string, name: string)
@@ -14,7 +16,10 @@ return {
     [PathConfig.Effects.PrecursorTestEffect] = function(p1: Vector3, id: number)
 
         local tower = TowerEffects.GetTowerById(id)
+        
         if (not tower) then return end
+        if (not tower.Clonned) then return end
+        if (not tower.Model.PrimaryPart) then return end
 
         local effect = ReplicatedStorage.Samples.Effects.AttackBeam :: Beam
 
@@ -33,6 +38,16 @@ return {
         local cache = InstanceCache.new(tower.Model)
         tower.Cache = cache
 
+        --[[
+        local weld: Weld = tower.Model.PrimaryPart.Weld
+
+        if (weld) then
+            weld.C0 = CFrame.new(tower.Model:GetPivot().Position, p1).Rotation * CFrame.Angles(0, math.rad(180), 0)
+        end
+        ]]
+
+        tower.Model:PivotTo(CFrame.new( tower.Model.PrimaryPart.Position, p1 ))
+
         for _, val: Instance in pairs(tower.Model:GetDescendants()) do
             if (val:IsA('ParticleEmitter')) then val:Emit(1) end
             if (val:IsA('Attachment') and val.Name == 'BeamAttachment') then
@@ -42,10 +57,10 @@ return {
 
                 if (#cache.Table < 1) then
                     attachment = Instance.new('Attachment')
-                    attachment.Parent = tower.Instance
+                    attachment.Parent = tower.Model.PrimaryPart --IgnoreFolder
                     
                     clonnedEffect = effect:Clone()
-                    clonnedEffect.Parent = tower.Instance
+                    clonnedEffect.Parent = tower.Model.PrimaryPart --IgnoreFolder
     
                     clonnedEffect.Attachment0 = val
                     clonnedEffect.Attachment1 = attachment
