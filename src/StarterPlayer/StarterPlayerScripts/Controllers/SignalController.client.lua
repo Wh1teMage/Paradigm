@@ -35,9 +35,11 @@ SignalComponent:GetSignal('ManageTowersBindable', true):Connect(
 )
 
 SignalComponent:GetSignal('ManageEffects'):Connect(
-	function(scope: number, ...)
+	function(scope: string, ...)
 
-		if (tonumber( scope ) == tonumber( PathConfig.Scope.ReplicateEffect )) then
+		scope = tostring(scope)
+
+		if (scope == tostring( PathConfig.Scope.ReplicateEffect )) then
 			ReplicationComponent:TriggerEffect(...)
 		end
 

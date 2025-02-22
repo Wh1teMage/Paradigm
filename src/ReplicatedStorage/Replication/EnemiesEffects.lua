@@ -1,24 +1,14 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local EntitiesEffects = require(ReplicatedStorage.Replication.EntitiesEffects)
-local RunService = game:GetService('RunService')
 
 local Templates = ReplicatedStorage.Templates
 local Enums = require(Templates.Enums)
 local EnemiesInfo = require(ReplicatedStorage.Info.EnemiesInfo)
-local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
-
 type IEnemyInfo = typeof(require(Templates.EnemyTemplate)())
 
 local MAX_DELAY = 60
 
 local ReplicatedEnemies = {}
-
-local function FindAttribute(part: Part, name: string)
-    local value = part:GetAttribute(name)
-    if (not value) then return end --warn(part.Name..' Failed to find '..name);
-
-    return value
-end
 
 local function GetEnemyInfo(enemyName: string)
     if (not EnemiesInfo[enemyName]) then warn(enemyName..' doesnt exist'); return end
@@ -67,6 +57,14 @@ end)
 ]]
 
 return {
+
+    ['SetAttribute'] = function(id: number, scope: string, value: any)
+        local enemy = ReplicatedEnemies[tostring(id)]
+        if (not enemy) then return end
+
+        enemy[scope] = value
+    end,
+
 
     ['GetEnemyById'] = function(id: number)
         return ReplicatedEnemies[tostring(id)]

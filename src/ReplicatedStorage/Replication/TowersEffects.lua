@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local EntitiesEffects = require(ReplicatedStorage.Replication.EntitiesEffects)
-local RunService = game:GetService('RunService')
 
 local Templates = ReplicatedStorage.Templates
 local Enums = require(Templates.Enums)
@@ -13,13 +12,6 @@ local MAX_DELAY = 60
 local ReplicatedTowers = {}
 
 local TowersCache = {}
-
-local function FindAttribute(part: Part, name: string)
-    local value = part:GetAttribute(name)
-    if (not value) then return end --warn(part.Name..' Failed to find '..name);
-
-    return value
-end
 
 local function GetTowerInfo(towerName: string, towerLevel: number)
     if (not TowersCache[towerName]) then
@@ -79,11 +71,6 @@ return {
         if (not tower) then return end
 
         tower[scope] = value
-        --[[
-        for _, tower in pairs(ReplicatedTowers) do
-            if (tower.Instance.Name == name) then return tower end
-        end
-        ]]
     end,
 
     ['GetTowerByModel'] = function(model: Model)

@@ -4,7 +4,6 @@ local RunService = game:GetService('RunService')
 local Templates = ReplicatedStorage.Templates
 local Info = ReplicatedStorage.Info
 
-local EnemiesInfo = require(Info.EnemiesInfo)
 local GlobalInfo = require(Info.GlobalInfo)
 local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
 
@@ -18,13 +17,6 @@ local SpawnQueue = {}
 local Models = {}
 local ModelDeltas = {}
 
-local function FindAttribute(part: Part, name: string)
-    local value = part:GetAttribute(name)
-    if (not value) then warn(part.Name..' Failed to find '..name); return end
-
-    return value
-end
-
 local entityCount = 0
 local queueCount = 0
 local packageCount = 0
@@ -36,8 +28,6 @@ local maxSpawnCount = 200
 
 local clusterCount = defaultClusterCount --defaultClusterCount
 local moving = false
-
-local recieveTime = os.clock()
 
 local lastUpdated = os.clock()
 local delta = 1/10
@@ -135,17 +125,6 @@ local entityFilter = {} --15
 local clearTime = 1
 
 local Functions = {
---[[
-    ['SetAttribute'] = function(id: number, name: string, value: any)
-        if (not EnemyAttributes[id]) then EnemyAttributes[id] = {} end
-        EnemyAttributes[id][name] = value
-    end,
-
-    ['GetAttribute'] = function(id: number, name: string)
-        if (not EnemyAttributes[id]) then EnemyAttributes[id] = {} end
-        return EnemyAttributes[id][name]
-    end,
-]]
 
     ['DespawnPackage'] = function(packageId: number)
         local package = ReplicatedPackages[tostring(packageId)]

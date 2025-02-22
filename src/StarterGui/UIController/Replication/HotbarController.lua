@@ -18,18 +18,22 @@ end
 
 function manageBaseHealth(value: number)
 	local bar: Frame = mainUI.Container.Health.Health
-	bar.HP.Text = tostring( value )..' HP'
+	local barHP: TextLabel = bar:FindFirstChild('HP') :: TextLabel
+	local greenBar: Frame = bar:FindFirstChild('Green') :: Frame
+
+
+	barHP.Text = tostring( value )..' HP'
 
 	local defaultValue = 250
 	local percentage = math.clamp(value/defaultValue, 0, 1)
 
-	TweenService:Create(bar.Green, TweenInfo.new(.1, Enum.EasingStyle.Linear), { ['Size'] = UDim2.fromScale(percentage, 1) }):Play()
+	TweenService:Create(greenBar, TweenInfo.new(.1, Enum.EasingStyle.Linear), { ['Size'] = UDim2.fromScale(percentage, 1) }):Play()
 end
 
 local towerLimit = 60
 local towerAmount = 0
 
-function managePlayerLimit(current: number, max: number)
+function managePlayerLimit(current: number?, max: number?)
 	if (max) then towerLimit = max end
 	if (current) then towerAmount = current end
 
@@ -58,7 +62,7 @@ return function(UI, component)
 	end)
 
 	replica:ListenToChange('Session.Attributes.TowerAmount', function(newValue: number)
-		managePlayerLimit(newValue)
+		managePlayerLimit(newValue, nil)
 	end)
 
 	replica:ListenToChange('Profile.Values.ExpValue', function(newValue: number)

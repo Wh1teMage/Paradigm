@@ -115,9 +115,9 @@ function TowerComponent:ReplicateDescriptions()
 	end
 end
 
-function TowerComponent:ReplicateField(fieldName: string, value: number)
+function TowerComponent:ReplicateField(fieldName: string, value: any)
 	if (not self.CFrame) then return end
-	--SignalComponent:GetSignal('ManageTowers'):FireAllClients(PathConfig.Scope.ReplicateAttributes, self.Id, fieldName, value)
+	SignalComponent:GetSignal('ManageTowers'):FireAllClients(PathConfig.Scope.ReplicateAttributes, self.Id, fieldName, value)
 end
 
 function TowerComponent:ReplicateCreation()

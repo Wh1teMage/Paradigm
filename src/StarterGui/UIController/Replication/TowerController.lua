@@ -11,7 +11,7 @@ local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
 local mainUI;
 
 local currentlySelectedTower = nil
-local currentlySelectedPart = nil
+local selectedTowerInfo = nil
 
 function addFrameToUpgradeInfo(text: {string}, passive: boolean?)
 	if (not text) then return end
@@ -71,15 +71,15 @@ function stopPlacingUI()
 end
 
 function updateUpgradeUI()
-	if (not currentlySelectedPart) then return end
+	if (not selectedTowerInfo) then return end
 	
-	local messages = InstanceUtilities:FindAttribute(currentlySelectedPart, 'Description')
+	local messages = selectedTowerInfo['Description']
 	if (not messages) then messages = nil else messages = string.split( messages, '/' ) end
 
 	local passives = {}
 
 	for i = 1, 10 do
-		local passive = InstanceUtilities:FindAttribute(currentlySelectedPart, 'Passive'..i)
+		local passive = selectedTowerInfo['Passive'..i]
 		if (not passive) then continue end
 		table.insert(passives, string.split( passive, '/' ) )
 	end
@@ -88,20 +88,18 @@ function updateUpgradeUI()
 		if (obj:IsA('Frame') or obj:IsA('TextLabel')) then obj:Destroy() end
 	end
 
-	if (#passives < 1) then passives = nil end
+	--if (#passives < 1) then passives = nil end
 
 	addFrameToUpgradeInfo(messages)
 	for i = 1, #passives do
 		addFrameToUpgradeInfo(passives[i], true)
 	end
 
-    
-
-	local sellPrice = InstanceUtilities:FindAttribute(currentlySelectedPart, 'SellPrice')
+	local sellPrice = selectedTowerInfo['SellPrice']
 	if (not sellPrice) then return end
 	mainUI.Upgrade.Sell.SellPrice.Text = '$'..sellPrice
 
-	local upgradePrice = InstanceUtilities:FindAttribute(currentlySelectedPart, 'UpgradePrice')
+	local upgradePrice = selectedTowerInfo['UpgradePrice']
 	if (not upgradePrice) then return end
 	mainUI.Upgrade.UpgInfo.Upgrade.Price.Text = '$'..upgradePrice
 end
@@ -127,7 +125,7 @@ function setupTowerButtons()
 		if (not currentlySelectedTower) then return end
 		SignalComponent:GetSignal('ManageTowersBindable', true):Fire('SellTower')
 		currentlySelectedTower = nil
-		currentlySelectedPart = nil
+		selectedTowerInfo = nil
 	end)
 
 	--ButtonComponent.new(mainUI.Upgrade.Sell)
@@ -154,7 +152,7 @@ return function(UI, component)
 			if (scope == 'UpdateUpgradeUI') then updateUpgradeUI() end
 
 			if (scope == 'OpenUpgradeUI') then 
-				currentlySelectedTower, currentlySelectedPart = ...
+				currentlySelectedTower, selectedTowerInfo = ...
 				openUpgradeUI()
 			end
 

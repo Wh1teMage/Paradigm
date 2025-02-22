@@ -27,7 +27,7 @@ local function GetTowerInfo(towerName: string, towerLevel: number)
         TowersCache[towerName] = require(TowersInfo:FindFirstChild(towerName))
     end
 
-    if (not TowersCache[towerName][towerLevel]) then warn(towerLevel..' for '..towerName..' doesnt exist') return end
+    if (not TowersCache[towerName][towerLevel]) then warn(towerLevel..' for '..towerName..' doesnt exist'); return end
 
     local selectedInfo = TowersCache[towerName][towerLevel]()
 
@@ -221,11 +221,12 @@ function TowersComponent:SelectTower()
 	if (not currentlySelectedModel) then return end
 
 	currentlySelected = currentlySelectedModel.Name
+	local towerInfo = TowersEffects.GetTowerByModel(currentlySelectedModel)
 
 	--!! implement range calculations
-	CreateRange(currentlySelectedModel.PrimaryPart :: Part, 10)
+	CreateRange(currentlySelectedModel.PrimaryPart :: Part, towerInfo.Range or 10)
 
-	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, currentlySelectedModel)
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, towerInfo)
 end
 
 function TowersComponent:UpgradeTower()
