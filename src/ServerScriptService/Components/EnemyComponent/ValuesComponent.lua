@@ -1,9 +1,25 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local ServerScriptService = game:GetService('ServerScriptService')
 
+local MovablePackageComponent = require(ServerScriptService.Components.MovablePackageComponent)
+
 local avaliableScopes = { 'Range', 'Damage', 'Firerate', 'Health', 'Speed' }
 
 local ValuesComponent = {}
+
+function ValuesComponent:SetPackageAttribute(name: string, value: any)
+    local package = MovablePackageComponent:GetPackage(self.PackageId)
+    if (not package) then return end
+
+    package:SetAttribute(name, value)
+end
+
+function ValuesComponent:SetPackageAmplifier(name: string, value: number)
+    local package = MovablePackageComponent:GetPackage(self.PackageId)
+    if (not package) then return end
+
+    package:SetAmplifier(name, value)
+end
 
 function ValuesComponent:GetValue(scope: string)
     --if (not table.find(avaliableScopes, scope)) then return end

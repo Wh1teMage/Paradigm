@@ -2,6 +2,36 @@
 
 ## [Structure](https://miro.com/app/board/uXjVLKPyetg=/?share_link_id=227356778849)
 
+## Project Initialization
+
+This article will help you to set up the whole system correctly
+
+Preraration
++ Download Visual Studio Code [Here](https://code.visualstudio.com/download)
++ Create a Github account [Here](https://github.com/)
++ Open VSC and download Rojo extension (Ctrl + Shift + X to open extensions tab)
++ Install Rojo plugin in RS
++ Download Luau and Luau Language Server extensions in VSC
+
+
+Now for the project itself
++ Download [this](https://github.com/Wh1teMage/Paradigm#) file as zip
++ Unzip this file anywhere you like and open VSC in that folder
++ Go to Source Control Tab (Ctrl + Shift + G + G) and login into your github
+
+
+Sync project with RS
++ Open menu (Ctrl + Shift + P) and type in Rojo: Open Menu
++ Select Install Rojo option
++ Now you should be able to run Rojo (run default file through VSC menu -> Rojo menu)
++ Go to RS, open Rojo plugin, click Connect and you should be ready to develop
+
+> [!NOTE]
+> Only ONE person can connect to the studio via Rojo
+> Multiple people connecting will result in an error
+> 
+> You can use VSC without opening RS, thats the key for modifing the same project by multiple people
+
 ## Paths
 ```diff
 Configs

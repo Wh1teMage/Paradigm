@@ -9,8 +9,10 @@ local AttackPatterns = require(ServerScriptService.Components.Static.TowerAttack
 local tower = require(ServerScriptService.Components.TowerComponent)
 local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
 
+local MovablePackageComponent = require(ServerScriptService.Components.MovablePackageComponent)
+
 return function(position: Vector3, callback)
-	local self = tower.new(position, 'MovingPrecursor', callback)
+	local self = tower.new(position, 'MovingPrecursor')
 	if (not self) then return end 
 
 	local test = function()
@@ -42,7 +44,13 @@ return function(position: Vector3, callback)
 	function self:OnAttack()
 		if (not getmetatable(self.SelectedTarget)) then return end -- extra check
 
+		local package = MovablePackageComponent:GetPackage(self.PackageId)
+		if (not package) then return end
+
+		package:AppendBuff('PackageSlowness', 10, {package, 10^6})
 		test()
+		package:RemoveBuff('PackageSlowness')
+
 	end
 	
 	return self
