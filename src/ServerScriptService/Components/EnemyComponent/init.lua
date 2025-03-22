@@ -9,7 +9,6 @@ local SignalComponent = require(ReplicatedStorage.Components.SignalComponent)
 local SignalFunctions = require(ReplicatedStorage.Components.SignalComponent.CustomFunctions)
 
 local PathConfig = require(ReplicatedStorage.Templates.PathConfig)
-local MovablePackageComponent = require(ServerScriptService.Components.MovablePackageComponent)
 
 local LoadedComponents = {}
 
@@ -38,6 +37,8 @@ local EnemyComponent = setmetatable({}, {
 		for _, module in pairs(LoadedComponents) do
 			if (module[i]) then return module[i] end
 		end
+
+		return
 	end,
 })
 
@@ -107,7 +108,7 @@ local EnemyComponentFabric = {}
 
 function EnemyComponentFabric.new(name: string): typeof(EnemyComponent)
 
-	if (not EnemiesInfo[name]) then warn(name..' enemy doesnt exist') return end
+	if (not EnemiesInfo[name]) then warn(name..' enemy doesnt exist'); return end
 
 	--local clockId = tostring(math.round(math.fmod(os.clock(), 1)*1000))
 	--local postfix = string.rep('0', (4-string.len(clockId)))

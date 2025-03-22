@@ -225,17 +225,16 @@ function TowersComponent:SelectTower()
 	if (not currentlySelectedModel) then return end
 
 	currentlySelected = currentlySelectedModel.Name
-	local towerInfo = TowersEffects.GetTowerById(currentlySelected)
+	local towerInfo = TowersEffects.GetTowerById(currentlySelected).Info
 	if (not towerInfo) then
 		currentlySelected = nil 
 		currentlySelectedModel = nil
 		return
 	end
 
-	--!! implement range calculations
 	CreateRange(currentlySelectedModel.PrimaryPart :: Part, towerInfo.Range or 10)
 
-	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, towerInfo)
+	SignalComponent:GetSignal('ManageTowersUI', true):Fire('OpenUpgradeUI', currentlySelected, currentlySelectedModel)
 end
 
 function TowersComponent:UpgradeTower()

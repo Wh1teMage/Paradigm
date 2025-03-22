@@ -9,16 +9,54 @@ local Queue = {}
 local ExistingPackages = {}
 local CFrames = {}
 
-local PackageComponent = {}
-local PackageComponentFabric = {}
+local LoadedComponents = {}
 
-local MoveEnemyEvent = ReplicatedStorage.Events.MoveEnemy :: RemoteEvent
+for _, component in ipairs(script:GetChildren()) do
+	LoadedComponents[component.Name] = require(component)
+end
+
+local PackageComponent = setmetatable({}, {
+	__index = function(t, i)
+		for _, module in pairs(LoadedComponents) do
+			if (module[i]) then return module[i] end
+		end
+
+		return
+	end,
+})
+
+local PackageComponentFabric = {}
 
 local packageCount = 0
 
-function PackageComponent:GetSpeed() -- add self amplifiers
-    return self.Speed * self.Game.Info.EnemyAmplifiers.Speed
+function PackageComponent:GetAttribute(scope: string)
+    --if (not table.find(avaliableScopes, scope)) then return end
+    local value = self.Attributes[scope] * ( self:GetAmplifier(scope) or 1 )
+    --self:ReplicateField(scope, value)
+    return value
 end
+
+function PackageComponent:GetAmplifier(scope: string)
+    --if (not table.find(avaliableScopes, scope)) then return end  
+    return ( self.Amplifiers[scope] or 1 ) * ( self.Game.Info.EnemyAmplifiers[scope] or 1 )
+end
+
+function PackageComponent:SetAttribute(name: string, value: number)
+    self.Attributes[name] = value
+
+    for _, obj in pairs(self.Entities) do 
+        obj[name] = value
+    end
+end
+
+function PackageComponent:SetAmplifier(name: string, value: number)
+    self.Amplifiers[name] = value
+
+    for _, obj in pairs(self.Entities) do 
+        obj.Amplifiers[name] = value
+    end
+end
+
 
 function PackageComponent:Destroy()
 	SignalComponent:GetSignal('ManagePackages'):FireAllClients(PathConfig.Scope.DestroyPackage, self.Id)
@@ -61,7 +99,7 @@ function PackageComponent.new(data, info)
     self.Track = track
     self.Direction = direction
 
-    self.Speed = speed
+    self.Attributes.Speed = speed
     self.CurrentStep = startingPoint
 
     self.EntityCount = count

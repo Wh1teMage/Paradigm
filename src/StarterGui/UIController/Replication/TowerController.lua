@@ -6,12 +6,14 @@ local Components = script:FindFirstAncestorWhichIsA('Player').PlayerGui.Componen
 
 local FrameComponent = require(Components.UIFrameComponent) 
 local ButtonComponent = require(Components.UIButtonComponent)
-local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
+--local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
+local TowersEffects = require(ReplicatedStorage.Replication.TowersEffects)
 
 local mainUI;
 
-local currentlySelectedTower = nil
-local selectedTowerInfo = nil
+local currentlySelectedTower: string? = nil
+local selectedTowerModel: Model? = nil
+local selectedTowerInfo: {[string]: any}? = nil
 
 function addFrameToUpgradeInfo(text: {string}, passive: boolean?)
 	if (not text) then return end
@@ -70,7 +72,17 @@ function stopPlacingUI()
 	mainUI.PlacingText.Visible = false
 end
 
+function recalculateTowerInfo()
+	if (not selectedTowerModel) then return end
+
+	local tower = TowersEffects.GetTowerByModel(selectedTowerModel)
+	if (not tower) then return end
+
+	selectedTowerInfo = tower.Info
+end
+
 function updateUpgradeUI()
+	recalculateTowerInfo()
 	if (not selectedTowerInfo) then return end
 	
 	local messages = selectedTowerInfo['Description']
@@ -125,6 +137,7 @@ function setupTowerButtons()
 		if (not currentlySelectedTower) then return end
 		SignalComponent:GetSignal('ManageTowersBindable', true):Fire('SellTower')
 		currentlySelectedTower = nil
+		selectedTowerModel = nil
 		selectedTowerInfo = nil
 	end)
 
@@ -137,7 +150,7 @@ end
 
 
 return function(UI, component)
-	local replica = component.Replica
+	--local replica = component.Replica
 
     mainUI = UI
 
@@ -152,7 +165,7 @@ return function(UI, component)
 			if (scope == 'UpdateUpgradeUI') then updateUpgradeUI() end
 
 			if (scope == 'OpenUpgradeUI') then 
-				currentlySelectedTower, selectedTowerInfo = ...
+				currentlySelectedTower, selectedTowerModel = ...
 				openUpgradeUI()
 			end
 

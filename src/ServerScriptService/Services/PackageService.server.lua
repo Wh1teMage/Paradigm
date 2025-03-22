@@ -33,7 +33,7 @@ task.spawn(function()
 
             local length = data.Track:GetPathLength()
 
-            data.CurrentStep += (data:GetSpeed()*UPDATE_RATE)/length * data.Direction
+            data.CurrentStep += (data:GetAttribute('Speed')*UPDATE_RATE)/length * data.Direction
             data.CFrame = data.Track:CalculateUniformCFrame(data.CurrentStep)
             data.Distance = data.CurrentStep * length
 
@@ -48,7 +48,7 @@ task.spawn(function()
                 if (data.Direction < 0 and data.CurrentStep <= 0) then entity:Destroy(); continue end
                 if (data.Direction > 0 and data.CurrentStep >= 1) then entity:CompletedPath(); continue end
                 if (entity.CanAttack) then entity:Attack() end
-
+                
             end
 
             if (not data.EntityCount) then continue end

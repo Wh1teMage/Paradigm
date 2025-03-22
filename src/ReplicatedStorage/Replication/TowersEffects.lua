@@ -71,7 +71,7 @@ return {
         local tower = ReplicatedTowers[tostring(id)]
         if (not tower) then return end
 
-        tower[scope] = value
+        tower.Info[scope] = value
     end,
 
     ['GetTowerByModel'] = function(model: Model)
