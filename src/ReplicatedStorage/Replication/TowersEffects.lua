@@ -3,6 +3,7 @@ local EntitiesEffects = require(ReplicatedStorage.Replication.EntitiesEffects)
 
 local Templates = ReplicatedStorage.Templates
 local Enums = require(Templates.Enums)
+local InstanceUtilities = require(ReplicatedStorage.Utilities.InstanceUtilities)
 local TowersInfo = ReplicatedStorage.Info.Towers
 
 type ITowerInfo = typeof(require(Templates.TowerTemplate)())
@@ -170,6 +171,12 @@ return {
 
         end
 
+        local hitbox = ReplicatedStorage.Samples.TowerPart:Clone() :: Part
+        hitbox.Anchored = false
+        hitbox.Parent = self.Model
+
+        InstanceUtilities:Weld(self.Model.PrimaryPart, hitbox)
+
         self.FXCache['AttackAnimation'] = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(self.Info.Animations.Attack)
         
         --if (self.Info.Animations.Attack) then end
@@ -182,12 +189,12 @@ return {
         local idle = selectedInfo.Animations.Idle
         if (not idle) then return end
     
-        pcall(function()
-            local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
-            loadedAnimation.Looped = true
+
+        local loadedAnimation: AnimationTrack = self.Model.AnimationController:FindFirstChildWhichIsA('Animator'):LoadAnimation(idle)
+        loadedAnimation.Looped = true
         
-            loadedAnimation:Play()
-        end)
+        loadedAnimation:Play()
+        
         
         --[[
         self.LevelChange = part:GetAttributeChangedSignal('Level'):Connect(function()

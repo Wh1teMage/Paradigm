@@ -10,21 +10,21 @@ local Towers: {[number]: () -> typeof(Template())} = {}
 Towers[1] = function()
 	local tower = Template()
 
-	tower.ModelsFolder = TowerSamples.Mine
+	tower.ModelsFolder = TowerSamples.Precursor
 	tower.Price = 20
 	tower.Range = 20
-	tower.Damage = 5
-	tower.Firerate = 2.05
+	tower.Damage = 50
+	tower.Firerate = .05
 
 	tower.ShootType = Enums.ShootType.Burst
-	tower.BurstCount = 6
-	tower.BurstCD = .1
+	tower.BurstCount = 600
+	tower.BurstCD = 1/60
 
 	tower.Level = 1
 	tower.SellPrice = tower.Price * .8
 
 	local idleAnim = Instance.new('Animation')
-	idleAnim.AnimationId = 'rbxassetid://14253606347'
+	idleAnim.AnimationId = 'rbxassetid://15289102971'
 
 	local attackAnim = Instance.new('Animation')
 	attackAnim.AnimationId = 'rbxassetid://14535901409'

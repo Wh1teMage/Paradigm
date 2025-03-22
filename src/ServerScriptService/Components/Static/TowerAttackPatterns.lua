@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
+local Enums = require(ReplicatedStorage.Templates.Enums)
 local ServerScriptService = game:GetService('ServerScriptService')
 
 local EnemyComponentFolder = ServerScriptService.Enemies
@@ -56,23 +57,26 @@ Patterns['Spawn'] = function(component, enemyName, towerName)
 	task.spawn(function()
 		while not component.Game do task.wait(.1) end
 
-		local enemy = require(EnemyComponentFolder:FindFirstChild(enemyName))() -- not sure if we need cache here
-		--enemy.IsTower = true
-		enemy:SetCurrentGame(component.Game)
-		enemy:StartMoving(1, 1, -1)
+		--local enemy = require(EnemyComponentFolder:FindFirstChild(enemyName))() -- not sure if we need cache here
+		--enemy.PackageType = Enums.PackageType.Tower
+		--enemy:SetCurrentGame(component.Game)
+		--enemy:StartMoving(1, 1, -1)
 	
-		local tower = require(ServerScriptService.Towers:FindFirstChild(towerName))(enemy.CFrame.Position, function() return true end)
+		local tower = require(ServerScriptService.Towers:FindFirstChild(towerName))(Vector3.new(0,0,0))
+		tower.PackageType = Enums.PackageType.Tower
 		tower:SetCurrentGame(component.Game)
+		tower:StartMoving(1, 1, -1)
 
-		tower.LinkedEnemy = enemy
-	
+		--tower.LinkedEnemy = enemy
+		--[[
 		while tower.Id and enemy.Id do
-			tower.Hitbox.CFrame = enemy.CFrame
+			tower.CFrame = enemy.CFrame
 			task.wait(.1)
 		end
+		]]
 	
-		if (enemy.Id) then enemy:Destroy() end
-		if (tower.Id) then tower:Destroy() end
+		--if (enemy.Id) then enemy:Destroy() end
+		--if (tower.Id) then tower:Destroy() end
 
 	end)
 

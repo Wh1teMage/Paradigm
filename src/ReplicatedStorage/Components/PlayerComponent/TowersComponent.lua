@@ -205,14 +205,18 @@ function TowersComponent:SelectTower()
 	
 	local raycast = createRaycast(selectParams)
 	
+	print(raycast, currentlySelectedModel)
+
 	if (currentlySelectedModel) then
 		DestroyRange(currentlySelectedModel.PrimaryPart :: Part)
+		currentlySelected = nil 
 		currentlySelectedModel = nil
 		SignalComponent:GetSignal('ManageTowersUI', true):Fire('CloseUpgradeUI')
 	end
-	
+
 	if (not raycast) then 
 		currentlySelected = nil 
+		currentlySelectedModel = nil
 		SignalComponent:GetSignal('ManageTowersUI', true):Fire('CloseUpgradeUI')
 		return 
 	end
@@ -221,7 +225,12 @@ function TowersComponent:SelectTower()
 	if (not currentlySelectedModel) then return end
 
 	currentlySelected = currentlySelectedModel.Name
-	local towerInfo = TowersEffects.GetTowerByModel(currentlySelectedModel)
+	local towerInfo = TowersEffects.GetTowerById(currentlySelected)
+	if (not towerInfo) then
+		currentlySelected = nil 
+		currentlySelectedModel = nil
+		return
+	end
 
 	--!! implement range calculations
 	CreateRange(currentlySelectedModel.PrimaryPart :: Part, towerInfo.Range or 10)
@@ -232,13 +241,13 @@ end
 function TowersComponent:UpgradeTower()
 	if (not currentlySelected) then return end
 	
-	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.UpgradeTower, currentlySelected) -- use promise there
-	--print('sent promise')
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.UpgradeTower, currentlySelectedModel.Name) -- use promise there
+	print('sent promise')
 	local promise;
 
 	promise = SignalComponent:GetSignal('ManageTowers'):Connect(function(scope)
 		if (scope ~= tostring( PathConfig.Scope.TowerUpdated )) then return end
-		--print('recieved promise')
+		print('recieved promise')
 		SignalComponent:GetSignal('ManageTowersUI', true):Fire('UpdateUpgradeUI')
 		promise:Disconnect()
 	end)
@@ -249,7 +258,9 @@ end
 function TowersComponent:SellTower()
 	if (not currentlySelected) then return end
 
-	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.SellTower, currentlySelected)
+	DestroyRange(currentlySelectedModel.PrimaryPart :: Part)
+
+	SignalComponent:GetSignal('ManageTowers'):Fire(PathConfig.Scope.SellTower, currentlySelectedModel.Name)
 	SignalComponent:GetSignal('ManageTowersUI', true):Fire('CloseUpgradeUI')
 
 	currentlySelected = nil 

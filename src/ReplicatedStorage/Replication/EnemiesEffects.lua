@@ -11,6 +11,7 @@ local MAX_DELAY = 60
 local ReplicatedEnemies = {}
 
 local function GetEnemyInfo(enemyName: string)
+    if (not enemyName) then return end
     if (not EnemiesInfo[enemyName]) then warn(enemyName..' doesnt exist'); return end
 
     local selectedInfo: IEnemyInfo? = EnemiesInfo[enemyName]()

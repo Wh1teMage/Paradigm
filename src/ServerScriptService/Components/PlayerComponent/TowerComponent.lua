@@ -77,7 +77,7 @@ function TowerComponent:SellTower(partName: string)
 end
 
 function TowerComponent:UpgradeTower(partName: string)
-	local tower = TowerFabric:GetTower(partName)
+	local tower = TowerFabric:GetTower(tostring(partName))
 	if (not tower) then return end
 
 	if (self:GetAttribute('Cash') < tower.UpgradePrice) then return end -- add cash warning	

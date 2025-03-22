@@ -9,8 +9,8 @@ local AttackPatterns = require(ServerScriptService.Components.Static.TowerAttack
 local tower = require(ServerScriptService.Components.TowerComponent)
 local PlayerComponent = require(ServerScriptService.Components.PlayerComponent)
 
-return function(position: Vector3, callback)
-	local self = tower.new(position, 'MovingPrecursor', callback)
+return function(position: Vector3)
+	local self = tower.new(position, 'MovingPrecursor')
 	if (not self) then return end 
 
 	local test = function()
@@ -21,7 +21,7 @@ return function(position: Vector3, callback)
 				PathConfig.Scope.ReplicateEffect, 
 				PathConfig.Effects.PrecursorTestEffect,
 				self.SelectedTarget.CFrame.Position,
-				self.Hitbox.Name
+				self.Id
 			)
 			
 			local damageAmount = self:GetValue('Damage')

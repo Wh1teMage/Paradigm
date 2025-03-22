@@ -140,11 +140,13 @@ function TowerComponent:SetOwner(owner)
 end
 
 function TowerComponentFabric:GetTower(partName: string): typeof(TowerComponent)
+	--[[
 	for part, tower in pairs(Towers) do
 		if (part.Name == partName) then return tower end
 	end
+	]]
 
-	return
+	return Towers[partName] -- check later
 end
 
 function TowerComponentFabric:GetTowers(): typeof({TowerComponent})
