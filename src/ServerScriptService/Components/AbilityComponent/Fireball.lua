@@ -6,7 +6,7 @@ return function()
 	local component;
 
 	function self.OnStart()
-		print('Started Ability')
+		print('Started Ability 123')
 		task.wait(1)
 	end
 
