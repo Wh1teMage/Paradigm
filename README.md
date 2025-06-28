@@ -36,7 +36,7 @@ Now for the project itself
 + Name the branch however you want (this will be your main working branch)
 + Now, the lower left corner of the screen should say yours branch name
 
-This branch that you have just created is visible only on your device, lets continue to set it up
+This branch that you have just created will be mostly used only by you, lets continue to set it up
 
 + Open VSC command palette
 + Type Tasks Configure Task
