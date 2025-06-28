@@ -8,29 +8,65 @@ This article will help you to set up the whole system correctly
 
 Preraration
 + Download Visual Studio Code [Here](https://code.visualstudio.com/download)
++ Download Git [Here](https://git-scm.com/downloads/win) (Standalone Installer -> Git for Windows/x64 Setup)
 + Create a Github account [Here](https://github.com/)
-+ Open VSC and download Rojo extension (Ctrl + Shift + X to open extensions tab)
-+ Install Rojo plugin in RS
-+ Download Luau and Luau Language Server extensions in VSC
++ Install Rojo plugin in RS [Here](https://create.roblox.com/store/asset/6415005344/Rojo-7)
 
+VSC Controls
++ Ctrl + Shift + X to open extensions tab
++ Ctrl + Shift + P to open command palette (or press F1)
++ Ctrl + Shift + G + G to open source control (or find something similar to graphs on your left pannel)
+
+List of extensions to install
++ Rojo - Roblox Studio Sync
++ Roblox LSP
++ Luau Language Server
 
 Now for the project itself
-+ Download [this](https://github.com/Wh1teMage/Paradigm#) file as zip
-+ Unzip this file anywhere you like and open VSC in that folder
-+ Go to Source Control Tab (Ctrl + Shift + G + G) and login into your github
 
++ Open VSC command palette (F1)
++ Type Git Clone
++ Select the 1st result
++ Paste this link https://github.com/Wh1teMage/Paradigm.git
++ Select the desired destination
++ Login into your github account
++ Head to the lower left corner of the screen (button should have something like master or main on it), click on it
++ In the corresponding menu click "create new branch from"
++ Select dev (or origin/dev) 
++ Name the branch however you want (this will be your main working branch)
++ Now, the lower left corner of the screen should say yours branch name
 
-Sync project with RS
-+ Open menu (Ctrl + Shift + P) and type in Rojo: Open Menu
-+ Select Install Rojo option
-+ Now you should be able to run Rojo (run default file through VSC menu -> Rojo menu)
-+ Go to RS, open Rojo plugin, click Connect and you should be ready to develop
+This branch that you have just created is visible only on your device, lets continue to set it up
+
++ Open VSC command palette
++ Type Tasks Configure Task
++ Select create tasks.json from template
++ Select Other option
++ Delete everything in tasks.json file and paste the following code (should be in #rewrite-discussion, pinned and saved as file)
+
+The whole setup process is done. Moving onto syncing this with RS
+
++ Open command palette (F1) and type in Rojo: Open Menu
++ Select Install Rojo option (ignore this step if already installed)
++ Now you should be able to run Rojo (command pallete -> Rojo: Open Menu -> default.project.json)
+
++ Go to Roblox Creator Hub -> Paradigm-Shift Studios
++ Click on PSTD New Core Structure Testing
++ Go to Configure -> Places
++ Find a place with your nickname on it
++ Click Edit in Studio
++ Go to plugins -> Rojo -> Connect
++ Now you should be ready to develop
+
+## Workflow rules
 
 > [!NOTE]
-> Only ONE person can connect to the studio via Rojo
-> Multiple people connecting will result in an error
-> 
-> You can use VSC without opening RS, thats the key for modifing the same project by multiple people
+> Whenever you are done with your task (E.x you did a skin system module)
+> you should go to command palette, type "Tasks Run Task" and run "Git Sync with Dev"
+> that way your local branch will push changes to the dev branch.
+
+Whenever dev branch has enough stable updates, you (one of head devs) should push changes to the main branch
+That way the main branch can have a clear update history while the dev one will consist only of small changes
 
 ## Paths
 ```diff
