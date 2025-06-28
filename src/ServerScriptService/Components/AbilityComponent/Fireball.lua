@@ -7,6 +7,7 @@ return function()
 
 	function self.OnStart()
 		print('mnxczvzxmncvm')
+		print("a change")
 		task.wait(1)
 	end
 
