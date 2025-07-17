@@ -83,6 +83,7 @@ end
 
 function updateUpgradeUI()
 	recalculateTowerInfo()
+	print(selectedTowerInfo)
 	if (not selectedTowerInfo) then return end
 	
 	local messages = selectedTowerInfo['Description']
@@ -158,6 +159,8 @@ return function(UI, component)
 
 	SignalComponent:GetSignal('ManageTowersUI', true):Connect(
 		function(scope, ...)
+
+			print(scope)
 
 			if (scope == 'StartPlacingUI') then startPlacingUI(...) end
 			if (scope == 'StopPlacingUI') then stopPlacingUI() end

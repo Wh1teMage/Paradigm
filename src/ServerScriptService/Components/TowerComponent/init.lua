@@ -94,6 +94,9 @@ function TowerComponent:Upgrade()
 end
 
 function TowerComponent:ReplicateDescriptions()
+
+	print('replicated')
+
 	if (#self.Descriptions > 0) then
 		self:ReplicateField('Description', table.concat(self.Descriptions[1], '/'))
 
@@ -208,12 +211,6 @@ function TowerComponentFabric.new(position: Vector3, name: string) --, checkCall
 
 	data.Passives = nil
 	data.Abilities = nil
-
-	self:ReplicateField('Range', self.Range)
-	self:ReplicateField('Level', self.Level)
-	self:ReplicateField('Name', name)
-
-	self:ReplicateDescriptions()
 
 	Towers[tostring(data.Id)] = self
 

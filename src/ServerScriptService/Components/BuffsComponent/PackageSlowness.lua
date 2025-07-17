@@ -3,7 +3,7 @@ local buff = require(script.Parent)
 return function()
 	local self = buff.new()
 
-    local multiplier = self.Level;
+    local multiplier = 10;
     local startTime = os.clock();
 
     local duration = 2;

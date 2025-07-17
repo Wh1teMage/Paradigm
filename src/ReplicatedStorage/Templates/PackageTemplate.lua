@@ -12,7 +12,7 @@ local data = {
 
     Amplifiers = {
 		[Enums.TowerAmplifiers.Cash] = 1,
-		[Enums.EnemyAmplifiers.Speed] = 1,
+        [Enums.EnemyAmplifiers.Speed] = 1,
 		[Enums.EnemyAmplifiers.Range] = 1,
 		[Enums.EnemyAmplifiers.Damage] = 1,
 		[Enums.EnemyAmplifiers.Health] = 1,

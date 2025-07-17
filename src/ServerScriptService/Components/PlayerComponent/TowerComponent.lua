@@ -45,6 +45,12 @@ function TowerComponent:PlaceTower(position: Vector3, name: string)
 	--tower:StartMoving(1, 1, -1)
 	tower:ReplicateCreation()
 
+	tower:ReplicateField('Range', tower.Range)
+	tower:ReplicateField('Level', tower.Level)
+	tower:ReplicateField('Name', name)
+
+	tower:ReplicateDescriptions()
+
 	--[[
 	local blockingParts = workspace:GetPartBoundsInBox(CFrame.new(position), tower.Hitbox.Size) 
 	local canBePlaced = true

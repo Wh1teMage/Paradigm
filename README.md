@@ -36,14 +36,6 @@ Now for the project itself
 + Name the branch however you want (this will be your main working branch)
 + Now, the lower left corner of the screen should say yours branch name
 
-This branch that you have just created will be mostly used only by you, lets continue to set it up
-
-+ Open VSC command palette
-+ Type Tasks Configure Task
-+ Select create tasks.json from template
-+ Select Other option
-+ Delete everything in tasks.json file and paste the following code (should be in #rewrite-discussion, pinned and saved as file)
-
 The whole setup process is done. Moving onto syncing this with RS
 
 + Open command palette (F1) and type in Rojo: Open Menu
