@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Git Sync with Dev",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "git add . && git commit -m \"${input:commitMessage}\" && git push origin HEAD:dev && git pull origin dev --rebase"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "options": {
+        "shell": {
+          "executable": "cmd.exe"
+        }
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "commitMessage",
+      "type": "promptString",
+      "description": "Enter commit message:",
+      "default": "Update"
+    }
+  ]
+}
