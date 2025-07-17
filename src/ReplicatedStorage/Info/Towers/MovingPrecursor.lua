@@ -17,8 +17,10 @@ Towers[1] = function()
 	tower.Firerate = .05
 
 	tower.ShootType = Enums.ShootType.Burst
-	tower.BurstCount = 600
-	tower.BurstCD = 1/60
+	tower.BurstCount = 6
+	tower.BurstCD = 1/10
+
+	tower.Speed = 10
 
 	tower.Level = 1
 	tower.SellPrice = tower.Price * .8
